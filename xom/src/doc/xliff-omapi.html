@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+    <title>Data Model</title>
+  </head>
+  <body>
+    <p>Prototype of object model and API for XLIFF.</p>
+    <ul>
+    </ul>
+    <strong>This document is UNDER DEVELOPMENT and NOT COMPLETE YET and it
+      covers only A PORTION of the object model</strong>.<strong><br>
+      This document Is ONLY A PRELIMINARY PROTOTYPE and it HAS NO OFFICIAL
+      STANDING of any kind</strong>.<br>
+    The XLIFF specification it is based on is 2.0, here: : <a target="_blank" href="http://docs.oasis-open.org/xliff/xliff-core/v2.0/xliff-core-v2.0.html">http://docs.oasis-open.org/xliff/xliff-core/v2.0/xliff-core-v2.0.html</a><br>
+    The mailing list for the discussion is here: <a target="_blank" href="https://lists.oasis-open.org/archives/xliff-users/">https://lists.oasis-open.org/archives/xliff-users/</a>
+    <ul>
+    </ul>
+    <p>Table of Content:</p>
+    <ul>
+      <li><a href="#terms">Terms</a></li>
+      <li><a href="#overview">Overview Chart</a></li>
+      <li><a href="#unit">The Unit</a></li>
+      <li><a href="#content">The Inline Content</a></li>
+      <li><a href="#requirements">Appendix A - Requirements</a></li>
+    </ul>
+    <h2><a id="terms" name="terms"></a>Terms</h2>
+    <dt>Tag</dt>
+    <dd>A inline object that represent the opening, the closing or the
+      stand-alone location of a code or the opening or closing location of an
+      annotation. </dd>
+    <dt>Annotation</dt>
+    <dd>A type inline data that holds some properties associated to the spanned
+      content.</dd>
+    <dt>Code</dt>
+    <dd>An abstract representation of a native code. Most of the time inline
+      codes are coming directly from the original markup in the document that
+      was extracted.</dd>
+    <dt>Tag reference</dt>
+    <dd>A pair of special characters in the coded text that represents the key
+      to access a given tag.</dd>
+    <dt>Key</dt>
+    <dd>An integer value constructed from a tag reference. It is the hash value
+      used to access the tag referenced by the tag reference.</dd>
+    <dt>Coded text</dt>
+    <dd>A string with tag references. It represents the text and the tag
+      references of a content.</dd>
+    <h2><a id="overview" name="overview"></a>Overview Chart</h2>
+    <pre>Legend:  1 : one<br>         ? : zero or one<br>         + : one or more<br>         * : zero, one or more<br>        &lt;&lt; : right-side also implements left-side<br>       ... : recursive</pre>
+    <p>The object model from the document level down to the unit is as follows:<br>
+      (Note that the order of the objects in the charts is not significant and
+      not related to the order in the XLIFF serialization).</p>
+    <pre><strong><a href="./org/oasisopen/xliff/om/v1/IDocument.html">IDocument</a></strong><br> |<br> +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IFile.html">IFile</a></strong>+<br>      |<br>      +-- ISkeleton?<br>      |<br>      +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |    |<br>      |    +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>      |<br>      +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObjects.html">IExtObjects</a></strong>?<br>      |    |<br>      |    +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>*<br>      |         |<br>      |         +-- (<strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>... | <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObjectData.html">IExtObjectData</a></strong>)*<br>      |         |<br>      |         +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |              |<br>      |              +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*
+      |<br>      +-- <strong><a href="./org/oasisopen/xliff/om/v1/INotes.html">INotes</a></strong>?<br>      |    |<br>      |    +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/INote.html">INote</a></strong>*<br>      |         |<br>      |         +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |              |<br>      |              +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>      |<br>      +-- (<strong><a
+href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IGroup.html">IGroup</a></strong>)* | (<strong><a
+href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IUnit.html">IUnit</a></strong>)+<br>            |             |                         |<br>            |             |                         +-- <a
+href="#chartUnit">See details below</a><br>            |             |<br>            |             +-- (<strong><a
+href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IGroup.html">IGroup</a></strong>)... | (<strong><a
+href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IUnit.html">IUnit</a></strong>)*
+            |<br>            +-- <strong><a href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>            |    |<br>            |    +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>            |<br>            +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObjects.html">IExtObjects</a></strong>?
+            |    |<br>            |    +-- <strong><a href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>*<br>            |         |<br>            |         +-- (<strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>... | <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IExtObjectData.html">IExtObjectData</a></strong>)*<br>            |         |<br>            |         +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>            |              |<br>            |              +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*
+            |<br>            +-- <strong><a href="./org/oasisopen/xliff/om/v1/INotes.html">INotes</a></strong>?<br>                 |<br>                 +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/INote.html">INote</a></strong>*<br>                      |<br>                      +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>                           |<br>                           +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*</pre>
+    <p><a name="chartUnit"></a>The object model from the unit down is as
+      follows:</p>
+    <pre><strong><a href="./org/oasisopen/xliff/om/v1/IUnit.html">IUnit</a></strong><br> |<br> +-- <a
+href="./org/oasisopen/xliff/om/v1/IStore.html"><strong>IStore</strong></a>1<br> |<br> +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/INotes.html">INotes</a></strong>?<br> |    |<br> |    +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/INote.html">INote</a></strong>*<br> |         |<br> |         +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br> |              |<br> |              +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br> |      <br> +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IPart.html">IPart</a></strong>* | (<strong><a
+href="./org/oasisopen/xliff/om/v1/IPart.html">IPart</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/ISegment.html">ISegment</a></strong>)+<br>      |<br>      +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>1 (source)<br>      |    |<br>      |    +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/ITags.html">ITags</a></strong>1<br>      |         |<br>      |         +-- (<strong><a
+href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/ICode.html">ICode</a></strong> | <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IAnnotation.html">IAnnotation</a></strong><strong></strong>)*<br>      |                                   |<br>      |                                   +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |                                        |<br>      |                                        +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>      |<br>      +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>? (target)<br>           |<br>           +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/ITags.html">ITags</a></strong>1<br>                |<br>                +-- (<strong><a
+href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/ICode.html">ICode</a></strong> | <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IAnnotation.html">IAnnotation</a></strong><strong></strong>)*<br>                                          |<br>                                          +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>                                               |<br>                                               +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*</pre>
+    <h2><a id="unit" name="unit"></a>The Unit</h2>
+    <p>The unit is one of the main objects of the model. It holds the source and
+      target of a "paragraph"-level content.</p>
+    <p>Constraints:</p>
+    <ol>
+      <li>There is always at least one segment in a unit.</li>
+      <li>The id of a unit must not be null and must not be an empty string.</li>
+      <li>The store of a unit must not be null.</li>
+    </ol>
+    <p>The core content of a unit is a sequence of parts of two different types:
+      ignorables and segments. An ignorable part is represented by an <strong><a
+          href="./org/oasisopen/xliff/om/v1/IPart.html">IPart</a></strong>
+      object, while a segment part is represented by an <strong><a href="./org/oasisopen/xliff/om/v1/ISegment.html">ISegment</a></strong>
+      object. The <strong><a href="./org/oasisopen/xliff/om/v1/ISegment.html">ISegment</a></strong>
+      object is derived from <strong><a href="./org/oasisopen/xliff/om/v1/IPart.html">IPart</a></strong>
+      but offers additional metadata and methods.</p>
+    <p>Each part (segment or ignorable) is made of a source <strong><a href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>
+      and an optional target <strong><a href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>.</p>
+    <h2><a id="content" name="content"></a>The Inline Content </h2>
+    <p> The inline content corresponds to the content of the <code>&lt;source&gt;</code>
+      and <code>&lt;target&gt;</code> element. The data is encoded into two
+      main objects: A string and a collection of <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>
+      objects. Within the string, each inline tag is represented by two special
+      characters: </p>
+    <ul>
+      <li>The first character represent the type and the class of the tag:<br>
+        The are three types of tags: opening, closing and standalone. There are
+        two classes of tags: code and annotation.<br>
+        Therefore the values for the first character are:</li>
+      <ul>
+        <li>U+E101: Opening code (<code>&lt;pc&gt;</code> or <code>&lt;sc/&gt;</code>)</li>
+        <li>U+E102: Closing code (<code>&lt;/pc&gt;</code> or <code>&lt;ec/&gt;</code>)</li>
+        <li>U+E103: Standalone code (<code>&lt;ph/&gt;</code>)</li>
+        <li>U+E104: Opening annotation (<code>&lt;mrk&gt;</code> or <code>&lt;sm/&gt;</code>)</li>
+        <li>U+E105: Closing annotation (<code>&lt;/mrk&gt;</code> or <code>&lt;em/&gt;</code>)</li>
+      </ul>
+      <li>The second character has a value between U+E110 and U+F8FF and
+        represents the index for the given type/class of tag and pointing to its
+        object representation.</li>
+    </ul>
+    <p>The two characters together constitute a tag reference. Their values are
+      combined into a single integer key, unique within a unit:</p>
+    <ul>
+      <li><code>int key = ((char1 &lt;&lt; 16) | char2);</code></li>
+      <li><code>char char1 = (char)(key &gt;&gt; 16);</code></li>
+      <li><code>char char2 = (char)key;</code></li>
+    </ul>
+    <p>That key can be used as a unique hash value to access the object where
+      the information about the given tag is held.</p>
+    <ul>
+    </ul>
+    <p>This representation has the following characteristics:</p>
+    <ul>
+      <li>Both characters are in the Unicode Private Use Area and should not be
+        affected with common string operation such as <code>toLowercase()</code>,
+        <code>toUppercase()</code>, etc. (Req-1).</li>
+      <li>The two characters of the pair are in separate ranges, so you can
+        always know where you are in the string, even when accessing a character
+        randomly.</li>
+      <li>The maximum number of inline elements of a given type one can
+        represent in a single unit is 6128. That is, one can have at the same
+        time: 6128 <code>&lt;pc&gt;</code> or <code>&lt;sc/&gt;</code>, 6128 <code>&lt;/pc&gt;</code>
+        or <code>&lt;ec/&gt;</code>, 6128 <code>&lt;ph/&gt;</code>, 6128 <code>&lt;mrk&gt;</code>
+        or <code>&lt;sm/&gt;</code>, and 6128 <code>&lt;/mrk&gt;</code> or <code>&lt;em/&gt;</code>.
+        (Req-7)</li>
+      <li>Deleting, adding and inserting tags are not expensive operations:
+        there is no index to update in the string. (Req-2).</li>
+      <li>The order of the tag objects in the store is not related to the
+        positions of the tag references in the coded text.</li>
+      <li>Drawbacks:</li>
+      <ul>
+        <li>One need to keep track of the last index used for each tag
+          type/class and one has to recycle that index when reaching the maximum
+          value.</li>
+        <li>To visit each tag in the order the appear in the string, one must
+          loop through the string rather than just iterate through the store of
+          tags.</li>
+      </ul>
+    </ul>
+    <p>Example:</p>
+    <p>For instance, the following HTML content:</p>
+    <table border="1" cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr>
+          <td class="letter">T</td>
+          <td class="letter">e</td>
+          <td class="letter">x</td>
+          <td class="letter">t</td>
+          <td class="letter"> <br>
+          </td>
+          <td class="code">&lt;</td>
+          <td class="code">b</td>
+          <td class="code">&gt;</td>
+          <td class="letter">b</td>
+          <td class="letter">o</td>
+          <td class="letter">l</td>
+          <td class="letter">d</td>
+          <td class="code">&lt;</td>
+          <td class="code">/</td>
+          <td class="code">b</td>
+          <td class="code">&gt;</td>
+          <td class="letter">.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Is represented as:</p>
+    <p>A) The following coded text:</p>
+    <table border="1" cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr>
+          <td class="letter">T</td>
+          <td class="letter">e</td>
+          <td class="letter">x</td>
+          <td class="letter">t</td>
+          <td class="letter"> <br>
+          </td>
+          <td class="code">U+E101</td>
+          <td class="code">U+E110</td>
+          <td class="letter">b</td>
+          <td class="letter">o</td>
+          <td class="letter">l</td>
+          <td class="letter">d</td>
+          <td class="code">U+E102</td>
+          <td class="code">U+E110</td>
+          <td class="letter">.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
+    <ul>
+    </ul>
+    <p>Where:</p>
+    <ul>
+      <li>(U+E101 &lt;&lt; 16) | U+E110) = -519970544</li>
+      <li>(U+E102 &lt;&lt; 16) | U+E110) = -519905008</li>
+    </ul>
+    <p>And B) the following store of Tag objects hashed on the tag reference
+      keys:</p>
+    <table border="1" cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr>
+          <td class="letter">-519970544</td>
+          <td class="letter2">Tag object for "&lt;b&gt;"</td>
+        </tr>
+        <tr>
+          <td class="letter">-519905008</td>
+          <td class="letter2">Tag object for "&lt;/b&gt;"</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Interfaces</h3>
+    <ul>
+    </ul>
+    <p>The inline content is represented by different objects. Each object is
+      either a basic type (String, int, boolean), or an object represented by an
+      interface:</p>
+    <ul>
+      <li><strong><a href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>
+        - the main object holding the inline content.</li>
+      <li><strong><a href="./org/oasisopen/xliff/om/v1/ITags.html">ITags</a></strong>
+        - the collection of tags associated with the content.</li>
+      <li><strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>
+        - a tag (code or annotation)</li>
+      <li><strong><a href="./org/oasisopen/xliff/om/v1/ICode.html">ICode</a></strong>
+        - a code.</li>
+      <li><strong><a href="./org/oasisopen/xliff/om/v1/IAnnotation.html">IAnnotation</a></strong>
+        - an annotation.</li>
+    </ul>
+    <ul>
+    </ul>
+    <h3>JSON Serialization</h3>
+    <p>In JSON, the IContent object is represented as an array of alternating
+      Strings and ITag objects. If the content has no tag it is represented as
+      an array of a single string. This serialization allows the object model to
+      possibly change to some degree how the tags are associated with their
+      position in the text. This also means the keys values of a content written
+      out may or may not be the same when it is read back. The field names
+      should be short (this is meant to be read only by machines and developers,
+      not end-users).</p>
+    <ul>
+      <li>Fields with their value equals to their defaults MAY have no
+        representation in the JSON string.</li>
+      <li>The fields within the ITag object have no prescribed order.</li>
+      <li>The fields common to both the opening and ending codes (e.g. id, type,
+        etc.) are serialized once only: in the opening code. If there is no
+        opening code (i.e. there is an isolated closing code) those fields are
+        serialized with the closing code.</li>
+    </ul>
+    TODO: details of the field names.
+    <p>Example of serialization (characters are escaped for readability):</p>
+    <p>XLIFF serialization:</p>
+    <pre>&lt;originalData&gt;<br> &lt;data id='d1'&gt;&amp;lf;b&gt;&lt;/data&gt;<br> &lt;data id='d2'&gt;&amp;lt;/b&gt;&lt;/data&gt;<br> &lt;data id='d3'&gt;&amp;lt;br&gt;&lt;/data&gt;<br>&lt;/originalData&gt;<br>...<br>&lt;source&gt;Text in &lt;pc id='1' dataRefStart='d1' dataRefEnd='d2'&gt;bold&lt;/pc&gt; format.&lt;ph id='2' dataRef='d3'/&gt;&lt;/source&gt;</pre>
+    <p>JSON serialization:</p>
+    <ul>
+    </ul>
+    <pre>[  "Text in ",
+   {
+      "kind":"\uE101",
+      "id":"1",
+      "data":"&lt;b&gt;"
+   },
+   "bold",
+   {
+      "kind":"\uE102",
+      "id":"1",
+      "data":"&lt;\/b&gt;"
+   },
+   " format.",
+   {
+      "kind":"\uE103",
+      "id":"2",
+      "data":"&lt;br&gt;"
+   }
+]  </pre>
+    <p>TODO: more examples </p>
+    <h2>Extensions and Unsupported Modules</h2>
+    <p>TODO</p>
+    <p>The object model provides support for extensions, both as objects (<strong><a
+          href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>)
+      and fields (<strong><a href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>).
+      The purpose of those interfaces is to provide the user with a basic
+      mechanism to store and access data that are not part of the object model
+      specification.</p>
+    <p>Extension fields can be set to the following core objects: IUnit,
+      IAnnotation</p>
+    <p>Unsupported modules are handled like extensions.</p>
+    <p>An implementation of the XLIFF object model does not have to support more
+      than the core, but it may supports one, more or all modules. When an
+      implementation does not supports a module it still needs to be able to
+      preserve the data for that module throughout any process. It may also be
+      very useful to provide a generic interface to add, remove and access
+      module objects and fields, for example to allow users to take advantage of
+      features that are part of the standard but not implemented yet by the
+      library they are using.</p>
+    <h2>Appendix A - <a id="requirements" name="requirements"></a>Requirements</h2>
+    <p>For the Inline content:</p>
+    <ol>
+      <li>One should be able to apply most string-based functions (e.g. <code>toUppercase()</code>)
+        to the content without undue complexity or side-effect.</li>
+      <li>Adding, removing and modifying inline codes and annotations should be
+        not be expensive operations.</li>
+      <li>Accessing a field common to the opening and closing ends of inline
+        codes (e.g. id, type, sub-type, etc.) should always return the same
+        value regardless from which end it is accessed.</li>
+      <li>There should be an easy way to modify the content without touching the
+        parts that are set to translate='no'.</li>
+      <li>There should be an easy way to access spans of content marked by
+        annotations.</li>
+      <li>There should be an easy way to re-use existing annotation spans when
+        applying new annotations, when it make sense.</li>
+      <li>The maximum number of inline codes and annotations allowed in a unit
+        should be ideally unlimited or at least reasonably high.</li>
+    </ol>
+    <p><br>
+    </p>
+  </body>
+</html>
