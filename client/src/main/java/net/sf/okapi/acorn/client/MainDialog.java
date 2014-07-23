@@ -104,7 +104,7 @@ public class MainDialog extends JFrame {
 		// Add the API test panel
 		APITestPanel atPanel = new APITestPanel();
 		// Add the tab
-		tabPane.addTab("API Test", atPanel);
+		tabPane.addTab("TAUS API Test", atPanel);
 		
 		// Add the Input Files tab
 		JPanel panel = new JPanel(new BorderLayout());
