@@ -7,7 +7,7 @@ import java.util.List;
  * <p>An extension object can hold a collection of extension objects or a terminal {@link IExtObjectData}
  * with some content.
  */
-public interface IExtObject extends IExtObjectItem, IWithExtFields {
+public interface IExtObject extends IExtObjectItem, IWithExtFields, Iterable<IExtObjectItem> {
 
 	/**
 	 * Gets the object namespace URI.

@@ -3,7 +3,7 @@ package org.oasisopen.xliff.om.v1;
 /**
  * Represents a file object.
  */
-public interface IFile extends IWithExtFields, IWithExtObjects, IWithNotes {
+public interface IFile extends IWithExtFields, IWithExtObjects, IWithNotes, Iterable<IGroupOrUnit> {
 
 	/**
 	 * Gets the id for this file.

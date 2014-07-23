@@ -1,5 +1,6 @@
 package net.sf.okapi.acorn.xom;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -80,6 +81,11 @@ public class File extends BaseData3 implements IFile {
 	public IUnit add (IUnit unit) {
 		map.put("u"+unit.getId(), unit);
 		return unit;
+	}
+
+	@Override
+	public Iterator<IGroupOrUnit> iterator () {
+		return map.values().iterator();
 	}
 
 }

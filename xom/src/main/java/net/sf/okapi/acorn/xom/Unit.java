@@ -14,6 +14,8 @@ import org.oasisopen.xliff.om.v1.InvalidParameterException;
 public class Unit extends BaseData3 implements IUnit {
 
 	private String id;
+	private String name;
+	private String type;
 	private IStore store;
 	private ArrayList<IPart> parts;
 	private boolean translate = true;
@@ -45,6 +47,26 @@ public class Unit extends BaseData3 implements IUnit {
 		this.id = id;
 	}
 	
+	@Override
+	public String getName () {
+		return name;
+	}
+
+	@Override
+	public void setName (String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String getType () {
+		return type;
+	}
+
+	@Override
+	public void setType (String type) {
+		this.type = type;
+	}
+
 	@Override
 	public boolean getTranslate () {
 		return translate;

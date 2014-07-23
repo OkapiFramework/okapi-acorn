@@ -18,26 +18,37 @@
   See also the full LGPL text here: http://www.gnu.org/copyleft/lesser.html
 ===========================================================================*/
 
-package net.sf.okapi.acorn.client;
+package net.sf.okapi.acorn;
 
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-public class Main {
-
-	public static void main (String[] originalArgs) {
-		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ( "Nimbus".equals(info.getName()) ) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
+@Path("accept")
+public class Accept {
+	
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}")
+	public Response accept_id_PUT (
+    	@PathParam("id") String id
+		)
+	{
+		if (( id == null ) || id.trim().isEmpty() ) {
+			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "ID must not be null or empty.");
 		}
-		catch ( Exception e ) {
-			// Use default
+		TransRequest treq = DataStore.getInstance().get(id);
+		if ( treq == null ) {
+			return ErrorResponse.create(Response.Status.BAD_REQUEST, id,
+				String.format("ID '%s' does not exists.", id));
 		}
-		MainDialog.start();
+		treq.setStatus("accepted");
+		treq.stamp();
+		
+		return Response.ok(treq.toJSON(), MediaType.APPLICATION_JSON).build();
 	}
 
 }

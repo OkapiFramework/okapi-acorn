@@ -13,6 +13,22 @@ public interface IUnit extends IGroupOrUnit, IWithStore, Iterable<IPart> {
 	 * @throws InvalidParameterException if the id is null or empty.
 	 */
 	public void setId (String id);
+
+	/**
+	 * Gets the name of this unit.
+	 * @return the name of this unit (can be null).
+	 */
+	public String getName ();
+	
+	/**
+	 * Sets the name of this unit.
+	 * @param name the name of this unit (can be null).
+	 */
+	public void setName (String name);
+	
+	public String getType ();
+	
+	public void setType (String type);
 	
 	public boolean getTranslate ();
 	
@@ -107,8 +123,8 @@ public interface IUnit extends IGroupOrUnit, IWithStore, Iterable<IPart> {
 	/**
 	 * Gets the object associated with a given id in this unit.
 	 * <p>The objects checked are: all the parts (segments and ignorable part)
-	 * and all the inline codes and annotations.
-	 * Note that for inline codes and annotations with an opening and closing tag either one
+	 * and all the inline codes and annotations (the scope of the "#u=id" in an XLIFF fragment identifier).
+	 * <p>Note that for inline codes and annotations with both opening and closing tags either one
 	 * can be returned.
 	 * @param id the id to look for.
 	 * @return the object found, or null if not found.

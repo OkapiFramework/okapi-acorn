@@ -1,7 +1,10 @@
-package net.sf.okapi.acorn.xom;
+package net.sf.okapi.acorn.xom.json;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import net.sf.okapi.acorn.xom.Const;
+import net.sf.okapi.acorn.xom.Util;
 
 import org.json.simple.JSONArray;
 import org.oasisopen.xliff.om.v1.CanReorder;
@@ -113,6 +116,5 @@ public class JSONWriter {
 
 		return map;
 	}
-
 	
 }

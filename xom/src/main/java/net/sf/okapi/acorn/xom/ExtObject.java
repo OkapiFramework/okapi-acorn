@@ -1,6 +1,7 @@
 package net.sf.okapi.acorn.xom;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.namespace.QName;
@@ -69,6 +70,11 @@ public class ExtObject extends BaseData1 implements IExtObject {
 		item.setRaw(raw);
 		items.add(item);
 		return item;
+	}
+
+	@Override
+	public Iterator<IExtObjectItem> iterator () {
+		return items.iterator();
 	}
 
 }

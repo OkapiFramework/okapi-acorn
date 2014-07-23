@@ -1,17 +1,18 @@
 package net.sf.okapi.acorn.xom;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.oasisopen.xliff.om.v1.IGroup;
 import org.oasisopen.xliff.om.v1.IGroupOrUnit;
-import org.oasisopen.xliff.om.v1.INotes;
 import org.oasisopen.xliff.om.v1.IUnit;
 import org.oasisopen.xliff.om.v1.InvalidParameterException;
 
-public class Group extends BaseData2 implements IGroup {
+public class Group extends BaseData3 implements IGroup {
 
 	private String id;
+	private String name;
 	private IGroup parent;
 	private Map<String, IGroupOrUnit> map = new LinkedHashMap<>(2);
 	
@@ -40,6 +41,16 @@ public class Group extends BaseData2 implements IGroup {
 		this.id = id;
 	}
 	
+	@Override
+	public String getName () {
+		return name;
+	}
+
+	@Override
+	public void setName (String name) {
+		this.name = name;
+	}
+
 	@Override
 	public boolean isUnit () {
 		return false;
@@ -95,15 +106,8 @@ public class Group extends BaseData2 implements IGroup {
 	}
 
 	@Override
-	public boolean hasNote () {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public INotes getNotes () {
-		// TODO Auto-generated method stub
-		return null;
+	public Iterator<IGroupOrUnit> iterator () {
+		return map.values().iterator();
 	}
 
 }

@@ -4,7 +4,7 @@ package org.oasisopen.xliff.om.v1;
 /**
  * Represents a group.
  */
-public interface IGroup extends IGroupOrUnit {
+public interface IGroup extends IGroupOrUnit, Iterable<IGroupOrUnit> {
 
 	/**
 	 * Gets the id for this group.
@@ -17,6 +17,18 @@ public interface IGroup extends IGroupOrUnit {
 	 * @param id the id for this group (cannot be null).
 	 */
 	public void setId (String id);
+	
+	/**
+	 * Gets the name for this group (can be null).
+	 * @return the name for this group.
+	 */
+	public String getName ();
+	
+	/**
+	 * Sets the name for this group.
+	 * @param name the name for this group (cane be null).
+	 */
+	public void setName (String name);
 
 	/**
 	 * Gets the parent for this group.

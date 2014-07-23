@@ -1,6 +1,8 @@
-package net.sf.okapi.acorn.xom;
+package net.sf.okapi.acorn.xom.json;
 
 import java.io.StringWriter;
+
+import net.sf.okapi.acorn.xom.StartCode;
 
 import org.oasisopen.xliff.om.v1.ICode;
 

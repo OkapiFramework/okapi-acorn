@@ -1,6 +1,9 @@
-package net.sf.okapi.acorn.xom;
+package net.sf.okapi.acorn.xom.json;
 
 import java.util.Map;
+
+import net.sf.okapi.acorn.xom.Const;
+import net.sf.okapi.acorn.xom.Content;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

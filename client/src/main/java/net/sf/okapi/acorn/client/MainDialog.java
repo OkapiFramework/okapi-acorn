@@ -51,8 +51,9 @@ public class MainDialog extends JFrame {
 
 	private JTextField edPath;
 	private JButton btAddFile;
-	private JButton btValidate;
+	private JButton btReqTrans;
 	private JTextPane edLog;
+	private JTextPane edInput;
 	private Vector inputFiles;
 
 	public MainDialog () {
@@ -100,6 +101,11 @@ public class MainDialog extends JFrame {
 
 		JTabbedPane tabPane = new JTabbedPane();
 
+		// Add the API test panel
+		APITestPanel atPanel = new APITestPanel();
+		// Add the tab
+		tabPane.addTab("API Test", atPanel);
+		
 		// Add the Input Files tab
 		JPanel panel = new JPanel(new BorderLayout());
 		// List of files
@@ -107,13 +113,13 @@ public class MainDialog extends JFrame {
 	    JList listbox = new JList(model);
 	    JScrollPane pane = new JScrollPane(listbox);
 		// Add the tab
-		tabPane.addTab("Input Files", panel);
+//		tabPane.addTab("Input Files", panel);
 		
 		// Add the Log tab
 		edLog = new JTextPane();
 		edLog.setEditable(false);
 		edLog.setBorder(BorderFactory.createLineBorder(Color.gray));
-		tabPane.addTab("Log", edLog);
+//		tabPane.addTab("Log", edLog);
 		
 		add(tabPane);
 		

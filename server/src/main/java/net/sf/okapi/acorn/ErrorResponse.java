@@ -18,26 +18,30 @@
   See also the full LGPL text here: http://www.gnu.org/copyleft/lesser.html
 ===========================================================================*/
 
-package net.sf.okapi.acorn.client;
+package net.sf.okapi.acorn;
 
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
+import java.util.Date;
 
-public class Main {
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
-	public static void main (String[] originalArgs) {
-		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ( "Nimbus".equals(info.getName()) ) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-		}
-		catch ( Exception e ) {
-			// Use default
-		}
-		MainDialog.start();
+public class ErrorResponse {
+
+	public static Response create (Response.Status status,
+		String reqId,
+		String userMessage)
+	{
+		ResponseBuilder rb = Response.status(status);
+		StringBuilder tmp = new StringBuilder();
+		tmp.append("{\"error\":{");
+		tmp.append("\"id\":"+"\""+(DataStore.getNextErrorId())+"\",");
+		tmp.append("\"requestId\":"+"\""+reqId+"\",");
+		tmp.append("\"httpCode\":"+"\""+status.getStatusCode()+"\",");
+		tmp.append("\"datetime\":"+"\""+DataStore.formatDate(new Date())+"\",");
+		tmp.append("\"userMessage\":"+"\""+userMessage+"\"");
+		tmp.append("}}");
+		rb.entity(tmp.toString());
+		return rb.build();
 	}
-
+	
 }
