@@ -5,9 +5,9 @@ import java.util.List;
 
 import net.sf.okapi.acorn.xom.ExtObject;
 import net.sf.okapi.acorn.xom.Group;
-import net.sf.okapi.lib.xliff2.core.AMarker;
-import net.sf.okapi.lib.xliff2.core.BaseMarker;
-import net.sf.okapi.lib.xliff2.core.CMarker;
+import net.sf.okapi.lib.xliff2.core.Tag;
+import net.sf.okapi.lib.xliff2.core.CTag;
+import net.sf.okapi.lib.xliff2.core.CanReorder;
 import net.sf.okapi.lib.xliff2.core.Directionality;
 import net.sf.okapi.lib.xliff2.core.ExtAttribute;
 import net.sf.okapi.lib.xliff2.core.ExtAttributes;
@@ -17,6 +17,7 @@ import net.sf.okapi.lib.xliff2.core.ExtElements;
 import net.sf.okapi.lib.xliff2.core.Fragment;
 import net.sf.okapi.lib.xliff2.core.IExtChild;
 import net.sf.okapi.lib.xliff2.core.IWithExtElements;
+import net.sf.okapi.lib.xliff2.core.MTag;
 import net.sf.okapi.lib.xliff2.core.Part;
 import net.sf.okapi.lib.xliff2.core.StartFileData;
 import net.sf.okapi.lib.xliff2.core.StartGroupData;
@@ -25,10 +26,9 @@ import net.sf.okapi.lib.xliff2.core.Unit;
 import net.sf.okapi.lib.xliff2.reader.Event;
 import net.sf.okapi.lib.xliff2.reader.XLIFFReader;
 
-import org.oasisopen.xliff.om.v1.CanReorder;
 import org.oasisopen.xliff.om.v1.Direction;
-import org.oasisopen.xliff.om.v1.IAnnotation;
-import org.oasisopen.xliff.om.v1.ICode;
+import org.oasisopen.xliff.om.v1.IMTag;
+import org.oasisopen.xliff.om.v1.ICTag;
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IDocument;
 import org.oasisopen.xliff.om.v1.IExtObject;
@@ -198,30 +198,30 @@ public class XLIFFImport {
 		else cont = mPart.getSource();
 		// Process the content
 		for ( int i=0; i<ct.length(); i++ ) {
-			if ( Fragment.isMarker(ct.charAt(i)) ) {
+			if ( Fragment.isChar1(ct.charAt(i)) ) {
 				int key = Fragment.toKey(ct.charAt(i), ct.charAt(++i));
-				BaseMarker bm = frag.getMarker(key);
-				CMarker cm = (bm.isCode() ? (CMarker)bm : null);
-				ICode code = null;
-				IAnnotation anno = null;
+				Tag bm = frag.getTag(key);
+				CTag cm = (bm.isCode() ? (CTag)bm : null);
+				ICTag code = null;
+				IMTag anno = null;
 				switch ( bm.getTagType() ) {
 				case CLOSING:
 					if ( bm.isCode() ) {
-						code = cont.closeCode(bm.getId(), cm.getOriginalData());
+						code = cont.closeCodeSpan(bm.getId(), cm.getData());
 						copyCMarker(cm, code);
 					}
 					else {
-						anno = cont.closeAnnotation(bm.getId());
+						anno = cont.closeMarkerSpan(bm.getId());
 					}
 					break;
 				case OPENING:
 					if ( bm.isCode() ) {
-						code = cont.appendOpeningCode(bm.getId(), cm.getOriginalData());
+						code = cont.startCodeSpan(bm.getId(), cm.getData());
 						copyCMarker(cm, code);
 					}
 					else {
-						AMarker am = (AMarker)bm;
-						anno = cont.appendOpeningAnnotation(bm.getId(), am.getType());
+						MTag am = (MTag)bm;
+						anno = cont.startMarkerSpan(bm.getId(), am.getType());
 						anno.setRef(am.getRef());
 						anno.setValue(am.getValue());
 						anno.setTranslate(am.getTranslate().equals("yes"));
@@ -229,7 +229,7 @@ public class XLIFFImport {
 					}
 					break;
 				case STANDALONE: // Always a code
-					code = cont.appendStandaloneCode(cm.getId(), cm.getOriginalData());
+					code = cont.appendCode(cm.getId(), cm.getData());
 					copyCMarker(cm, code);
 					break;
 				}
@@ -240,8 +240,8 @@ public class XLIFFImport {
 		}
 	}
 	
-	private void copyCMarker (CMarker cm,
-		ICode code)
+	private void copyCMarker (CTag cm,
+		ICTag code)
 	{
 		code.setCanCopy(cm.getCanCopy());
 		code.setCanDelete(cm.getCanDelete());
@@ -257,15 +257,15 @@ public class XLIFFImport {
 		code.setType(cm.getType());
 	}
 	
-	private org.oasisopen.xliff.om.v1.CanReorder convCanReorder (int canReorder) {
+	private org.oasisopen.xliff.om.v1.CanReorder convCanReorder (CanReorder canReorder) {
 		switch ( canReorder ) {
-		case CMarker.CANREORDER_FIRSTNO:
-			return CanReorder.FIRSTNO;
-		case CMarker.CANREORDER_NO:
-			return CanReorder.NO;
-		case CMarker.CANREORDER_YES:
+		case FIRSTNO:
+			return org.oasisopen.xliff.om.v1.CanReorder.FIRSTNO;
+		case NO:
+			return org.oasisopen.xliff.om.v1.CanReorder.NO;
+		case YES:
 		default:
-			return CanReorder.YES;
+			return org.oasisopen.xliff.om.v1.CanReorder.YES;
 		}
 	}
 	

@@ -187,9 +187,9 @@ public class APITestPanel extends JPanel {
 			    	.build();
 				StringBuilder jtmp = new StringBuilder("{\"translationRequest\"{");
 				jtmp.append("id:\""+edId.getText()+"\",");
-				jtmp.append("sourceLanguage: \""+edSrcLang.getText()+"\",");
-				jtmp.append("targetLanguage: \""+edTrgLang.getText()+"\",");
-				jtmp.append("source: \""+edSource.getText()+"\"");
+				jtmp.append("sourceLanguage:\""+edSrcLang.getText()+"\",");
+				jtmp.append("targetLanguage:\""+edTrgLang.getText()+"\",");
+				jtmp.append("source:\""+edSource.getText()+"\"");
 				jtmp.append("}}");
 				target = cli.target("http://localhost:8080/taustapi/v2").path("translation");
 				final MultiPart multiPartEntity = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE).bodyPart(

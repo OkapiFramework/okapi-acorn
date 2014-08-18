@@ -27,6 +27,12 @@ public interface IContent {
 	public boolean hasTag ();
 	
 	/**
+	 * Gets a plain text version (all tag references stripped out) of the content of this fragment.
+	 * @return the plain text version of this fragment.
+	 */
+	public String getPlainText ();
+
+	/**
 	 * Gets the coded text for this content.
 	 * @return the coded text for this content.
 	 * @see #setCodedText(String)
@@ -80,86 +86,89 @@ public interface IContent {
 	/**
 	 * Appends a plain text string at the end of this content.
 	 * @param plainText the text to append.
+	 * @return this content itself.
 	 */
-	public void append (String plainText);
+	public IContent append (CharSequence plainText);
 	
 	/**
 	 * Appends a character at the end of this content.
 	 * @param ch the character to add.
+	 * @return this content itself.
 	 */
-	public void append (char ch);
+	public IContent append (char ch);
 
 	/**
 	 * Appends an inline code at the end of this content.
 	 * @param code the code to add.
 	 * @return the code that was added (same as the parameter).
 	 */
-	public ICode append (ICode code);
+	public ICTag append (ICTag code);
 	
 	/**
-	 * Appends an opening code to this content.
+	 * Appends to this content the opening tag for a new code.
 	 * @param id the id of the code.
-	 * @param data the original data for the code, e.g. <code>&lt;B></code>. (can be null).
-	 * @return the new {@link ICode} created.
-	 * @see #closeCode(String, String)
-	 * @see #appendStandaloneCode(String, String)
+	 * @param data the original data for the code, e.g. <code>&lt;B></code> (can be null).
+	 * @return the new {@link ICTag} created.
+	 * @see #closeCodeSpan(String, String)
+	 * @see #appendCode(String, String)
 	 */
-	public ICode appendOpeningCode (String id, 
+	public ICTag startCodeSpan (String id, 
 		String data);
 	
 	/**
-	 * Appends a closing tag for an existing opened code.
+	 * Appends to this content the closing tag for an existing opened code.
 	 * @param id the id of the code to close.
-	 * @param data the original data for the code, e.g. <code>&lt;/B></code>. (can be null).
-	 * @return the new {@link ICode} created.
-	 * @see #appendOpeningCode(String, String) 
+	 * @param data the original data for the code, e.g. <code>&lt;/B></code> (can be null).
+	 * @return the new {@link ICTag} created.
+	 * @see #startCodeSpan(String, String) 
 	 */
-	public ICode closeCode (String id,
+	public ICTag closeCodeSpan (String id,
 		String data);
 	
 	/**
 	 * Appends a standalone inline code to this content.
 	 * @param id the id of the code.
-	 * @param data the original data for the code, e.g. <code>&lt;BR></code>. (can be null). 
-	 * @return the new {@link ICode} created.
-	 * @see #appendOpeningCode(String, String)
+	 * @param data the original data for the code, e.g. <code>&lt;BR></code> (can be null). 
+	 * @return the new {@link ICTag} created.
+	 * @see #startCodeSpan(String, String)
 	 */
-	public ICode appendStandaloneCode (String id,
+	public ICTag appendCode (String id,
 		String data);
 	
 	/**
-	 * Appends an opening inline annotation to this content. 
-	 * @param id the id of the annotation.
-	 * @param type the type of the annotation.
-	 * @return the new {@link IAnnotation} created.
+	 * Appends to this content the opening tag of a new inline marker. 
+	 * @param id the id of the marker.
+	 * @param type the type of the marker.
+	 * @return the new {@link IMTag} created.
 	 */
-	public IAnnotation appendOpeningAnnotation (String id,
+	public IMTag startMarkerSpan (String id,
 		String type);
 	
 	/**
-	 * Appends a closing tag for an existing opened annotation.
-	 * @param id the id of the annotation to close.
-	 * @return the new {@link IAnnotation} created.
+	 * Appends to this content the closing tag for an existing opened marker.
+	 * @param id the id of the marker to close.
+	 * @return the new {@link IMTag} created.
 	 */
-	public IAnnotation closeAnnotation (String id);
+	public IMTag closeMarkerSpan (String id);
 
 	/**
 	 * Inserts a plain text string at a given position in the coded text.
 	 * @param pos the position where to insert.
 	 * @param plainText the string to insert.
+	 * @return this content itself.
 	 * @throws InvalidPositionException if the insertion point is inside a tag reference.
 	 */
-	public void insert (int pos,
+	public IContent insert (int pos,
 		String plainText);
 
 	/**
-	 * Inserts an inline code at a given position in the coded text.
+	 * Inserts an inline code's tag at a given position in the coded text.
 	 * @param pos the position where to insert.
-	 * @param code the inline code to insert.
-	 * @return the code that was inserted (same as the parameter).
+	 * @param code the inline code's tag to insert.
+	 * @return the {@link ICTag} that was inserted (same as the parameter).
 	 * @throws InvalidPositionException if the insertion point is inside a tag reference.
 	 */
-	public ICode insert (int pos,
-		ICode code);
+	public ICTag insert (int pos,
+		ICTag code);
 
 }

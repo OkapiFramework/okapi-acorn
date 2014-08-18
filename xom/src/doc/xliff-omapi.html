@@ -30,7 +30,7 @@
     <dd>A inline object that represent the opening, the closing or the
       stand-alone location of a code or the opening or closing location of an
       annotation. </dd>
-    <dt>Annotation</dt>
+    <dt>Marker</dt>
     <dd>A type inline data that holds some properties associated to the spanned
       content.</dd>
     <dt>Code</dt>
@@ -104,15 +104,15 @@ href="./org/oasisopen/xliff/om/v1/ISegment.html">ISegment</a></strong>)+<br>    
 href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>1 (source)<br>      |    |<br>      |    +-- <strong><a
 href="./org/oasisopen/xliff/om/v1/ITags.html">ITags</a></strong>1<br>      |         |<br>      |         +-- (<strong><a
 href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/ICode.html">ICode</a></strong> | <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IAnnotation.html">IAnnotation</a></strong><strong></strong>)*<br>      |                                   |<br>      |                                   +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/ICTag.html">ICTag</a></strong> | <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IMTag.html">IMTag</a></strong><strong></strong>)*<br>      |                                   |<br>      |                                   +-- <strong><a
 href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |                                        |<br>      |                                        +-- <strong><a
 href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>      |<br>      +-- <strong><a
 href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>? (target)<br>           |<br>           +-- <strong><a
 href="./org/oasisopen/xliff/om/v1/ITags.html">ITags</a></strong>1<br>                |<br>                +-- (<strong><a
 href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/ICode.html">ICode</a></strong> | <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IAnnotation.html">IAnnotation</a></strong><strong></strong>)*<br>                                          |<br>                                          +-- <strong><a
+href="./org/oasisopen/xliff/om/v1/ICTag.html">ICTag</a></strong> | <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
+href="./org/oasisopen/xliff/om/v1/IMTag.html">IMTag</a></strong><strong></strong>)*<br>                                          |<br>                                          +-- <strong><a
 href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>                                               |<br>                                               +-- <strong><a
 href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*</pre>
     <h2><a id="unit" name="unit"></a>The Unit</h2>
@@ -277,11 +277,11 @@ href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*</pre>
       <li><strong><a href="./org/oasisopen/xliff/om/v1/ITags.html">ITags</a></strong>
         - the collection of tags associated with the content.</li>
       <li><strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>
-        - a tag (code or annotation)</li>
-      <li><strong><a href="./org/oasisopen/xliff/om/v1/ICode.html">ICode</a></strong>
-        - a code.</li>
-      <li><strong><a href="./org/oasisopen/xliff/om/v1/IAnnotation.html">IAnnotation</a></strong>
-        - an annotation.</li>
+        - a tag (of a code or a marker)</li>
+      <li><strong><a href="./org/oasisopen/xliff/om/v1/ICTag.html">ICTag</a></strong>
+        - a code's tag.</li>
+      <li><strong><a href="./org/oasisopen/xliff/om/v1/IMTag.html">IMTag</a></strong>
+        - a marker's tag.</li>
     </ul>
     <ul>
     </ul>
@@ -331,15 +331,14 @@ href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*</pre>
 ]  </pre>
     <p>TODO: more examples </p>
     <h2>Extensions and Unsupported Modules</h2>
-    <p>TODO</p>
-    <p>The object model provides support for extensions, both as objects (<strong><a
-          href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>)
-      and fields (<strong><a href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>).
-      The purpose of those interfaces is to provide the user with a basic
-      mechanism to store and access data that are not part of the object model
-      specification.</p>
-    <p>Extension fields can be set to the following core objects: IUnit,
-      IAnnotation</p>
+    The object model provides support for extensions, both as objects (<strong><a
+        href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>)
+    and fields (<strong><a href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>).
+    The purpose of those interfaces is to provide the user with a basic
+    mechanism to store and access data that are not part of the object model
+    specification.
+    <p>Extension fields can be set to the following core objects: <a href="./org/oasisopen/xliff/om/v1/IUnit.html"><strong>IUnit</strong></a>,
+      <a href="./org/oasisopen/xliff/om/v1/IMTag.html"><strong>IMTag</strong></a></p>
     <p>Unsupported modules are handled like extensions.</p>
     <p>An implementation of the XLIFF object model does not have to support more
       than the core, but it may supports one, more or all modules. When an
@@ -354,8 +353,8 @@ href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*</pre>
     <ol>
       <li>One should be able to apply most string-based functions (e.g. <code>toUppercase()</code>)
         to the content without undue complexity or side-effect.</li>
-      <li>Adding, removing and modifying inline codes and annotations should be
-        not be expensive operations.</li>
+      <li>Adding, removing and modifying inline codes and markers should be not
+        be expensive operations.</li>
       <li>Accessing a field common to the opening and closing ends of inline
         codes (e.g. id, type, sub-type, etc.) should always return the same
         value regardless from which end it is accessed.</li>

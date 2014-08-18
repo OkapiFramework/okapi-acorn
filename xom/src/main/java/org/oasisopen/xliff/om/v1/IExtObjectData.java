@@ -13,7 +13,7 @@ public interface IExtObjectData extends IExtObjectItem {
 	
 	/**
 	 * Sets the text content of this object item.
-	 * @param text the text content of this object item (can be null).
+	 * @param content the text content of this object item (can be null).
 	 */
 	public void setContent (String content);
 

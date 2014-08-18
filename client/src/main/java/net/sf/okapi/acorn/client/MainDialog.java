@@ -23,12 +23,12 @@ package net.sf.okapi.acorn.client;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Vector;
 
@@ -38,12 +38,18 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.TransferHandler;
+
+import net.sf.okapi.acorn.calais.OpenCalais;
+import net.sf.okapi.lib.xliff2.processor.XLIFFProcessor;
 
 public class MainDialog extends JFrame {
 
@@ -99,6 +105,26 @@ public class MainDialog extends JFrame {
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Okapi Acorn - Client");
 
+		//=== Menu
+		
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+
+		JMenu menu = new JMenu("File");
+		menu.setMnemonic(KeyEvent.VK_F);
+		menuBar.add(menu);
+		
+		JMenuItem menuItem = new JMenuItem("Process an XLIFF 2 Document with Open-Calais...", KeyEvent.VK_P);
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				applyOpenCalais();
+			}
+		});
+		
+		//=== Panels
+		
 		JTabbedPane tabPane = new JTabbedPane();
 
 		// Add the API test panel
@@ -204,6 +230,39 @@ public class MainDialog extends JFrame {
 			(dim.height - getSize().height) / 2);
 	}
 
+	private void applyOpenCalais () {
+		// Get an XLIFF 2.0 file
+		File inputFile;
+		File outputFile;
+    	try {
+    		JFileChooser fc = new JFileChooser();
+    		fc.setDialogTitle("Select an XLIFF 2 Document");
+    		int option = fc.showOpenDialog(this);
+    		if ( option == JFileChooser.APPROVE_OPTION ) {
+   				inputFile = fc.getSelectedFile();
+   				// Set the output
+   				StringBuilder path = new StringBuilder(inputFile.getAbsolutePath());
+   				int p = path.lastIndexOf(".");
+   				if ( p == -1 ) path.append(".out");
+   				else path.insert(p, ".out");
+   				outputFile = new File(path.toString());
+    		}
+    		else {
+    			return;
+    		}
+    	}
+    	catch ( Throwable e ) {
+    		e.printStackTrace();
+    		return;
+    	}
+		
+		// Process it
+		XLIFFProcessor proc = new XLIFFProcessor();
+		proc.add(new OpenCalais());
+		proc.run(inputFile, outputFile);
+		
+	}
+	
 	private void selectDocument () {
 		try {
 			JFileChooser fc = new JFileChooser();

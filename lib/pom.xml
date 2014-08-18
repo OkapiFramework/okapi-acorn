@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.oasisopen.xliff</groupId>
-	<artifactId>om-v1</artifactId>
+	<groupId>net.sf.okapi.acorn</groupId>
+	<artifactId>xom-v1</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>xliff-object-model</name>
+	<name>okapi-xom-impl</name>
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -53,6 +53,16 @@
 	</build>
 	<dependencies>
 		<!-- Additional dependencies -->
+		<dependency>
+			<groupId>org.oasisopen.xliff</groupId>
+			<artifactId>om-v1</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

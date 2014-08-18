@@ -35,6 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 
@@ -54,9 +55,17 @@ public class Translation {
 //    	@FormDataParam("source") String source
 		)
 	{
-		
-		FormDataBodyPart tr = form.getField("translationRequest");
-		System.out.println(tr.getValue());
+		int i=0;
+		for ( BodyPart bp : form.getBodyParts() ) {
+			String bpStr = bp.getEntityAs(String.class);
+			System.out.println(bpStr);
+			if ( i == 0 ) {
+				
+			}
+			i++;
+		}
+//		FormDataBodyPart tr = form.getField("translationRequest");
+//		System.out.println(tr.getValue());
 //		if (( id == null ) || id.trim().isEmpty() ) {
 //			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "ID must not be null or empty.");
 //		}
