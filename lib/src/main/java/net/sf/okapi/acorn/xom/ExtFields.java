@@ -30,6 +30,35 @@ public class ExtFields implements IExtFields {
 		this.parent = parent;
 	}
 	
+	/**
+	 * Copy constructor.
+	 * @param parent the parent of this new object.
+	 * @param original the original object to duplicate.
+	 */
+	ExtFields (IWithExtFields parent,
+		IExtFields original)
+	{
+		this.parent = parent;
+		for ( IExtField field : original ) {
+			set(field.getNSUri(), field.getName(), field.getValue());
+		}
+		autoPrefixCount = 1;
+		for ( String uri : original.getNSUris() ) {
+			String sh = original.getNSShorthand(uri);
+			setNS(uri, sh);
+			// try to update the auto-prefix counter
+			if ( sh.startsWith("x") && (( sh.length() > 1 ) && ( Character.isDigit(sh.charAt(1)) )) ) {
+				try {
+					int n = Integer.parseInt(sh.substring(1));
+					if ( n > autoPrefixCount ) autoPrefixCount = n+1;
+				}
+				catch ( NumberFormatException e ) {
+					// Nothing to do: not really an error
+				}
+			}
+		}
+	}
+
 	@Override
 	public Iterator<IExtField> iterator () {
 		if ( fields == null ) fields = new ArrayList<>(2);

@@ -4,7 +4,7 @@ import org.oasisopen.xliff.om.v1.CanReorder;
 import org.oasisopen.xliff.om.v1.Direction;
 import org.oasisopen.xliff.om.v1.ICTag;
 
-class CodeCommon {
+class CTagCommon {
 
 	private static final int CANCOPY = 0x01;
 	private static final int CANDELETE = 0x02;
@@ -18,7 +18,7 @@ class CodeCommon {
 	private String copyOf;
 	private Direction dir = Direction.INHERITED;
 	
-	CodeCommon (String id) {
+	CTagCommon (String id) {
 		this.id = id;
 	}
 	
@@ -26,7 +26,7 @@ class CodeCommon {
 	 * Copy constructor.
 	 * @param original the original object to copy.
 	 */
-	CodeCommon (CodeCommon original) {
+	CTagCommon (CTagCommon original) {
 		this.id = original.id;
 		this.type = original.type;
 		this.hints = original.hints;
@@ -37,7 +37,7 @@ class CodeCommon {
 		this.dir = original.dir;
 	}
 
-	CodeCommon (ICTag original) {
+	CTagCommon (ICTag original) {
 		this.id = original.getId();
 		this.type = original.getType();
 		this.setCanCopy(original.getCanCopy());
@@ -48,6 +48,7 @@ class CodeCommon {
 		this.copyOf = original.getCopyOf();
 		this.dir = original.getDir();
 	}
+
 	public String getId () {
 		return id;
 	}

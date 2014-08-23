@@ -6,6 +6,7 @@ import org.oasisopen.xliff.om.v1.IDocument;
 import org.oasisopen.xliff.om.v1.IExtObject;
 import org.oasisopen.xliff.om.v1.IFile;
 import org.oasisopen.xliff.om.v1.IGroup;
+import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.IPart;
 import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.IStore;
@@ -16,16 +17,16 @@ import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 import org.oasisopen.xliff.om.v1.InvalidParameterException;
 import org.oasisopen.xliff.om.v1.TagType;
 
+/**
+ * Implements a singleton instance of the {@link IXLIFFFactory} interface.
+ */
 public enum Factory implements IXLIFFFactory {
 
 	/**
 	 * The unique instance of the factory.
 	 */
 	XOM;
-
-//	final private JSONWriter jw = new JSONWriter();
-//	final private JSONReader jr = new JSONReader();
-
+	
 	@Override
 	public boolean supports (String moduleUri) {
 		// No modules are supported directly for now.
@@ -60,15 +61,6 @@ public enum Factory implements IXLIFFFactory {
 	{
 		return new Content(store, isTarget);
 	}
-
-//	@Override
-//	public IContent copyContent (IStore store,
-//		boolean isTarget,
-//		IContent original)
-//	{
-//		String str = jw.fromContent(original).toJSONString();
-//		return jr.readContent(store, isTarget, str);
-//	}
 
 	@Override
 	public IContent copyContent (IStore store,
@@ -118,17 +110,18 @@ public enum Factory implements IXLIFFFactory {
 		if ( original instanceof ICTag ) {
 			ICTag oct = null;
 			if ( original.getTagType() == TagType.CLOSING ) {
-				oct = destinationTags.getOpeningICTag(original.getId());
+				oct = destinationTags.getOpeningCTag(original.getId());
 			}
 			return new CTag((ICTag)original, (CTag)oct);
 		}
-//		if ( original instanceof MTag ) {
-//			MTag mct = null;
-//			if ( original.getTagType() == TagType.CLOSING ) {
-//				mct = destinationTags.getOpeningMTag(original.getId());
-//			}
-//			return new MTag((MTag)original, mct);
-//		}
+		if ( original instanceof IMTag ) {
+			IMTag omt = null;
+			if ( original.getTagType() == TagType.CLOSING ) {
+				omt = destinationTags.getOpeningMTag(original.getId());
+			}
+			return new MTag((IMTag)original, (MTag)omt);
+		}
+		// Else: error
 		throw new InvalidParameterException("The type of the original object is invalid.");
 	}
 
@@ -139,4 +132,5 @@ public enum Factory implements IXLIFFFactory {
 		return new ExtObject(nsUri, name);
 	}
 
+	
 }

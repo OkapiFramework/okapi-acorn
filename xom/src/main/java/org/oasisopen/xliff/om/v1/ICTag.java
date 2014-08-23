@@ -3,8 +3,9 @@ package org.oasisopen.xliff.om.v1;
 /**
  * The abstract representation of a native code. Most of the time inline codes are coming directly from markup 
  * in the original document that was extracted.
- * <p><b>IMPORTANT</b>: A number of fields are shared by opening and closing tags, implementations must ensure
- * that both objects have the values of these fields always the same.
+ * <p><b>IMPORTANT</b>: A number of fields are shared by the opening and closing tags, implementations must ensure
+ * that both objects have always the same values for those fields (i.e: when you change a value in one, it is
+ * automatically changed in the other as well.
  */
 public interface ICTag extends ITag {
 

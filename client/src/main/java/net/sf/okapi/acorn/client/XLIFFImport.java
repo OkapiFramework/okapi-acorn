@@ -1,11 +1,8 @@
 package net.sf.okapi.acorn.client;
 
 import java.io.File;
-import java.util.List;
 
-import net.sf.okapi.acorn.xom.ExtObject;
-import net.sf.okapi.acorn.xom.Group;
-import net.sf.okapi.lib.xliff2.core.Tag;
+import net.sf.okapi.acorn.xom.Factory;
 import net.sf.okapi.lib.xliff2.core.CTag;
 import net.sf.okapi.lib.xliff2.core.CanReorder;
 import net.sf.okapi.lib.xliff2.core.Directionality;
@@ -22,26 +19,29 @@ import net.sf.okapi.lib.xliff2.core.Part;
 import net.sf.okapi.lib.xliff2.core.StartFileData;
 import net.sf.okapi.lib.xliff2.core.StartGroupData;
 import net.sf.okapi.lib.xliff2.core.StartXliffData;
+import net.sf.okapi.lib.xliff2.core.Tag;
 import net.sf.okapi.lib.xliff2.core.Unit;
 import net.sf.okapi.lib.xliff2.reader.Event;
 import net.sf.okapi.lib.xliff2.reader.XLIFFReader;
 
 import org.oasisopen.xliff.om.v1.Direction;
-import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.ICTag;
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IDocument;
 import org.oasisopen.xliff.om.v1.IExtObject;
-import org.oasisopen.xliff.om.v1.IExtObjectItem;
 import org.oasisopen.xliff.om.v1.IExtObjects;
 import org.oasisopen.xliff.om.v1.IFile;
 import org.oasisopen.xliff.om.v1.IGroup;
+import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.IPart;
 import org.oasisopen.xliff.om.v1.IUnit;
 import org.oasisopen.xliff.om.v1.IWithExtFields;
 import org.oasisopen.xliff.om.v1.IWithExtObjects;
+import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 
 public class XLIFFImport {
+	
+	final static IXLIFFFactory xf = Factory.XOM;
 
 	public IDocument importDocument (File inputFile) {
 		IDocument doc = null;
@@ -53,7 +53,7 @@ public class XLIFFImport {
 				Event event = reader.next();
 				switch ( event.getType() ) {
 				case START_DOCUMENT:
-					doc = new net.sf.okapi.acorn.xom.Document();
+					doc = xf.createDocument();
 					break;
 				case START_XLIFF:
 					StartXliffData sxd = event.getStartXliffData();
@@ -63,13 +63,13 @@ public class XLIFFImport {
 					break;
 				case START_FILE:
 					StartFileData sfd = event.getStartFileData();
-					file = doc.add(new net.sf.okapi.acorn.xom.File(sfd.getId()));
+					file = xf.createFile(sfd.getId());
 					//todo: ext attributes
 					//copyExtAttributes(file, sfd);
 					break;
 				case START_GROUP:
 					StartGroupData sgd = event.getStartGroupData();
-					IGroup newGroup = new Group(group, sgd.getId());
+					IGroup newGroup = xf.createGroup(group, sgd.getId());
 					if ( group == null ) file.add(newGroup);
 					else group.add(newGroup);
 					group = newGroup;
@@ -154,7 +154,6 @@ public class XLIFFImport {
 		ExtElement xElem)
 	{
 		if ( !xElem.hasChild() ) return;
-		List<IExtObjectItem> list = xObj.getItems();
 		for ( IExtChild child : xElem.getChildren() ) {
 			switch ( child.getType() ) {
 			case CDATA:
@@ -163,7 +162,7 @@ public class XLIFFImport {
 			case ELEMENT:
 			default:
 				ExtElement cElem = (ExtElement)child;
-				IExtObject xChildObj = new ExtObject(cElem.getQName().getNamespaceURI(), cElem.getQName().getLocalPart());
+				IExtObject xChildObj = xf.createExtObject(cElem.getQName().getNamespaceURI(), cElem.getQName().getLocalPart());
 				xObj.getItems().add(xChildObj);
 				copyChildren(xChildObj, cElem);
 				break;
@@ -283,18 +282,4 @@ public class XLIFFImport {
 		}
 	}
 
-//	private org.oasisopen.xliff.om.v1.ExtObjectType convExtElemType (ExtChildType type) {
-//		switch ( type ) {
-//		case CDATA:
-//			return ExtObjectType.RAWTEXT;
-//		case PI:
-//			return ExtObjectType.INSTRUCTION;
-//		case TEXT:
-//			return ExtObjectType.TEXT;
-//		case ELEMENT:
-//		default:
-//			return ExtObjectType.OBJECTS;
-//		}
-//	}
-	
 }

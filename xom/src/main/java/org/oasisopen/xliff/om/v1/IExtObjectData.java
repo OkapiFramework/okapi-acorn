@@ -19,7 +19,7 @@ public interface IExtObjectData extends IExtObjectItem {
 
 	/**
 	 * Indicates if, when possible, this text content should be serialized with a mechanism that allows
-	 * its representation without escaping (e.g. in a CDATA section in XML).
+	 * its representation without escaping (e.g: in a CDATA section in XML).
 	 * @return true if a raw output is requested.
 	 */
 	public boolean getRaw ();

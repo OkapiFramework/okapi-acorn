@@ -58,7 +58,7 @@ public class Content implements IContent {
 			else if ( typeName.equals(String.class.getName()) ) mode = 1;
 			else if ( typeName.equals(ITag.class.getName()) ) mode = 2;
 			else if ( typeName.equals(ICTag.class.getName()) ) mode = 3;
-			//else if ( typeName.equals(MTag.class.getName()) ) mode = 4;
+			else if ( typeName.equals(MTag.class.getName()) ) mode = 4;
 			else {
 				throw new InvalidParameterException("Unsupported iteration type.");
 			}
@@ -318,26 +318,25 @@ public class Content implements IContent {
 	public IMTag openMarkerSpan (String id,
 		String type)
 	{
-		StartAnnotation anno = new StartAnnotation(id, type);
-		ctext.append(Util.toRef(tags.add(anno)));
-		return anno;
+		MTag mtag = new MTag(true, id, type);
+		ctext.append(Util.toRef(tags.add(mtag)));
+		return mtag;
 	}
 
 	@Override
 	public IMTag closeMarkerSpan (String id) {
-		ITag il = tags.getOpeningTag(id);
-		if ( il == null ) {
+		ITag opening = tags.getOpeningTag(id);
+		if ( opening == null ) {
 			throw new InvalidParameterException(
-				String.format("Cannot add closing annotation tag because id '%s' does not exist.", id));
+				String.format("Cannot add closing marker tag because id '%s' does not exist.", id));
 		}
-		if ( !(il instanceof StartAnnotation) ) {
+		if ( !(opening instanceof MTag) ) {
 			throw new InvalidParameterException(
-				String.format("The id '%s' does not correspond to an annotation.", id));
+				String.format("The id '%s' does not correspond to a marker.", id));
 		}
-		StartAnnotation sa = (StartAnnotation)il;
-		EndAnnotation ea = new EndAnnotation(sa);
-		ctext.append(Util.toRef(tags.add(ea)));
-		return ea;
+		MTag em = new MTag((MTag)opening);
+		ctext.append(Util.toRef(tags.add(em)));
+		return em;
 	}
 
 	private void checkPosition (int pos) {

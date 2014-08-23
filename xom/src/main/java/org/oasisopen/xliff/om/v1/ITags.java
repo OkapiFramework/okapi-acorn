@@ -61,7 +61,15 @@ public interface ITags extends Iterable<ITag> {
 	 * @return the opening {@link ICTag} or null if no tag with the given ID is found.
 	 * @throws InvalidParameterException if a tag is found but it is not a {@link ICTag} object.
 	 */
-	public ICTag getOpeningICTag (String id);
+	public ICTag getOpeningCTag (String id);
+
+	/**
+	 * Gets the opening {@link IMTag} for a given id.
+	 * @param id the ID of the opening tag to search for.
+	 * @return the opening {@link IMTag} or null if no tag with the given ID is found.
+	 * @throws InvalidParameterException if a tag is found but it is not a {@link IMTag} object.
+	 */
+	public IMTag getOpeningMTag (String id);
 
 	/**
 	 * Gets the closing tag for a given tag id.

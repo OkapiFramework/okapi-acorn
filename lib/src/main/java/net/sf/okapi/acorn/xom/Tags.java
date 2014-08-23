@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.oasisopen.xliff.om.v1.ICTag;
+import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.IStore;
 import org.oasisopen.xliff.om.v1.ITag;
 import org.oasisopen.xliff.om.v1.ITags;
@@ -92,18 +93,27 @@ public class Tags implements ITags {
 	}
 
 	@Override
-	public ICTag getOpeningICTag (String id) {
-		if ( tags == null ) return null;
-		for ( ITag tag : tags.values() ) {
-			if ( tag.getId().equals(id) ) {
-				if ( tag.getTagType() == TagType.OPENING ) {
-					if ( !(tag instanceof ICTag) ) {
-						throw new InvalidParameterException(String.format(
-							"The tag id='%s' exists but is not an ICTag.", id));
-					}
-					return (ICTag)tag;
-				}
+	public ICTag getOpeningCTag (String id) {
+		ITag tag = getOpeningTag(id);
+		if ( tag != null ) {
+			if ( !(tag instanceof ICTag) ) {
+				throw new InvalidParameterException(String.format(
+					"The tag id='%s' exists but is not an ICTag.", id));
 			}
+			return (ICTag)tag;
+		}
+		return null;
+	}
+	
+	@Override
+	public IMTag getOpeningMTag (String id) {
+		ITag tag = getOpeningTag(id);
+		if ( tag != null ) {
+			if ( !(tag instanceof IMTag) ) {
+				throw new InvalidParameterException(String.format(
+					"The tag id='%s' exists but is not an IMTag.", id));
+			}
+			return (IMTag)tag;
 		}
 		return null;
 	}

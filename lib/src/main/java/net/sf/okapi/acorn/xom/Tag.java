@@ -7,7 +7,7 @@ import org.oasisopen.xliff.om.v1.TagType;
 
 abstract class Tag implements ICTag {
 
-	protected CodeCommon cc = null;
+	protected CTagCommon cc = null;
 
 	private final TagType tagType;
 	private String data;
@@ -16,12 +16,12 @@ abstract class Tag implements ICTag {
 	private String subFlows;
 	private Direction dataDir = Direction.AUTO;
 
-	Tag (CodeCommon cc,
+	Tag (CTagCommon cc,
 		TagType tagType,
 		String id,
 		String data)
 	{
-		if ( cc == null ) this.cc = new CodeCommon(id);
+		if ( cc == null ) this.cc = new CTagCommon(id);
 		else this.cc = cc;
 		this.tagType = tagType;
 		this.data = data;

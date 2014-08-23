@@ -8,7 +8,7 @@ import org.oasisopen.xliff.om.v1.TagType;
 
 public class CTag implements ICTag {
 
-	protected CodeCommon cm = null;
+	protected CTagCommon cc = null;
 
 	private final TagType tagType;
 	private String data;
@@ -17,13 +17,13 @@ public class CTag implements ICTag {
 	private String subFlows;
 	private Direction dataDir = Direction.AUTO;
 
-	CTag (CodeCommon cm,
+	CTag (CTagCommon cm,
 		TagType tagType,
 		String id,
 		String data)
 	{
-		if ( cm == null ) this.cm = new CodeCommon(id);
-		else this.cm = cm;
+		if ( cm == null ) this.cc = new CTagCommon(id);
+		else this.cc = cm;
 		this.tagType = tagType;
 		this.data = data;
 	}
@@ -55,7 +55,7 @@ public class CTag implements ICTag {
 		default:
 			throw new InvalidParameterException("Counterpart must be an opening or closing tag.");
 		}
-		this.cm = opposite.cm;
+		this.cc = opposite.cc;
 		this.data = data;
 	}
 	
@@ -68,8 +68,8 @@ public class CTag implements ICTag {
 	CTag (ICTag original,
 		CTag opposite)
 	{
-		if ( opposite == null ) this.cm = new CodeCommon(original);
-		else this.cm = opposite.cm;
+		if ( opposite == null ) this.cc = new CTagCommon(original);
+		else this.cc = opposite.cc;
 
 		this.tagType = original.getTagType();
 		this.data = original.getData();
@@ -94,82 +94,82 @@ public class CTag implements ICTag {
 
 	@Override
 	public String getId () {
-		return cm.getId();
+		return cc.getId();
 	}
 
 	@Override
 	public void setId (String id) {
-		cm.setId(id);
+		cc.setId(id);
 	}
 
 	@Override
 	public String getType () {
-		return cm.getType();
+		return cc.getType();
 	}
 
 	@Override
 	public void setType (String type) {
-		cm.setType(type);
+		cc.setType(type);
 	}
 
 	@Override
 	public String getSubType () {
-		return cm.getSubType();
+		return cc.getSubType();
 	}
 
 	@Override
 	public void setSubType (String subType) {
-		cm.setSubType(subType);
+		cc.setSubType(subType);
 	}
 
 	@Override
 	public boolean getCanCopy () {
-		return cm.getCanCopy();
+		return cc.getCanCopy();
 	}
 
 	@Override
 	public void setCanCopy (boolean canCopy) {
-		cm.setCanCopy(canCopy);
+		cc.setCanCopy(canCopy);
 	}
 
 	@Override
 	public boolean getCanOverlap () {
-		return cm.getCanOverlap();
+		return cc.getCanOverlap();
 	}
 
 	@Override
 	public void setCanOverlap (boolean canOverlap) {
-		cm.setCanOverlap(canOverlap);
+		cc.setCanOverlap(canOverlap);
 	}
 
 	@Override
 	public boolean getCanDelete () {
-		return cm.getCanDelete();
+		return cc.getCanDelete();
 	}
 
 	@Override
 	public void setCanDelete (boolean canDelete) {
-		cm.setCanDelete(canDelete);
+		cc.setCanDelete(canDelete);
 	}
 
 	@Override
 	public CanReorder getCanReorder () {
-		return cm.getCanReorder();
+		return cc.getCanReorder();
 	}
 
 	@Override
 	public void setCanReorder (CanReorder canReorder) {
-		cm.setCanReorder(canReorder);
+		cc.setCanReorder(canReorder);
 	}
 
 	@Override
 	public String getCopyOf () {
-		return cm.getCopyOf();
+		return cc.getCopyOf();
 	}
 
 	@Override
 	public void setCopyOf (String id) {
-		cm.setCopyOf(id);
+		cc.setCopyOf(id);
 	}
 
 	@Override
@@ -225,12 +225,12 @@ public class CTag implements ICTag {
 
 	@Override
 	public Direction getDir () {
-		return cm.getDir();
+		return cc.getDir();
 	}
 
 	@Override
 	public void setDir (Direction dir) {
-		cm.setDir(dir);
+		cc.setDir(dir);
 	}
 
 }

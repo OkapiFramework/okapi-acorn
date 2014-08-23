@@ -97,7 +97,7 @@ public class ContentTest {
 		// Re-insert the opening code elsewhere
 		//TODO: need a more abstract way to connect start/end on add/insert
 		CTag end = (CTag)cont.getTags().get(U.kCC(0));
-		ICTag newSc = new CTag(end.cm, TagType.OPENING, "1", "<B>");
+		ICTag newSc = new CTag(end.cc, TagType.OPENING, "1", "<B>");
 		cont.insert(0, newSc);
 		// Note the new OC is index 1 now (just implementation)
 		assertEquals("fmt", cont.getTags().get(U.kOC(1)).getType());

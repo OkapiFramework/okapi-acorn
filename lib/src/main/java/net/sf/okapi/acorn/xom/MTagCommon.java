@@ -1,10 +1,10 @@
 package net.sf.okapi.acorn.xom;
 
-import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.IExtFields;
-import org.oasisopen.xliff.om.v1.TagType;
+import org.oasisopen.xliff.om.v1.IMTag;
+import org.oasisopen.xliff.om.v1.IWithExtFields;
 
-public class StartAnnotation implements IMTag {
+class MTagCommon implements IWithExtFields {
 
 	private String id;
 	private String type;
@@ -13,69 +13,60 @@ public class StartAnnotation implements IMTag {
 	private boolean translate;
 	private IExtFields xFields;
 	
-	StartAnnotation (String id,
+	MTagCommon (String id,
 		String type)
 	{
 		this.id = id;
 		this.type = type;
 	}
 
-	@Override
-	public TagType getTagType () {
-		return TagType.OPENING;
+	MTagCommon (IMTag original) {
+		this.id = original.getId();
+		this.type = original.getType();
+		this.value = original.getValue();
+		this.ref = original.getRef();
+		this.translate = original.getTranslate();
+		if ( original.hasExtField() ) {
+			xFields = new ExtFields(this, original.getExtFields());
+		}
 	}
 
-	@Override
 	public String getId () {
 		return id;
 	}
 
-	@Override
 	public void setId (String id) {
 		this.id = id;
 	}
 
-	@Override
 	public String getType () {
 		return type;
 	}
 
-	@Override
 	public void setType (String type) {
 		this.type = type;
 	}
 
-	@Override
-	public boolean isCode () {
-		return false;
-	}
-
-	@Override
 	public boolean getTranslate () {
 		return translate;
 	}
 
-	@Override
 	public void setTranslate (boolean translate) {
 		this.translate = translate;
 	}
 
-	@Override
 	public String getValue () {
 		return value;
 	}
 
-	@Override
 	public void setValue (String value) {
 		this.value = value;
 	}
 
-	@Override
 	public String getRef () {
 		return ref;
 	}
 
-	@Override
 	public void setRef (String ref) {
 		this.ref = ref;
 	}

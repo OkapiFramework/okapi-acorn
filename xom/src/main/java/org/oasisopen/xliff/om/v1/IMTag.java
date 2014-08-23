@@ -1,7 +1,10 @@
 package org.oasisopen.xliff.om.v1;
 
 /**
- * Represents an inline marker.
+ * Represents the tag of an inline marker.
+ * <p><b>IMPORTANT</b>: A number of fields are shared by the opening and closing tags, implementations must ensure
+ * that both objects have always the same values for those fields (i.e: when you change a value in one, it is
+ * automatically changed in the other as well).
  */
 public interface IMTag extends ITag, IWithExtFields {
 
