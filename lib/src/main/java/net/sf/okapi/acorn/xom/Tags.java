@@ -57,6 +57,13 @@ public class Tags implements ITags {
 	}
 
 	@Override
+	public ITag get (CharSequence ctext,
+		int pos)
+	{
+		return get(Util.toKey(ctext.charAt(pos), ctext.charAt(pos+1)));
+	}
+
+	@Override
 	public int getKey (ITag inline) {
 		if ( tags != null ) {
 			for ( Map.Entry<Integer, ITag> entry : tags.entrySet() ) {
@@ -84,6 +91,23 @@ public class Tags implements ITags {
 		return null;
 	}
 
+	@Override
+	public ICTag getOpeningICTag (String id) {
+		if ( tags == null ) return null;
+		for ( ITag tag : tags.values() ) {
+			if ( tag.getId().equals(id) ) {
+				if ( tag.getTagType() == TagType.OPENING ) {
+					if ( !(tag instanceof ICTag) ) {
+						throw new InvalidParameterException(String.format(
+							"The tag id='%s' exists but is not an ICTag.", id));
+					}
+					return (ICTag)tag;
+				}
+			}
+		}
+		return null;
+	}
+	
 	@Override
 	public ITag getClosingTag (String id) {
 		if ( tags == null ) return null;

@@ -23,6 +23,8 @@
       <li><a href="#overview">Overview Chart</a></li>
       <li><a href="#unit">The Unit</a></li>
       <li><a href="#content">The Inline Content</a></li>
+      <li><a href="#factory">The Factory</a></li>
+      <li><a href="#extensions">Extensions and Unsupported Modules</a></li>
       <li><a href="#requirements">Appendix A - Requirements</a></li>
     </ul>
     <h2><a id="terms" name="terms"></a>Terms</h2>
@@ -51,69 +53,125 @@
     <p>The object model from the document level down to the unit is as follows:<br>
       (Note that the order of the objects in the charts is not significant and
       not related to the order in the XLIFF serialization).</p>
-    <pre><strong><a href="./org/oasisopen/xliff/om/v1/IDocument.html">IDocument</a></strong><br> |<br> +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IFile.html">IFile</a></strong>+<br>      |<br>      +-- ISkeleton?<br>      |<br>      +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |    |<br>      |    +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>      |<br>      +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtObjects.html">IExtObjects</a></strong>?<br>      |    |<br>      |    +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>*<br>      |         |<br>      |         +-- (<strong><a
-href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>... | <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IExtObjectData.html">IExtObjectData</a></strong>)*<br>      |         |<br>      |         +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |              |<br>      |              +-- <strong><a
+    <pre><strong><a href="./org/oasisopen/xliff/om/v1/IDocument.html">IDocument</a></strong><br> |<br> +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IFile.html">IFile</a></strong>+<br>      |<br>      +-- ISkeleton?<br>      |<br>      +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |    |<br>      |    +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>      |<br>      +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtObjects.html">IExtObjects</a></strong>?<br>      |    |<br>      |    +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>*<br>      |         |<br>      |         +-- (<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>... | <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtObjectData.html">IExtObjectData</a></strong>)*<br>      |         |<br>      |         +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |              |<br>      |              +-- <strong><a
+
 href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*
-      |<br>      +-- <strong><a href="./org/oasisopen/xliff/om/v1/INotes.html">INotes</a></strong>?<br>      |    |<br>      |    +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/INote.html">INote</a></strong>*<br>      |         |<br>      |         +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |              |<br>      |              +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>      |<br>      +-- (<strong><a
-href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IGroup.html">IGroup</a></strong>)* | (<strong><a
-href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IUnit.html">IUnit</a></strong>)+<br>            |             |                         |<br>            |             |                         +-- <a
-href="#chartUnit">See details below</a><br>            |             |<br>            |             +-- (<strong><a
-href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IGroup.html">IGroup</a></strong>)... | (<strong><a
-href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
+      |<br>      +-- <strong><a href="./org/oasisopen/xliff/om/v1/INotes.html">INotes</a></strong>?<br>      |    |<br>      |    +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/INote.html">INote</a></strong>*<br>      |         |<br>      |         +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |              |<br>      |              +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>      |<br>      +-- (<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IGroup.html">IGroup</a></strong>)* | (<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IUnit.html">IUnit</a></strong>)+<br>            |             |                         |<br>            |             |                         +-- <a
+
+href="#chartUnit">See details below</a><br>            |             |<br>            |             +-- (<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IGroup.html">IGroup</a></strong>)... | (<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IGroupOrUnit.html">IGroupOrUnit</a></strong>&lt;&lt;<strong><a
+
 href="./org/oasisopen/xliff/om/v1/IUnit.html">IUnit</a></strong>)*
-            |<br>            +-- <strong><a href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>            |    |<br>            |    +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>            |<br>            +-- <strong><a
+            |<br>            +-- <strong><a href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>            |    |<br>            |    +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>            |<br>            +-- <strong><a
+
 href="./org/oasisopen/xliff/om/v1/IExtObjects.html">IExtObjects</a></strong>?
-            |    |<br>            |    +-- <strong><a href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>*<br>            |         |<br>            |         +-- (<strong><a
-href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>... | <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IExtObjectData.html">IExtObjectData</a></strong>)*<br>            |         |<br>            |         +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>            |              |<br>            |              +-- <strong><a
+            |    |<br>            |    +-- <strong><a href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>*<br>            |         |<br>            |         +-- (<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>... | <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtObjectItem.html">IExtObjectItem</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtObjectData.html">IExtObjectData</a></strong>)*<br>            |         |<br>            |         +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>            |              |<br>            |              +-- <strong><a
+
 href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*
-            |<br>            +-- <strong><a href="./org/oasisopen/xliff/om/v1/INotes.html">INotes</a></strong>?<br>                 |<br>                 +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/INote.html">INote</a></strong>*<br>                      |<br>                      +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>                           |<br>                           +-- <strong><a
+            |<br>            +-- <strong><a href="./org/oasisopen/xliff/om/v1/INotes.html">INotes</a></strong>?<br>                 |<br>                 +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/INote.html">INote</a></strong>*<br>                      |<br>                      +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>                           |<br>                           +-- <strong><a
+
 href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*</pre>
     <p><a name="chartUnit"></a>The object model from the unit down is as
       follows:</p>
-    <pre><strong><a href="./org/oasisopen/xliff/om/v1/IUnit.html">IUnit</a></strong><br> |<br> +-- <a
-href="./org/oasisopen/xliff/om/v1/IStore.html"><strong>IStore</strong></a>1<br> |<br> +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/INotes.html">INotes</a></strong>?<br> |    |<br> |    +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/INote.html">INote</a></strong>*<br> |         |<br> |         +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br> |              |<br> |              +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br> |      <br> +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IPart.html">IPart</a></strong>* | (<strong><a
-href="./org/oasisopen/xliff/om/v1/IPart.html">IPart</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/ISegment.html">ISegment</a></strong>)+<br>      |<br>      +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>1 (source)<br>      |    |<br>      |    +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/ITags.html">ITags</a></strong>1<br>      |         |<br>      |         +-- (<strong><a
-href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/ICTag.html">ICTag</a></strong> | <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IMTag.html">IMTag</a></strong><strong></strong>)*<br>      |                                   |<br>      |                                   +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |                                        |<br>      |                                        +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>      |<br>      +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>? (target)<br>           |<br>           +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/ITags.html">ITags</a></strong>1<br>                |<br>                +-- (<strong><a
-href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/ICTag.html">ICTag</a></strong> | <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
-href="./org/oasisopen/xliff/om/v1/IMTag.html">IMTag</a></strong><strong></strong>)*<br>                                          |<br>                                          +-- <strong><a
-href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>                                               |<br>                                               +-- <strong><a
+    <pre><strong><a href="./org/oasisopen/xliff/om/v1/IUnit.html">IUnit</a></strong><br> |<br> +-- <a
+
+href="./org/oasisopen/xliff/om/v1/IStore.html"><strong>IStore</strong></a>1<br> |<br> +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/INotes.html">INotes</a></strong>?<br> |    |<br> |    +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/INote.html">INote</a></strong>*<br> |         |<br> |         +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br> |              |<br> |              +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br> |      <br> +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IPart.html">IPart</a></strong>* | (<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IPart.html">IPart</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/ISegment.html">ISegment</a></strong>)+<br>      |<br>      +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>1 (source)<br>      |    |<br>      |    +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/ITags.html">ITags</a></strong>1<br>      |         |<br>      |         +-- (<strong><a
+
+href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/ICTag.html">ICTag</a></strong> | <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IMTag.html">IMTag</a></strong><strong></strong>)*<br>      |                                   |<br>      |                                   +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>      |                                        |<br>      |                                        +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*<br>      |<br>      +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IContent.html">IContent</a></strong>? (target)<br>           |<br>           +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/ITags.html">ITags</a></strong>1<br>                |<br>                +-- (<strong><a
+
+href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/ICTag.html">ICTag</a></strong> | <strong><a href="./org/oasisopen/xliff/om/v1/ITag.html">ITag</a></strong>&lt;&lt;<strong><a
+
+href="./org/oasisopen/xliff/om/v1/IMTag.html">IMTag</a></strong><strong></strong>)*<br>                                          |<br>                                          +-- <strong><a
+
+href="./org/oasisopen/xliff/om/v1/IExtFields.html">IExtFields</a></strong>?<br>                                               |<br>                                               +-- <strong><a
+
 href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*</pre>
     <h2><a id="unit" name="unit"></a>The Unit</h2>
     <p>The unit is one of the main objects of the model. It holds the source and
@@ -125,7 +183,8 @@ href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*</pre>
       <li>The store of a unit must not be null.</li>
     </ol>
     <p>The core content of a unit is a sequence of parts of two different types:
-      ignorables and segments. An ignorable part is represented by an <strong><a
+      ignorables and segments. An ignorable part is represented by an <strong><a
+
           href="./org/oasisopen/xliff/om/v1/IPart.html">IPart</a></strong>
       object, while a segment part is represented by an <strong><a href="./org/oasisopen/xliff/om/v1/ISegment.html">ISegment</a></strong>
       object. The <strong><a href="./org/oasisopen/xliff/om/v1/ISegment.html">ISegment</a></strong>
@@ -330,8 +389,15 @@ href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>*</pre>
    }
 ]  </pre>
     <p>TODO: more examples </p>
-    <h2>Extensions and Unsupported Modules</h2>
-    The object model provides support for extensions, both as objects (<strong><a
+    <h2><a id="factory" name="factory"></a>The Factory</h2>
+    <p>To allow application to be independent from the implementation all
+      objects of the model must be created using a factory.</p>
+    <p>The methods for this factory are defined in the <a href="./org/oasisopen/xliff/om/v1/IXLIFFFactory.html"><strong>IXLIFFFactory</strong></a>
+      interface.</p>
+    <h2><a id="extensions" name="extensions"></a>Extensions and Unsupported
+      Modules</h2>
+    The object model provides support for extensions, both as objects (<strong><a
+
         href="./org/oasisopen/xliff/om/v1/IExtObject.html">IExtObject</a></strong>)
     and fields (<strong><a href="./org/oasisopen/xliff/om/v1/IExtField.html">IExtField</a></strong>).
     The purpose of those interfaces is to provide the user with a basic

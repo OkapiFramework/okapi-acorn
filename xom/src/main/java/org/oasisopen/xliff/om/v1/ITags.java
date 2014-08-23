@@ -26,6 +26,15 @@ public interface ITags extends Iterable<ITag> {
 	public ITag get (int key);
 	
 	/**
+	 * Gets the {@link IMTag} or {@link ICTag} for a given reference in a coded text.
+	 * @param ctext the coded text (e.g. String or StringBuilder object).
+	 * @param pos the position of the first character of the reference.
+	 * @return the tag for the given tag reference, or null if there is no corresponding tag.
+	 */
+	public ITag get (CharSequence ctext,
+		int pos);
+
+	/**
 	 * Gets the key for a given tag.
 	 * @param tag the tag to lookup.
 	 * @return the key value for the given tag, or -1 if the tag is not found.
@@ -45,6 +54,14 @@ public interface ITags extends Iterable<ITag> {
 	 * @return the opening tag corresponding to the given id (or null if none is found).
 	 */
 	public ITag getOpeningTag (String id);
+
+	/**
+	 * Gets the opening {@link ICTag} for a given id.
+	 * @param id the ID of the opening tag to search for.
+	 * @return the opening {@link ICTag} or null if no tag with the given ID is found.
+	 * @throws InvalidParameterException if a tag is found but it is not a {@link ICTag} object.
+	 */
+	public ICTag getOpeningICTag (String id);
 
 	/**
 	 * Gets the closing tag for a given tag id.

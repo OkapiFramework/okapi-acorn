@@ -14,11 +14,11 @@ public class SimpleTMTest {
 		SimpleTM tm = createTM();
 		assertNotNull(tm);
 	}
-	
+
 	private SimpleTM createTM () {
 		SimpleTM tm = new SimpleTM();
 		IUnit unit = new Unit("id");
-		unit.appendNewSegment().getSource().append("This is a test.");
+		unit.appendSegment().getSource().append("This is a test.");
 		unit.getPart(0).getTarget(GetTarget.CREATE_EMPTY).append("C'est un test.");
 		tm.addSegments(unit);
 		return tm;

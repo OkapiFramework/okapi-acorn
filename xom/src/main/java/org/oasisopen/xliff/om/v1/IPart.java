@@ -36,8 +36,16 @@ public interface IPart {
 	public boolean hasTarget ();
 	
 	/**
+	 * Creates a new target content for this part.
+	 * @return the new target content.
+	 * @see #getTarget(GetTarget)
+	 */
+	public IContent createTarget ();
+
+	/**
 	 * Gets the target content of this part.
 	 * @return the target content of this part or null if there is no target.
+	 * @see #createTarget()
 	 * @see #getTarget(GetTarget)
 	 */
 	public IContent getTarget ();
@@ -45,7 +53,8 @@ public interface IPart {
 	/**
 	 * Gets the target content for this part, and possibly create it if it does not exists yet.
 	 * @param option action to take if no target exists yet for this part.
-	 * @return the target fragment or null if there is no target.
+	 * @return the target content or null if there is no target.
+	 * @see #createTarget()
 	 * @see #getTarget()
 	 */
 	public IContent getTarget (GetTarget option);

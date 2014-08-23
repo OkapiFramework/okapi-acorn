@@ -18,6 +18,13 @@ public class Document implements IDocument {
 	private String trgLang;
 	private Map<String, IFile> files = new HashMap<>(1);
 	
+	/**
+	 * Creates a new empty document.
+	 */
+	Document () {
+		// Nothing to do: hide this constructor from outside
+	}
+	
 	@Override
 	public IFile getFile (String id) {
 		return files.get(id);
@@ -26,12 +33,6 @@ public class Document implements IDocument {
 	@Override
 	public int getFileCount () {
 		return files.size();
-	}
-
-	@Override
-	public boolean supports (String moduleUri) {
-		// No modules are supported directly for now.
-		return false;
 	}
 
 	@Override

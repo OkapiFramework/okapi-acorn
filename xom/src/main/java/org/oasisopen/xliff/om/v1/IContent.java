@@ -6,7 +6,7 @@ import java.util.List;
  * Represents the inline content of an extracted original document.
  * For example, the content of XLIFF <code>&lt;source></code> or <code>&lt;target></code>.
  */
-public interface IContent {
+public interface IContent extends Iterable<Object> {
 
 	/**
 	 * Indicates if this content has any text or tag reference.
@@ -112,7 +112,7 @@ public interface IContent {
 	 * @see #closeCodeSpan(String, String)
 	 * @see #appendCode(String, String)
 	 */
-	public ICTag startCodeSpan (String id, 
+	public ICTag openCodeSpan (String id, 
 		String data);
 	
 	/**
@@ -120,7 +120,7 @@ public interface IContent {
 	 * @param id the id of the code to close.
 	 * @param data the original data for the code, e.g. <code>&lt;/B></code> (can be null).
 	 * @return the new {@link ICTag} created.
-	 * @see #startCodeSpan(String, String) 
+	 * @see #openCodeSpan(String, String) 
 	 */
 	public ICTag closeCodeSpan (String id,
 		String data);
@@ -130,7 +130,7 @@ public interface IContent {
 	 * @param id the id of the code.
 	 * @param data the original data for the code, e.g. <code>&lt;BR></code> (can be null). 
 	 * @return the new {@link ICTag} created.
-	 * @see #startCodeSpan(String, String)
+	 * @see #openCodeSpan(String, String)
 	 */
 	public ICTag appendCode (String id,
 		String data);
@@ -141,7 +141,7 @@ public interface IContent {
 	 * @param type the type of the marker.
 	 * @return the new {@link IMTag} created.
 	 */
-	public IMTag startMarkerSpan (String id,
+	public IMTag openMarkerSpan (String id,
 		String type);
 	
 	/**

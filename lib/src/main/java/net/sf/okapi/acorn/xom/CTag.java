@@ -59,6 +59,29 @@ public class CTag implements ICTag {
 		this.data = data;
 	}
 	
+	/**
+	 * Copy constructor.
+	 * @param original the original object to copy.
+	 * @param opposite the opening/closing tag to connect with this new tag.
+	 * this parameter must be created already. 
+	 */
+	CTag (ICTag original,
+		CTag opposite)
+	{
+		if ( opposite == null ) this.cm = new CodeCommon(original);
+		else this.cm = opposite.cm;
+
+		this.tagType = original.getTagType();
+		this.data = original.getData();
+		this.dataDir = original.getDataDir();
+//		this.dataRef = original.dataRef;
+//		this.initialWithData = original.initialWithData;
+//		this.canReorder = original.canReorder;
+		this.disp = original.getDisp();
+		this.equiv = original.getEquiv();
+		this.subFlows = original.getSubFlows();
+	}
+
 	@Override
 	public boolean isCode () {
 		return true;

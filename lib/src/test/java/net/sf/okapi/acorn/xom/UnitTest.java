@@ -46,9 +46,9 @@ public class UnitTest {
 	@Test
 	public void testSimpleUnit () {
 		IUnit unit = new Unit("id");
-		unit.appendNewSegment().setSource("src");
+		unit.appendSegment().setSource("src");
 		unit.getSegment(0).setTarget("trg");
-		unit.appendNewIgnorable().setSource(" S");
+		unit.appendIgnorable().setSource(" S");
 		unit.getPart(1).setTarget(" T");
 		assertEquals(1, unit.getSegmentCount());
 		assertEquals(2, unit.getPartCount());
@@ -61,8 +61,8 @@ public class UnitTest {
 	@Test
 	public void testTags () {
 		IUnit unit = new Unit("id");
-		IContent cont = unit.appendNewSegment().getSource();
-		cont.startCodeSpan("1", "[a]");
+		IContent cont = unit.appendSegment().getSource();
+		cont.openCodeSpan("1", "[a]");
 		cont.closeCodeSpan("1", "[/a]");
 		ITag tag = unit.getStore().getTag("1");
 		assertTrue(null!=tag);

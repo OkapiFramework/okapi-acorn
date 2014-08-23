@@ -20,6 +20,7 @@ public class Group extends BaseData3 implements IGroup {
 	 * Creates a new {@link IGroup} object with a given id and parent. 
 	 * @param parent the parent of this new group node (use null for top-level groups).
 	 * @param id the id for this group.
+	 * @throws InvalidParameterException if the id is invalid.
 	 */
 	public Group (IGroup parent,
 		String id)

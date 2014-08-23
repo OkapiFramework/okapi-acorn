@@ -47,13 +47,14 @@ public class Main {
 			// Use default
 		}
 		
-		TAAS taas = new TAAS();
-		taas.handleUnit(null);
+//		TAAS taas = new TAAS();
+//		taas.handleUnit(null);
 		
-//		OpenCalais proc = new OpenCalais();
-//		Unit unit = new Unit("id");
-//		Segment seg = unit.appendNewSegment();
-//		Fragment frag = seg.getSource();
+		OpenCalais proc = new OpenCalais();
+		Unit unit = new Unit("id");
+		Segment seg = unit.appendSegment();
+		Fragment frag = seg.getSource();
+		frag.append("The Rotary clubs in Nunavut are open to all.");
 //		frag.append("It became a vital link in a trade route between the Orient, Eastern Canada and London. ");
 
 //		frag.append("This is a test from Boulder, ");
@@ -63,7 +64,7 @@ public class Main {
 //		frag.append(", to see if this Java program works fine.");
 //		frag.appendStandalone("2", "<br>");
 		
-//		proc.handleUnit(new Event(EventType.TEXT_UNIT, null, unit));
+		proc.handleUnit(new Event(EventType.TEXT_UNIT, null, unit));
 
 //		MainDialog.start();
 	}

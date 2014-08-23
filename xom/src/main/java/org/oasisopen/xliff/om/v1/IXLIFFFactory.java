@@ -1,9 +1,41 @@
 package org.oasisopen.xliff.om.v1;
 
+/**
+ * Provides methods to create new or copies of various objects for the interface.
+ */
 public interface IXLIFFFactory {
 
 	/**
-	 * Creates a new {@link IUnit} instance.
+	 * Indicates if this implementation of the object model supports a given module.
+	 * @param moduleUri the namespace URI of the module for which the query is made.
+	 * @return true if the module is supported, false if it is not.
+	 */
+	public boolean supports (String moduleUri);
+
+	/**
+	 * Creates a new empty instance of {@link IDocument}.
+	 * @return the new document.
+	 */
+	public IDocument createDocument ();
+
+	/**
+	 * Creates a new empty instance of {@link IFile}.
+	 * @param id the id of this file (must not be null or empty).
+	 * @return the new file.
+	 */
+	public IFile createFile (String id);
+	
+	/**
+	 * Creates a new empty instance of {@link IGroup}.
+	 * @param parent the parent group or null to create a top-level group.
+	 * @param id the id of the group (must not be null or empty).
+	 * @return the new group.
+	 */
+	public IGroup createGroup (IGroup parent,
+		String id);
+	
+	/**
+	 * Creates a new instance of {@link IUnit}.
 	 * @param id the id of the new unit.
 	 * @return the new unit.
 	 */
@@ -25,7 +57,7 @@ public interface IXLIFFFactory {
 	 * @param original the original object to duplicate.
 	 * @return the new content.
 	 */
-	public IContent createContent (IStore store,
+	public IContent copyContent (IStore store,
 		boolean isTarget,
 		IContent original);
 	
@@ -59,7 +91,7 @@ public interface IXLIFFFactory {
 	 * opening tags when creating closing tags.
 	 * @return the new tag.
 	 */
-	public ITag createTag (ITag original,
+	public ITag copyTag (ITag original,
 		ITags destinationTags);
 
 	/**

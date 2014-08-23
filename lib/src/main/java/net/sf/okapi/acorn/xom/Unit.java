@@ -261,14 +261,14 @@ public class Unit extends BaseData3 implements IUnit {
 	}
 
 	@Override
-	public ISegment appendNewSegment () {
+	public ISegment appendSegment () {
 		ISegment seg = new Segment(store);
 		parts.add(seg);
 		return seg;
 	}
 
 	@Override
-	public IPart appendNewIgnorable () {
+	public IPart appendIgnorable () {
 		IPart part = new Part(store);
 		parts.add(part);
 		return part;

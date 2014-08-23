@@ -4,41 +4,53 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.sf.okapi.acorn.xom.Const;
-import net.sf.okapi.acorn.xom.Util;
 
 import org.json.simple.JSONArray;
 import org.oasisopen.xliff.om.v1.CanReorder;
 import org.oasisopen.xliff.om.v1.Direction;
-import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.ICTag;
 import org.oasisopen.xliff.om.v1.IContent;
+import org.oasisopen.xliff.om.v1.IMTag;
+import org.oasisopen.xliff.om.v1.IPart;
+import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.ITag;
 import org.oasisopen.xliff.om.v1.ITags;
 import org.oasisopen.xliff.om.v1.TagType;
 
 public class JSONWriter {
 	
-	public JSONArray fromContent (IContent content) {
-		JSONArray array = new JSONArray();
-		String ct = content.getCodedText();
-		int start = 0;
-		for ( int i=0; i<ct.length(); i++ ) {
-			char ch = ct.charAt(i);
-			if ( Util.isChar1(ch) ) {
-				// Output the preceding text if there is one
-				if ( i-start > 0 ) {
-					array.add(ct.substring(start, i));
-				}
-				// Get the tag
-				ITag tag = content.getTags().get(Util.toKey(ch, ct.charAt(++i)));
-				array.add(fromTag(tag, content.getTags()));
-				// Set the start for the next text
-				start = i+1;
+	public Map<String, Object> fromPart (IPart part) {
+		LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+		map.put("isseg", part.isSegment());
+		map.put("id", part.getId());
+		map.put("pws", part.getPreserveWS());
+		map.put("src", fromContent(part.getSource()));
+		if ( part.hasTarget() ) {
+			map.put("trg", fromContent(part.getTarget()));
+		}
+		if ( part.isSegment() ) {
+			ISegment seg = (ISegment)part;
+			map.put("state", seg.getState().toString());
+			if ( seg.getSubState() != null ){
+				map.put("substate", seg.getSubState());
 			}
 		}
-		// Remaining text (if any)
-		if ( ct.length()-start > 0 ) {
-			array.add(ct.substring(start));
+		return map;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JSONArray fromContent (IContent content) {
+		JSONArray array = new JSONArray();
+		for ( Object obj : content ) {
+			if ( obj instanceof String ) {
+				array.add((String)obj);
+			}
+			else if ( obj instanceof ITag ) {
+				array.add(fromTag((ITag)obj, content.getTags()));
+			}
+			else {
+				throw new RuntimeException("Unexpected part in content: "+obj.getClass().getName());
+			}
 		}
 		return array;
 	}
@@ -46,7 +58,6 @@ public class JSONWriter {
 	private Map<String, Object> fromTag (ITag tag,
 		ITags tags)
 	{
-		JSONArray a1 = new JSONArray();
 		String kind = null;
 		ICTag start = null;
 		ICTag end = null;
@@ -79,7 +90,7 @@ public class JSONWriter {
 					if ( !code.getCanCopy() ) map.put("canc", code.getCanCopy());
 					if ( !code.getCanDelete() ) map.put("cand", code.getCanDelete());
 					if ( code.getCanOverlap() ) map.put("cano", code.getCanOverlap());
-					if ( code.getCanReorder() != CanReorder.YES ) map.put("canr", code.getCanReorder());
+					if ( code.getCanReorder() != CanReorder.YES ) map.put("canr", code.getCanReorder().toString());
 					if ( code.getCopyOf() != null ) map.put("copy", code.getCopyOf());
 					if ( code.getDir() != Direction.INHERITED ) map.put("dir", code.getDir());
 				}
@@ -90,7 +101,7 @@ public class JSONWriter {
 				if ( !code.getCanCopy() ) map.put("canc", code.getCanCopy());
 				if ( !code.getCanDelete() ) map.put("cand", code.getCanDelete());
 				if ( code.getCanOverlap() ) map.put("cano", code.getCanOverlap());
-				if ( code.getCanReorder() != CanReorder.YES ) map.put("canr", code.getCanReorder());
+				if ( code.getCanReorder() != CanReorder.YES ) map.put("canr", code.getCanReorder().toString());
 				if ( code.getCopyOf() != null ) map.put("copy", code.getCopyOf());
 				if ( code.getTagType() == TagType.OPENING ) {
 					// Not for standalone codes

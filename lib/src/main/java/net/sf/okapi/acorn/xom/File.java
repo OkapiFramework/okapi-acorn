@@ -22,7 +22,7 @@ public class File extends BaseData3 implements IFile {
 	 * Creates a new {@link Unit} object.
 	 * @param id the id of the unit.
 	 */
-	public File (String id) {
+	File (String id) {
 		setId(id);
 	}
 

@@ -216,12 +216,12 @@ public class XLIFFImport {
 					break;
 				case OPENING:
 					if ( bm.isCode() ) {
-						code = cont.startCodeSpan(bm.getId(), cm.getData());
+						code = cont.openCodeSpan(bm.getId(), cm.getData());
 						copyCMarker(cm, code);
 					}
 					else {
 						MTag am = (MTag)bm;
-						anno = cont.startMarkerSpan(bm.getId(), am.getType());
+						anno = cont.openMarkerSpan(bm.getId(), am.getType());
 						anno.setRef(am.getRef());
 						anno.setValue(am.getValue());
 						anno.setTranslate(am.getTranslate().equals("yes"));

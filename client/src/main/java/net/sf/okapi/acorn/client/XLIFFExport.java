@@ -3,7 +3,7 @@ package net.sf.okapi.acorn.client;
 import java.io.File;
 import java.util.List;
 
-import net.sf.okapi.acorn.xom.XLIFFFactory;
+import net.sf.okapi.acorn.xom.Factory;
 import net.sf.okapi.lib.xliff2.core.CTag;
 import net.sf.okapi.lib.xliff2.core.CanReorder;
 import net.sf.okapi.lib.xliff2.core.Directionality;
@@ -37,12 +37,10 @@ import org.oasisopen.xliff.om.v1.IPart;
 import org.oasisopen.xliff.om.v1.IUnit;
 import org.oasisopen.xliff.om.v1.IWithExtFields;
 import org.oasisopen.xliff.om.v1.IWithExtObjects;
-import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 
 public class XLIFFExport {
 
 	private XLIFFWriter writer;
-	private IXLIFFFactory xf = new XLIFFFactory();
 	
 	public void exportDocument (IDocument doc,
 		File outputFile)
@@ -84,13 +82,13 @@ public class XLIFFExport {
 	}
 	
 	private IUnit fromXLIFFUnit (Unit unit) {
-		IUnit mUnit = xf.createUnit(unit.getId());
+		IUnit mUnit = Factory.XOM.createUnit(unit.getId());
 		mUnit.setCanResegment(unit.getCanResegment());
 		mUnit.setTranslate(unit.getTranslate());
 		for ( Part part : unit ) {
 			IPart mPart;
-			if ( part.isSegment() ) mPart = xf.createPart(mUnit.getStore());
-			else mPart = xf.createSegment(mUnit.getStore());
+			if ( part.isSegment() ) mPart = Factory.XOM.createPart(mUnit.getStore());
+			else mPart = Factory.XOM.createSegment(mUnit.getStore());
 			// Source
 			fillContent(mPart, part.getSource(), false);
 			if ( part.hasTarget() ) fillContent(mPart, part.getTarget(), true);
@@ -139,7 +137,8 @@ public class XLIFFExport {
 			case ELEMENT:
 			default:
 				ExtElement cElem = (ExtElement)child;
-				IExtObject xChildObj = xf.createExtObject(cElem.getQName().getNamespaceURI(), cElem.getQName().getLocalPart());
+				IExtObject xChildObj = Factory.XOM.createExtObject(cElem.getQName().getNamespaceURI(),
+					cElem.getQName().getLocalPart());
 				xObj.getItems().add(xChildObj);
 				copyChildren(xChildObj, cElem);
 				break;
@@ -203,7 +202,7 @@ public class XLIFFExport {
 					break;
 				case OPENING:
 					if ( tag.isCode() ) {
-						code = cont.startCodeSpan(tag.getId(), ctag.getData());
+						code = cont.openCodeSpan(tag.getId(), ctag.getData());
 						code.setCanCopy(ctag.getCanCopy());
 						code.setCanDelete(ctag.getCanDelete());
 						code.setCanOverlap(ctag.getCanOverlap());
@@ -219,7 +218,7 @@ public class XLIFFExport {
 					}
 					else {
 						MTag am = (MTag)tag;
-						anno = cont.startMarkerSpan(tag.getId(), am.getType());
+						anno = cont.openMarkerSpan(tag.getId(), am.getType());
 						anno.setRef(am.getRef());
 						anno.setValue(am.getValue());
 						anno.setTranslate(am.getTranslate().equals("yes"));

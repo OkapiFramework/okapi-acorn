@@ -3,6 +3,7 @@ package net.sf.okapi.acorn.xom;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.oasisopen.xliff.om.v1.IMTag;
@@ -20,6 +21,144 @@ public class Content implements IContent {
 
 	private StringBuilder ctext;
 	private ITags tags;
+	
+	/**
+	 * Inner class for the generic iterable.
+	 * @param <T> the class of the object to iterate.
+	 */
+	private class ContentIterable<T> implements Iterable<T> {
+
+		final private Class<T> theClass;
+		
+		public ContentIterable (Class<T> theClass) {
+			this.theClass = theClass;
+		}
+		
+		@Override
+		public Iterator<T> iterator () {
+			return new ContentIterator<T>(theClass);
+		}
+		
+	}
+
+	/**
+	 * Inner class for the generic iterator.
+	 * @param <T> the class of the object to iterate.
+	 */
+	private class ContentIterator<T> implements Iterator<T> {
+
+		final private int mode;
+		
+		private int start, pos;
+		private int returnType; // -1: no more, 0=string, 1=tag, 2=protected content
+		
+		public ContentIterator (Class<T> typeClass) {
+			String typeName = typeClass.getName();
+			if ( typeName.equals(Object.class.getName()) ) mode = 0;
+			else if ( typeName.equals(String.class.getName()) ) mode = 1;
+			else if ( typeName.equals(ITag.class.getName()) ) mode = 2;
+			else if ( typeName.equals(ICTag.class.getName()) ) mode = 3;
+			//else if ( typeName.equals(MTag.class.getName()) ) mode = 4;
+			else {
+				throw new InvalidParameterException("Unsupported iteration type.");
+			}
+			start = pos = 0;
+			returnType = -1;
+			findNext();
+		}
+		
+		@Override
+		public boolean hasNext () {
+			return (returnType != -1);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T next () {
+			int posNow = pos;
+			int startNow = start;
+			switch ( returnType ) {
+			case 0: // String
+				findNext();
+				return (T)ctext.substring(startNow, posNow);
+			case 1: // ITag, ICTag and IMTag
+				pos += 2;
+				findNext();
+				return (T)tags.get(Util.toKey(ctext.charAt(posNow), ctext.charAt(posNow+1)));
+//			case 2: // PCont
+//				pos += 2;
+//				findNext();
+//				return (T)tags.getPCont(ctext, posNow);
+			default: // Nothing
+				return null;
+			}
+		}
+
+		@Override
+		public void remove () {
+			throw new UnsupportedOperationException("The method remove() not supported.");
+		}
+		
+		private void findNext () {
+			// Search for next tag
+			start = pos;
+			for ( ; pos < ctext.length(); pos++ ) {
+				char ch = ctext.charAt(pos);
+				if ( Util.isChar1(ch) ) {
+					// Do we have text before?
+					// and if we in 'string' and 'object' modes
+					if (( start < pos ) && ( mode <= 1 )) {
+						// If we do: string to send will be ctext.substring(start, pos);
+						returnType = 0;
+						return;
+					}
+					else { // No string before
+						if ( mode == 1 ) {
+							// 'string' mode: skip the code and look for next one or end
+							pos++;
+							start = pos+1; // New start is the first char after the code
+							continue;
+						}
+					}
+					// Else: look at the tag
+					switch ( ch ) {
+					case Const.CODE_OPENING:
+					case Const.CODE_CLOSING:
+					case Const.CODE_STANDALONE:
+						if (( mode == 0 ) || ( mode == 2 ) || ( mode == 3 )) {
+							returnType = 1;
+							return;
+						}
+						break;
+					case Const.MARKER_OPENING:
+					case Const.MARKER_CLOSING:
+						if (( mode == 0 ) || ( mode == 2 ) || ( mode == 4 )) {
+							returnType = 1;
+							return;
+						}
+						break;
+//					case Const.PCONT_STANDALONE:
+//						if (( mode == 0 ) || ( mode == 5 )) {
+//							returnType = 2;
+//							return;
+//						}
+//						break;
+					}
+				}
+			}
+			
+			// No tag found: for 'string and 'object' modes we send the remaining of the content
+			if ( mode <= 1 ) {
+				// Next string is the remaining sub-string ctext.substring(start);
+				pos = ctext.length();
+				if ( start < pos ) returnType = 0;
+				else returnType = -1;
+			}
+			else {
+				returnType = -1; // Nothing left
+			}
+		}
+	}
 	
 	public Content (IStore store,
 		boolean isTarget)
@@ -140,7 +279,7 @@ public class Content implements IContent {
 	}
 	
 	@Override
-	public ICTag startCodeSpan (String id,
+	public ICTag openCodeSpan (String id,
 		String data)
 	{
 		CTag ctag = new CTag(null, TagType.OPENING, id, data);
@@ -176,7 +315,7 @@ public class Content implements IContent {
 	}
 
 	@Override
-	public IMTag startMarkerSpan (String id,
+	public IMTag openMarkerSpan (String id,
 		String type)
 	{
 		StartAnnotation anno = new StartAnnotation(id, type);
@@ -226,6 +365,11 @@ public class Content implements IContent {
 		checkPosition(pos);
 		ctext.insert(pos, Util.toRef(tags.add(code)));
 		return code;
+	}
+
+	@Override
+	public Iterator<Object> iterator () {
+		return (new ContentIterable<Object>(Object.class)).iterator();
 	}
 
 }

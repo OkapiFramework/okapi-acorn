@@ -49,13 +49,6 @@ public interface IDocument extends Iterable<IFile> {
 	public int getFileCount ();
 
 	/**
-	 * Indicates if this implementation supports a given module.
-	 * @param moduleUri the namespace URI of the module for which the query is made.
-	 * @return true if the module is supported, false if it is not.
-	 */
-	public boolean supports (String moduleUri);
-
-	/**
 	 * Adds a file to this document.
 	 * @param file the file to add.
 	 * @return the file that has been added.

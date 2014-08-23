@@ -13,17 +13,36 @@ public class ContentTest {
 
 	@Test
 	public void testEmptyFragment () {
-		IContent cont = new Content(new Unit("id").getStore(), true);
-		
+		IContent cont = new Content(Factory.XOM.createUnit("id").getStore(), true);
 		assertEquals("", cont.getCodedText());
 		assertEquals(0, cont.getTags().size());
 	}
 	
 	@Test
+	public void testIterator () {
+		IContent cont = new Content(new Unit("id").getStore(), true);
+		cont.append("Text in");
+		cont.openCodeSpan("1", "<b>");
+		cont.append("bold");
+		cont.closeCodeSpan("1", "</b>");
+		cont.append(" format.");
+		cont.appendCode("2", "<br>");
+		for ( Object obj : cont ) {
+			if ( obj instanceof String ) {
+				System.out.println((String)obj);
+			}
+			else if ( obj instanceof ICTag ) {
+				ICTag ctag = (ICTag)obj;
+				System.out.println("ICTag id="+ctag.getId()+" ["+ctag.getData()+"]");
+			}
+		}
+	}
+
+	@Test
 	public void testSimpleFragment () {
 		IContent cont = new Content(new Unit("id").getStore(), true);
 		cont.append("Text in");
-		cont.startCodeSpan("1", "<b>");
+		cont.openCodeSpan("1", "<b>");
 		cont.append("bold");
 		cont.closeCodeSpan("1", "</b>");
 		cont.append(" format.");
@@ -42,7 +61,7 @@ public class ContentTest {
 	@Test
 	public void testSharedFields () {
 		IContent cont = new Content(new Store(null), true);
-		ICTag sc = cont.startCodeSpan("1", "<b>");
+		ICTag sc = cont.openCodeSpan("1", "<b>");
 		sc.setCanCopy(false);
 		sc.setCanDelete(false);
 		sc.setCanReorder(CanReorder.FIRSTNO);
@@ -62,7 +81,7 @@ public class ContentTest {
 	public void testDeletion () {
 		IContent cont = new Content(new Store(null), true);
 		cont.append("a ");
-		ICTag sc = cont.startCodeSpan("1", "<b>");
+		ICTag sc = cont.openCodeSpan("1", "<b>");
 		sc.setType("fmt");
 		cont.append("b");
 		cont.closeCodeSpan("1", "<b>");

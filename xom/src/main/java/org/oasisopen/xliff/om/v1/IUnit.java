@@ -135,12 +135,12 @@ public interface IUnit extends IGroupOrUnit, IWithStore, Iterable<IPart> {
 	 * Creates a new {@link ISegment} at the end of the parts of this unit.
 	 * @return the new {@link ISegment} object.
 	 */
-	public ISegment appendNewSegment ();
+	public ISegment appendSegment ();
 
 	/**
 	 * Creates a new ignorable part at the end of the parts of this unit.
 	 * @return the new {@link IPart} object.
 	 */
-	public IPart appendNewIgnorable ();
+	public IPart appendIgnorable ();
 
 }

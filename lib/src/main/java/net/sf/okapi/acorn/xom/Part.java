@@ -64,6 +64,12 @@ public class Part implements IPart {
 	public boolean hasTarget () {
 		return (target != null);
 	}
+	
+	@Override
+	public IContent createTarget () {
+		target = new Content(store, true);
+		return target;
+	}
 
 	@Override
 	public IContent getTarget () {

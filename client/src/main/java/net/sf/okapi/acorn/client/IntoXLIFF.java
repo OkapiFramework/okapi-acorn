@@ -88,7 +88,7 @@ public class IntoXLIFF {
 				Segment srcSeg = (Segment)srcPart;
 			}
 			else {
-				Part xPart = unit.appendNewIgnorable();
+				Part xPart = unit.appendIgnorable();
 				//convert(xPart, srcPart.getContent())
 			}
 		}

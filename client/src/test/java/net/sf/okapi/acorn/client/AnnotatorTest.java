@@ -45,7 +45,7 @@ public class AnnotatorTest {
 	
 	@Test
 	public void testAnnotationsOnPlainNested () {
-		Fragment frag = new Unit("id").appendNewSegment().getSource();
+		Fragment frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
 		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
@@ -58,7 +58,7 @@ public class AnnotatorTest {
 
 	@Test
 	public void testAnnotationsOnPlainNestedAtStart () {
-		Fragment frag = new Unit("id").appendNewSegment().getSource();
+		Fragment frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
 		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
@@ -70,7 +70,7 @@ public class AnnotatorTest {
 
 	@Test
 	public void testAnnotationsOnPlainNestedAtEnd () {
-		Fragment frag = new Unit("id").appendNewSegment().getSource();
+		Fragment frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
 		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
@@ -82,7 +82,7 @@ public class AnnotatorTest {
 
 	@Test
 	public void testAnnotationsOnPlainNestedAtStartAndEnd () {
-		Fragment frag = new Unit("id").appendNewSegment().getSource();
+		Fragment frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
 		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
