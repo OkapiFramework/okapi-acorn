@@ -15,29 +15,23 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import net.sf.okapi.acorn.taus.TransAPIClient;
 import net.sf.okapi.acorn.xom.Factory;
-import net.sf.okapi.acorn.xom.json.JSONWriter;
 
-import org.glassfish.jersey.media.multipart.BodyPart;
-import org.glassfish.jersey.media.multipart.MultiPart;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 
-public class APITestPanel extends JPanel {
+public class TausAPIPanel extends JPanel {
 
+	private final static long serialVersionUID = 1L;
 	private final static String BASEURL = "http://localhost:8080/taustapi/v2"; 
 	private final static IXLIFFFactory xf = Factory.XOM;
-	private final static JSONWriter jw = new JSONWriter();
+
+	private final TransAPIClient ttapi;
 	
-	private JList lbMethods;
+	private JList<String> lbMethods;
 	private JTextField edId;
 	private JTextField edCallbackUrl;
 	private JTextField edSrcLang;
@@ -46,9 +40,10 @@ public class APITestPanel extends JPanel {
 	private JTextField edTarget;
 	private JTextArea edResult;
 	
-	public APITestPanel () {
+	public TausAPIPanel () {
 		GridBagLayout layout =  new GridBagLayout();
 		setLayout(layout);
+		ttapi = new TransAPIClient(BASEURL);
 		
 		String[] methods = {
 			/* 0 */ "GET translation - get a list of all translation requests",
@@ -61,7 +56,7 @@ public class APITestPanel extends JPanel {
 			/* 7 */ "PUT reject/{id}",
 			/* 8 */ "PUT confirm/{id}",
 			/* 9 */ "PUT cancel/{id}"};
-		lbMethods = new JList(methods);
+		lbMethods = new JList<>(methods);
 		lbMethods.setSelectedIndex(0);
 		lbMethods.addListSelectionListener(new ListSelectionListener() {
 			@Override
@@ -185,91 +180,48 @@ public class APITestPanel extends JPanel {
 
 	private void execute () {
 		edResult.setText("Executing the command...");
-		Response resp = null;
-		StringBuilder jtmp;
 		ISegment seg;
-		Client cli;
-		MultiPart multiPartEntity;
-		
 		try {
-			Client client = ClientBuilder.newClient();
-			WebTarget target;
 			switch ( lbMethods.getSelectedIndex() ) {
 			case 0: // GET translation
-				target = client.target(BASEURL).path("translation");
-				resp = target.request(MediaType.APPLICATION_JSON_TYPE).get();
+				ttapi.translation_get();
 				break;
 			case 1: // POST translation
-				jtmp = new StringBuilder("{\"translationRequest\"{");
-				jtmp.append("\"id\":\""+edId.getText()+"\",");
-				jtmp.append("\"sourceLanguage\":\""+edSrcLang.getText()+"\",");
-				jtmp.append("\"targetLanguage\":\""+edTrgLang.getText()+"\",");
-				jtmp.append("\"source\":\""+edSource.getText()+"\",");
-				// XLIFF content
 				seg = xf.createLoneSegment();
 				seg.setSource(edSource.getText());
-				jtmp.append("\"xlfSource\":"+jw.fromContent(seg.getSource()).toJSONString());
-				// End of payload
-				jtmp.append("}}");
-				cli = ClientBuilder.newBuilder()
-			    	.register(MultiPartFeature.class)
-			    	.build();
-				target = cli.target(BASEURL).path("translation");
-				multiPartEntity = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE).bodyPart(
-					new BodyPart(jtmp.toString(), MediaType.APPLICATION_JSON_TYPE));
-				resp = target.request().post(Entity.entity(multiPartEntity, multiPartEntity.getMediaType())); 
+				ttapi.translation_post(edId.getText(), edSrcLang.getText(), edTrgLang.getText(), seg.getSource());
 				break;
 			case 2: // GET translation/{id}
-				target = client.target(BASEURL).path("translation/"+edId.getText());
-				resp = target.request(MediaType.APPLICATION_JSON_TYPE).get();
+				ttapi.translation_id_get(edId.getText());
 				break;
 			case 3: // PUT translation/{id}
-				jtmp = new StringBuilder("{\"translationRequest\"{");
-				jtmp.append("\"id\":\""+edId.getText()+"\",");
-				jtmp.append("\"sourceLanguage\":\""+edSrcLang.getText()+"\",");
-				jtmp.append("\"targetLanguage\":\""+edTrgLang.getText()+"\",");
-				jtmp.append("\"source\":\""+edSource.getText()+"\",");
-				jtmp.append("\"target\":\""+edTarget.getText()+"\",");
-				// XLIFF content
 				seg = xf.createLoneSegment();
 				seg.setSource(edSource.getText());
-				jtmp.append("\"xlfSource\":"+jw.fromContent(seg.getSource()).toJSONString());
-				// End of payload
-				jtmp.append("}}");
-				cli = ClientBuilder.newBuilder()
-			    	.register(MultiPartFeature.class)
-			    	.build();
-				target = cli.target(BASEURL).path("translation/"+edId.getText());
-				multiPartEntity = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE).bodyPart(
-					new BodyPart(jtmp.toString(), MediaType.APPLICATION_JSON_TYPE));
-				resp = target.request().put(Entity.entity(multiPartEntity, multiPartEntity.getMediaType())); 
+				seg.setTarget(edTarget.getText());
+				ttapi.translation_id_put(edId.getText(), edSrcLang.getText(), edTrgLang.getText(),
+					seg.getSource(), seg.getTarget());
 				break;
 			case 4: // DELETE translation/{id}
-				target = client.target(BASEURL).path("translation/"+edId.getText());
-				resp = target.request(MediaType.APPLICATION_JSON_TYPE).delete();
+				ttapi.translation_id_delete(edId.getText());
 				break;
 			case 5: // GET status/{id}
-				target = client.target(BASEURL).path("status/"+edId.getText());
-				resp = target.request(MediaType.APPLICATION_JSON_TYPE).get();
+				ttapi.status_id_get(edId.getText());
 				break;
 			case 6: // PUT accept/{id}
-				target = client.target(BASEURL).path("accept/"+edId.getText());
-				resp = target.request(MediaType.APPLICATION_JSON_TYPE).put(Entity.text(""));
+				ttapi.accept_id_put(edId.getText());
 				break;
 			case 7: // PUT reject/{id}
-				target = client.target(BASEURL).path("reject/"+edId.getText());
-				resp = target.request(MediaType.APPLICATION_JSON_TYPE).put(Entity.text(""));
+				ttapi.reject_id_put(edId.getText());
 				break;
 			case 8: // PUT confirm/{id}
-				target = client.target(BASEURL).path("confirm/"+edId.getText());
-				resp = target.request(MediaType.APPLICATION_JSON_TYPE).put(Entity.text(""));
+				ttapi.confirm_id_put(edId.getText());
 				break;
 			case 9: // PUT cancel/{id}
-				target = client.target(BASEURL).path("cancel/"+edId.getText());
-				resp = target.request(MediaType.APPLICATION_JSON_TYPE).put(Entity.text(""));
+				ttapi.cancel_id_put(edId.getText());
 				break;
 			}
 
+			Response resp = ttapi.getResponse();
 			StringBuilder tmp = new StringBuilder();
 			tmp.append("Result: "+resp.getStatus()+"\n");
 			tmp.append(resp.readEntity(String.class));

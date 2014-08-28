@@ -20,10 +20,8 @@
 
 package net.sf.okapi.acorn.client;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -31,10 +29,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -44,7 +39,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.TransferHandler;
 
 import net.sf.okapi.acorn.calais.OpenCalais;
@@ -63,11 +57,7 @@ public class MainDialog extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private JTextField edPath;
-	private JButton btAddFile;
-	private JButton btReqTrans;
 	private JTextArea edLog;
-	private JTextPane edInput;
-	private Vector inputFiles;
 	private SimpleTM tm;
 	private TMPanel tmPanel;
 
@@ -176,7 +166,7 @@ public class MainDialog extends JFrame {
 		tabPane.addTab(tabStart+"TM Console"+tabEnd, tmPanel);
 		
 		// Add the TAUS API test panel
-		APITestPanel atPanel = new APITestPanel();
+		TausAPIPanel atPanel = new TausAPIPanel();
 		tabPane.addTab(tabStart+"TAUS API Test"+tabEnd, atPanel);
 		
 //		// Add the Input Files tab
@@ -384,20 +374,6 @@ public class MainDialog extends JFrame {
 		tmPanel.updateEntries();
 	}
 	
-	private void selectDocument () {
-		try {
-			JFileChooser fc = new JFileChooser();
-			fc.setDialogTitle("Select a Document to Load");
-			int option = fc.showOpenDialog(this);
-			if ( option == JFileChooser.APPROVE_OPTION ) {
-				edPath.setText(fc.getSelectedFile().getAbsolutePath());
-			}
-		}
-		catch (Throwable e) {
-			log(e.getLocalizedMessage());
-		}
-	}
-
 	private void log (String text) {
 		edLog.setText(edLog.getText()+text+"\n");
 	}

@@ -35,17 +35,26 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import net.sf.okapi.acorn.xom.Factory;
+import net.sf.okapi.acorn.xom.json.JSONReader;
+
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.oasisopen.xliff.om.v1.ISegment;
+
+import com.mycorp.tmlib.Entry;
 
 @Path("translation")
 public class Translation {
 	
 	private @Context ServletContext context;
 	private final JSONParser parser = new JSONParser();
+	private final JSONReader jr = new JSONReader();
+	
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -55,6 +64,7 @@ public class Translation {
 		String source = null;
 		String srcLang = null;
 		String trgLang = null;
+		ISegment seg = null;
 		
 		int i=0;
 		for ( BodyPart bp : form.getBodyParts() ) {
@@ -68,6 +78,10 @@ public class Translation {
 					source = (String)o2.get("source");
 					srcLang = (String)o2.get("sourceLanguage");
 					trgLang = (String)o2.get("targetLanguage");
+					if ( o2.containsKey("xlfSource") ) {
+						seg = Factory.XOM.createLoneSegment();
+						jr.readContent(seg.getStore(), false, (JSONArray)o2.get("xlfSource"));
+					}
 				}
 				catch ( ParseException e ) {
 					return ErrorResponse.create(Response.Status.BAD_REQUEST, "unknown", "JSON parsing error:\n"+e.getMessage());
@@ -91,11 +105,17 @@ public class Translation {
 		TransRequest treq = new TransRequest(id);
 		treq.setSourceLang(srcLang);
 		treq.setTargetLang(trgLang);
-		treq.setSource(source);
+		if ( source != null ) treq.setSource(source);
+		if ( seg != null ) treq.setSegment(seg);
 		DataStore.getInstance().add(treq);
 		
 		ResponseBuilder rb = Response.ok(treq.toJSON(), MediaType.APPLICATION_JSON);
-		return rb.status(Response.Status.CREATED).build();
+		Response response = rb.status(Response.Status.CREATED).build();
+
+		// Trigger the translation
+		triggerTranslation(treq);
+		
+		return response;
 	}
 	
     @PUT
@@ -244,4 +264,16 @@ public class Translation {
 		return Response.status(Response.Status.NO_CONTENT).build();
     }
 
+    private void triggerTranslation (TransRequest treq) {
+    	ISegment seg = treq.getSegment();
+    	
+    	Entry res = DataStore.getInstance().getTM().search(seg.getSource());
+    	if ( res == null ) return;
+    	// Else: set the translation and update the status
+    	// TODO: set content
+    	seg.setTarget(res.getTarget().getPlainText());
+    	treq.setStatus(TransRequest.STATUS_CONFIRMED);
+    	treq.stamp();
+    }
+    
 }

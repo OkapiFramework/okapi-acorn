@@ -199,7 +199,15 @@ public class TransRequest {
 		updateCounter++;
 		modDate = DataStore.formatDate(new Date());
 	}
+	
+	public ISegment getSegment () {
+		return segment;
+	}
 
+	public void setSegment (ISegment segment) {
+		this.segment = segment;
+	}
+	
 	public String toJSON () {
 		StringBuilder tmp = new StringBuilder();
 		tmp.append("{\"translationRequest\":{");

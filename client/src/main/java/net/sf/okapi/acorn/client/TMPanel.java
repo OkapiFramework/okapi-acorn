@@ -22,6 +22,8 @@ import com.mycorp.tmlib.SimpleTM;
 
 public class TMPanel extends JPanel {
 
+	private final static long serialVersionUID = 1L;
+
 	private SimpleTM tm;
 	private JLabel stEntries;
 	private JTextField edSearch;

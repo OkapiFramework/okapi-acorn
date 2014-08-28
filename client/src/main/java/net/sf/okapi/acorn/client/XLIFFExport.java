@@ -1,7 +1,6 @@
 package net.sf.okapi.acorn.client;
 
 import java.io.File;
-import java.util.List;
 
 import net.sf.okapi.acorn.xom.Factory;
 import net.sf.okapi.lib.xliff2.core.CTag;
@@ -27,7 +26,6 @@ import org.oasisopen.xliff.om.v1.ICTag;
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IDocument;
 import org.oasisopen.xliff.om.v1.IExtObject;
-import org.oasisopen.xliff.om.v1.IExtObjectItem;
 import org.oasisopen.xliff.om.v1.IExtObjects;
 import org.oasisopen.xliff.om.v1.IFile;
 import org.oasisopen.xliff.om.v1.IGroup;
@@ -128,7 +126,6 @@ public class XLIFFExport {
 		ExtElement xElem)
 	{
 		if ( !xElem.hasChild() ) return;
-		List<IExtObjectItem> list = xObj.getItems();
 		for ( IExtChild child : xElem.getChildren() ) {
 			switch ( child.getType() ) {
 			case CDATA:

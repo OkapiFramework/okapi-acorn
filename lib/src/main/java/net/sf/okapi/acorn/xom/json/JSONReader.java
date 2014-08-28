@@ -71,6 +71,16 @@ public class JSONReader {
 		return cont;
 	}
 	
+	public IContent readContent (IStore store,
+		boolean isTarget,
+		JSONArray array)
+	{
+		IContent cont = new Content(store, isTarget);
+		convertToContent(array, cont);
+		return cont;
+	}
+	
+	
 	private void convertToContent (JSONArray array,
 		IContent dest)
 	{

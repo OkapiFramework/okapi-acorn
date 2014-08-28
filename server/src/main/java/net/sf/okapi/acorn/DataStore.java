@@ -41,7 +41,6 @@ public class DataStore implements Iterable<TransRequest> {
 	
 	private DataStore () {
 		dateFormat.setTimeZone(timeZone);
-		tm = new SimpleTM();
 		requests = new HashMap<>();
 		TransRequest tr = new TransRequest("74b6b0de-540b-48e0-aa39-6244cf22159b");
 		tr.setSource("text 1");
@@ -56,6 +55,9 @@ public class DataStore implements Iterable<TransRequest> {
 		tr.setTarget("texte 2.");
 		tr.setStatus("translated");
 		add(tr);
+
+		tm = new SimpleTM();
+		tm.addSegment("We can pave the way for the future.", "ᓯᕗᓂᑦᓴᑎᓐᓄᑦ ᐊᖁᑎᒃᓴᓕᐅᕆᐊᖃᕋᑦᑕ.");
 	}
 	
 	private static class Holder {
@@ -112,6 +114,10 @@ public class DataStore implements Iterable<TransRequest> {
 	@Override
 	public Iterator<TransRequest> iterator () {
 		return requests.values().iterator();
+	}
+
+	public SimpleTM getTM () {
+		return tm;
 	}
 
 }
