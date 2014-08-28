@@ -80,9 +80,17 @@ public interface IXLIFFFactory {
 	/**
 	 * Creates a new {@link ISegment} object with an empty source.
 	 * @param store the store associated with the new segment (cannot be null).
-	 * @return the new part.
+	 * @return the new segment.
 	 */
 	public ISegment createSegment (IStore store);
+	
+	/**
+	 * Creates a new unattached {@link ISegment} object with an empty source.
+	 * This segment will have its own store and cannot be used with other or within a unit.
+	 * Lone segments cannot use any methods related to their parent. 
+	 * @return the new segment.
+	 */
+	public ISegment createLoneSegment ();
 	
 	/**
 	 * Creates a deep copy of a given {@link ITag} object.

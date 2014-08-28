@@ -46,11 +46,11 @@ public class Status {
 		}
 		TransRequest treq = DataStore.getInstance().get(id);
 		if ( treq == null ) {
-			return ErrorResponse.create(Response.Status.BAD_REQUEST, id,
+			return ErrorResponse.create(Response.Status.NOT_FOUND, id,
 				String.format("ID '%s' does not exists.", id));
 		}
 
-		return Response.ok("{\"status\":\""+treq.getStatus()+"\"}", MediaType.APPLICATION_JSON).build();
+		return Response.ok("{\"status\":"+DataStore.quote(treq.getStatus())+"}", MediaType.APPLICATION_JSON).build();
 	}
 
 }

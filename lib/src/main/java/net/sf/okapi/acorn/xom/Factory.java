@@ -104,6 +104,11 @@ public enum Factory implements IXLIFFFactory {
 	}
 
 	@Override
+	public ISegment createLoneSegment () {
+		return new Segment(new Store(null)); 
+	}
+
+	@Override
 	public ITag copyTag (ITag original,
 		ITags destinationTags)
 	{

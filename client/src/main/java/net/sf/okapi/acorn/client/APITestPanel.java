@@ -1,5 +1,6 @@
 package net.sf.okapi.acorn.client;
 
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -21,12 +22,21 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import net.sf.okapi.acorn.xom.Factory;
+import net.sf.okapi.acorn.xom.json.JSONWriter;
+
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.oasisopen.xliff.om.v1.ISegment;
+import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 
 public class APITestPanel extends JPanel {
 
+	private final static String BASEURL = "http://localhost:8080/taustapi/v2"; 
+	private final static IXLIFFFactory xf = Factory.XOM;
+	private final static JSONWriter jw = new JSONWriter();
+	
 	private JList lbMethods;
 	private JTextField edId;
 	private JTextField edCallbackUrl;
@@ -112,7 +122,7 @@ public class APITestPanel extends JPanel {
 		c.gridx = 1; c.gridy = 4; c.fill = GridBagConstraints.HORIZONTAL;
 		 c.gridwidth = GridBagConstraints.REMAINDER;
 		add((edTrgLang = new JTextField()), c);
-		edTrgLang.setText("fr");
+		edTrgLang.setText("iu");
 
 		c = new GridBagConstraints();
 		c.gridx = 0; c.gridy = 5; c.anchor = GridBagConstraints.LINE_START;
@@ -131,13 +141,16 @@ public class APITestPanel extends JPanel {
 		add((edTarget = new JTextField()), c);
 		
 		edResult = new JTextArea();
-		JScrollPane scrollPane = new JScrollPane(edResult); 
-		//edResult.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(edResult);
+		edResult.setLineWrap(true);
+		edResult.setWrapStyleWord(true);
+		Font font = new Font("Gadugi", 0, 20); // Gadugi, Euphemia //new Font("Courier New", 0, 20);
+		edResult.setFont(font);
 		c = new GridBagConstraints(); c.anchor = GridBagConstraints.PAGE_END;
 		c.gridx = 0; c.gridy = 7; c.fill = GridBagConstraints.BOTH;
 		c.weighty = 1.0;
 		 c.gridwidth = GridBagConstraints.REMAINDER;
-		add(edResult, c);
+		add(scrollPane, c);
 		
 		updateCommand();
 	}
@@ -173,46 +186,87 @@ public class APITestPanel extends JPanel {
 	private void execute () {
 		edResult.setText("Executing the command...");
 		Response resp = null;
+		StringBuilder jtmp;
+		ISegment seg;
+		Client cli;
+		MultiPart multiPartEntity;
+		
 		try {
 			Client client = ClientBuilder.newClient();
 			WebTarget target;
 			switch ( lbMethods.getSelectedIndex() ) {
-			case 2: // GET translation/{id}
-				target = client.target("http://localhost:8080/taustapi/v2").path("translation/"+edId.getText());
+			case 0: // GET translation
+				target = client.target(BASEURL).path("translation");
 				resp = target.request(MediaType.APPLICATION_JSON_TYPE).get();
 				break;
 			case 1: // POST translation
-				final Client cli = ClientBuilder.newBuilder()
+				jtmp = new StringBuilder("{\"translationRequest\"{");
+				jtmp.append("\"id\":\""+edId.getText()+"\",");
+				jtmp.append("\"sourceLanguage\":\""+edSrcLang.getText()+"\",");
+				jtmp.append("\"targetLanguage\":\""+edTrgLang.getText()+"\",");
+				jtmp.append("\"source\":\""+edSource.getText()+"\",");
+				// XLIFF content
+				seg = xf.createLoneSegment();
+				seg.setSource(edSource.getText());
+				jtmp.append("\"xlfSource\":"+jw.fromContent(seg.getSource()).toJSONString());
+				// End of payload
+				jtmp.append("}}");
+				cli = ClientBuilder.newBuilder()
 			    	.register(MultiPartFeature.class)
 			    	.build();
-				StringBuilder jtmp = new StringBuilder("{\"translationRequest\"{");
-				jtmp.append("id:\""+edId.getText()+"\",");
-				jtmp.append("sourceLanguage:\""+edSrcLang.getText()+"\",");
-				jtmp.append("targetLanguage:\""+edTrgLang.getText()+"\",");
-				jtmp.append("source:\""+edSource.getText()+"\"");
-				jtmp.append("}}");
-				target = cli.target("http://localhost:8080/taustapi/v2").path("translation");
-				final MultiPart multiPartEntity = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE).bodyPart(
+				target = cli.target(BASEURL).path("translation");
+				multiPartEntity = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE).bodyPart(
 					new BodyPart(jtmp.toString(), MediaType.APPLICATION_JSON_TYPE));
 				resp = target.request().post(Entity.entity(multiPartEntity, multiPartEntity.getMediaType())); 
 				break;
-			case 5: // GET status/{id}
-				target = client.target("http://localhost:8080/taustapi/v2").path("status/"+edId.getText());
-				resp = target.request(MediaType.APPLICATION_JSON_TYPE).put(Entity.json(""));
-				break;
-	//		case 6: // PUT accept/{id}
-	//			break;
-	//		case 7: // PUT reject/{id}
-	//			break;
-	//		case 8: // PUT confirm/{id}
-	//			break;
-	//		case 9: // PUT cancel/{id}
-	//			break;
-				
-			case 0: // GET translation
-			default:
-				target = client.target("http://localhost:8080/taustapi/v2").path("translation");
+			case 2: // GET translation/{id}
+				target = client.target(BASEURL).path("translation/"+edId.getText());
 				resp = target.request(MediaType.APPLICATION_JSON_TYPE).get();
+				break;
+			case 3: // PUT translation/{id}
+				jtmp = new StringBuilder("{\"translationRequest\"{");
+				jtmp.append("\"id\":\""+edId.getText()+"\",");
+				jtmp.append("\"sourceLanguage\":\""+edSrcLang.getText()+"\",");
+				jtmp.append("\"targetLanguage\":\""+edTrgLang.getText()+"\",");
+				jtmp.append("\"source\":\""+edSource.getText()+"\",");
+				jtmp.append("\"target\":\""+edTarget.getText()+"\",");
+				// XLIFF content
+				seg = xf.createLoneSegment();
+				seg.setSource(edSource.getText());
+				jtmp.append("\"xlfSource\":"+jw.fromContent(seg.getSource()).toJSONString());
+				// End of payload
+				jtmp.append("}}");
+				cli = ClientBuilder.newBuilder()
+			    	.register(MultiPartFeature.class)
+			    	.build();
+				target = cli.target(BASEURL).path("translation/"+edId.getText());
+				multiPartEntity = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE).bodyPart(
+					new BodyPart(jtmp.toString(), MediaType.APPLICATION_JSON_TYPE));
+				resp = target.request().put(Entity.entity(multiPartEntity, multiPartEntity.getMediaType())); 
+				break;
+			case 4: // DELETE translation/{id}
+				target = client.target(BASEURL).path("translation/"+edId.getText());
+				resp = target.request(MediaType.APPLICATION_JSON_TYPE).delete();
+				break;
+			case 5: // GET status/{id}
+				target = client.target(BASEURL).path("status/"+edId.getText());
+				resp = target.request(MediaType.APPLICATION_JSON_TYPE).get();
+				break;
+			case 6: // PUT accept/{id}
+				target = client.target(BASEURL).path("accept/"+edId.getText());
+				resp = target.request(MediaType.APPLICATION_JSON_TYPE).put(Entity.text(""));
+				break;
+			case 7: // PUT reject/{id}
+				target = client.target(BASEURL).path("reject/"+edId.getText());
+				resp = target.request(MediaType.APPLICATION_JSON_TYPE).put(Entity.text(""));
+				break;
+			case 8: // PUT confirm/{id}
+				target = client.target(BASEURL).path("confirm/"+edId.getText());
+				resp = target.request(MediaType.APPLICATION_JSON_TYPE).put(Entity.text(""));
+				break;
+			case 9: // PUT cancel/{id}
+				target = client.target(BASEURL).path("cancel/"+edId.getText());
+				resp = target.request(MediaType.APPLICATION_JSON_TYPE).put(Entity.text(""));
 				break;
 			}
 

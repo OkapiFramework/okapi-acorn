@@ -22,16 +22,25 @@ package net.sf.okapi.acorn;
 
 import java.util.Date;
 
+import net.sf.okapi.acorn.xom.Factory;
+
+import org.oasisopen.xliff.om.v1.ISegment;
+
 public class TransRequest {
 
+	public final static String STATUS_INITIAL = "initial";
+	public final static String STATUS_ACCEPTED = "accepted";
+	public final static String STATUS_CONFIRMED = "confirmed";
+	public final static String STATUS_REJECTED = "rejected";
+	public final static String STATUS_CANCELLED = "cancelled";
+	
 	private final String id;
-	private String status;
+	private String status = STATUS_INITIAL;
 	private int updateCounter;
 	private String callbackUrl;
 	private String srcLang;
 	private String trgLang;
-	private String source;
-	private String target;
+	private ISegment segment;
 	private boolean mt;
 	private boolean crowd;
 	private boolean prof;
@@ -45,6 +54,7 @@ public class TransRequest {
 	public TransRequest (String id) {
 		this.id = id;
 		this.creDate = DataStore.formatDate(new Date());
+		this.segment = Factory.XOM.createLoneSegment();
 	}
 	
 	public String getId () {
@@ -52,11 +62,11 @@ public class TransRequest {
 	}
 	
 	public String getSource () {
-		return source;
+		return segment.getSource().getPlainText();
 	}
 	
 	public void setSource (String source) {
-		this.source = source;
+		segment.setSource(source);
 	}
 	
 	public int getUpdateCounter () {
@@ -84,11 +94,13 @@ public class TransRequest {
 	}
 
 	public String getTarget () {
-		return target;
+		if ( !segment.hasTarget() ) return null;
+		return segment.getTarget().getPlainText();
 	}
 
 	public void setTarget (String target) {
-		this.target = target;
+		if ( !segment.hasTarget() ) segment.createTarget();
+		segment.setTarget(target);
 	}
 
 	public String getStatus () {
@@ -199,13 +211,21 @@ public class TransRequest {
 		tmp.append("\"crowd\":"+(crowd?"true":"false")+",");
 		tmp.append("\"professional\":"+(prof?"true":"false")+",");
 		tmp.append("\"postedit\":"+(postEdit?"true":"false")+",");
-		if ( comment != null ) tmp.append("\"owner\":\""+DataStore.esc(owner)+"\",");
-		if ( owner != null ) tmp.append("\"translator\":\""+DataStore.esc(translator)+"\",");
-		if ( translator != null ) tmp.append("\"comment\":\""+DataStore.esc(comment)+"\",");
+		if ( comment != null ) {
+			tmp.append("\"comment\":\""+DataStore.esc(comment)+"\",");
+		}
+		if ( owner != null ) {
+			tmp.append("\"owner\":\""+DataStore.esc(owner)+"\",");
+		}
+		if ( translator != null ) {
+			tmp.append("\"translator\":\""+DataStore.esc(translator)+"\",");
+		}
 		tmp.append("\"creationDatetime\":\""+creDate+"\",");
 		if ( modDate != null ) tmp.append("\"modificationDatetime\":\""+modDate+"\",");
 		tmp.append("\"updateCounter\":"+updateCounter+",");
-		tmp.append("\"status\":\""+status+"\"");
+		tmp.append("\"status\":"+DataStore.quote(status)+",");
+		tmp.append("\"source\":"+DataStore.quote(getSource())+",");
+		tmp.append("\"target\":"+DataStore.quote(getTarget())+"");
 		tmp.append("}}");
 		return tmp.toString();
 	}

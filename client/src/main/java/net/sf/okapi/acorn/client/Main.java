@@ -23,15 +23,6 @@ package net.sf.okapi.acorn.client;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import net.sf.okapi.acorn.calais.OpenCalais;
-import net.sf.okapi.acorn.taas.TAAS;
-import net.sf.okapi.lib.xliff2.core.Fragment;
-import net.sf.okapi.lib.xliff2.core.Segment;
-import net.sf.okapi.lib.xliff2.core.TagType;
-import net.sf.okapi.lib.xliff2.core.Unit;
-import net.sf.okapi.lib.xliff2.reader.Event;
-import net.sf.okapi.lib.xliff2.reader.EventType;
-
 public class Main {
 
 	public static void main (String[] originalArgs) {
@@ -50,12 +41,13 @@ public class Main {
 //		TAAS taas = new TAAS();
 //		taas.handleUnit(null);
 		
-		OpenCalais proc = new OpenCalais();
-		Unit unit = new Unit("id");
-		Segment seg = unit.appendSegment();
-		Fragment frag = seg.getSource();
-		frag.append("The Rotary clubs in Nunavut are open to all.");
-//		frag.append("It became a vital link in a trade route between the Orient, Eastern Canada and London. ");
+//		OpenCalais proc = new OpenCalais();
+//		Unit unit = new Unit("id");
+//		Segment seg = unit.appendSegment();
+//		Fragment frag = seg.getSource();
+//		frag.append("The Rotary Club in Iqaluit meets every first Monday of each month.");
+
+		//		frag.append("It became a vital link in a trade route between the Orient, Eastern Canada and London. ");
 
 //		frag.append("This is a test from Boulder, ");
 //		frag.append(TagType.OPENING, "1", "<b>", false);
@@ -64,9 +56,9 @@ public class Main {
 //		frag.append(", to see if this Java program works fine.");
 //		frag.appendStandalone("2", "<br>");
 		
-		proc.handleUnit(new Event(EventType.TEXT_UNIT, null, unit));
+//		proc.handleUnit(new Event(EventType.TEXT_UNIT, null, unit));
 
-//		MainDialog.start();
+		MainDialog.start();
 	}
 
 }

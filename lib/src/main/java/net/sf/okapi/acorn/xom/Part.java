@@ -59,6 +59,18 @@ public class Part implements IPart {
 	public IContent getSource () {
 		return source;
 	}
+	
+//	public IContent setSource (IContent content) {
+//		if ( content.isTarget() ) {
+//			throw new InvalidParameterException("The content parameter must not be defined as for target.");
+//		}
+//		if ( content.getTags().getStore() != getStore() ) {
+//			throw new InvalidParameterException("The content parameter must use the same store as the part where is is set.");
+//		}
+//		//TODO: clean up tags of old source
+//		source = content;
+//		return source;
+//	}
 
 	@Override
 	public boolean hasTarget () {
@@ -93,6 +105,18 @@ public class Part implements IPart {
 		return target;
 	}
 
+//	public IContent setTarget (IContent content) {
+//		if ( !content.isTarget() ) {
+//			throw new InvalidParameterException("The content parameter must be defined as for target.");
+//		}
+//		if ( content.getTags().getStore() != getStore() ) {
+//			throw new InvalidParameterException("The content parameter must use the same store as the part where is is set.");
+//		}
+//		//TODO: clean up the tags of the old target?
+//		target = content;
+//		return target;
+//	}
+
 	@Override
 	public int getTargetOrder () {
 		return targetOrder;
@@ -116,14 +140,15 @@ public class Part implements IPart {
 
 	@Override
 	public IContent setSource (String plainText) {
-		source = new Content(store, false);
+		source.clear();
 		source.append(plainText);
 		return source;
 	}
 
 	@Override
 	public IContent setTarget (String plainText) {
-		target = new Content(store, false);
+		if ( target == null ) target = new Content(store, false);
+		else target.clear();
 		target.append(plainText);
 		return target;
 	}

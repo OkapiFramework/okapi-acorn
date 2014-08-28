@@ -25,6 +25,7 @@ import net.sf.okapi.lib.xliff2.reader.Event;
 import net.sf.okapi.lib.xliff2.reader.XLIFFReader;
 
 import org.oasisopen.xliff.om.v1.Direction;
+import org.oasisopen.xliff.om.v1.GetTarget;
 import org.oasisopen.xliff.om.v1.ICTag;
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IDocument;
@@ -64,6 +65,7 @@ public class XLIFFImport {
 				case START_FILE:
 					StartFileData sfd = event.getStartFileData();
 					file = xf.createFile(sfd.getId());
+					doc.add(file);
 					//todo: ext attributes
 					//copyExtAttributes(file, sfd);
 					break;
@@ -74,6 +76,7 @@ public class XLIFFImport {
 					else group.add(newGroup);
 					group = newGroup;
 					group.setName(sgd.getName());
+					file.add(group);
 					//group.setType(sgd.getType());
 					//todo copy 
 					copyExtAttributes(group, sgd.getExtAttributes());
@@ -86,7 +89,6 @@ public class XLIFFImport {
 				case END_GROUP:
 					group = group.getParent();
 					break;
-
 				case MID_FILE:
 					break;
 				case SKELETON:
@@ -102,26 +104,27 @@ public class XLIFFImport {
 		return doc;
 	}
 	
-	private IUnit fromXLIFFUnit (Unit unit) {
-		IUnit mUnit = new net.sf.okapi.acorn.xom.Unit(unit.getId());
-		mUnit.setCanResegment(unit.getCanResegment());
-		mUnit.setTranslate(unit.getTranslate());
-		mUnit.setName(unit.getName());
-		mUnit.setType(unit.getType());
-		mUnit.setSourceDir(convDir(unit.getSourceDir()));
-		mUnit.setTargetDir(convDir(unit.getTargetDir()));
+	private IUnit fromXLIFFUnit (Unit oriUnit) {
+		IUnit dstUnit = xf.createUnit(oriUnit.getId());
+		dstUnit.setCanResegment(oriUnit.getCanResegment());
+		dstUnit.setTranslate(oriUnit.getTranslate());
+		dstUnit.setName(oriUnit.getName());
+		dstUnit.setType(oriUnit.getType());
+		dstUnit.setSourceDir(convDir(oriUnit.getSourceDir()));
+		dstUnit.setTargetDir(convDir(oriUnit.getTargetDir()));
 		//mUnit.setPreserveWS(unit.getPreserveWS());
-		for ( Part part : unit ) {
-			IPart mPart;
-			if ( part.isSegment() ) mPart = new net.sf.okapi.acorn.xom.Part(mUnit.getStore());
-			else mPart = new net.sf.okapi.acorn.xom.Segment(mUnit.getStore());
+		for ( Part oriPart : oriUnit ) {
+			IPart dstPart;
+			if ( oriPart.isSegment() ) dstPart = dstUnit.appendSegment();
+			else dstPart = dstUnit.appendIgnorable();
 			// Source
-			fillContent(mPart, part.getSource(), false);
-			if ( part.hasTarget() ) fillContent(mPart, part.getTarget(), true);
+			fillContent(dstPart, oriPart.getSource(), false);
+			// Target
+			if ( oriPart.hasTarget() ) fillContent(dstPart, oriPart.getTarget(), true);
 		}
-		copyExtAttributes(mUnit, unit.getExtAttributes());
-		copyExtElements(mUnit, unit);
-		return mUnit;
+		copyExtAttributes(dstUnit, oriUnit.getExtAttributes());
+		copyExtElements(dstUnit, oriUnit);
+		return dstUnit;
 	}
 	
 	private void copyExtElements (IWithExtObjects dest,
@@ -187,73 +190,75 @@ public class XLIFFImport {
 		}
 	}
 	
-	private void fillContent (IPart mPart,
-		Fragment frag,
+	private void fillContent (IPart dstPart,
+		Fragment oriFrag,
 		boolean isTarget)
 	{
-		String ct = frag.getCodedText();
-		IContent cont;
-		if ( isTarget ) cont = mPart.getTarget();
-		else cont = mPart.getSource();
+		String ct = oriFrag.getCodedText();
+		IContent dstCont;
+		if ( isTarget ) dstCont = dstPart.getTarget(GetTarget.CREATE_EMPTY);
+		else dstCont = dstPart.getSource();
 		// Process the content
 		for ( int i=0; i<ct.length(); i++ ) {
 			if ( Fragment.isChar1(ct.charAt(i)) ) {
 				int key = Fragment.toKey(ct.charAt(i), ct.charAt(++i));
-				Tag bm = frag.getTag(key);
-				CTag cm = (bm.isCode() ? (CTag)bm : null);
-				ICTag code = null;
-				IMTag anno = null;
-				switch ( bm.getTagType() ) {
+				Tag oriTag = oriFrag.getTag(key);
+				CTag oriCTag = (oriTag.isCode() ? (CTag)oriTag : null);
+				ICTag dstCTag = null;
+				IMTag dstCMrk = null;
+				switch ( oriTag.getTagType() ) {
 				case CLOSING:
-					if ( bm.isCode() ) {
-						code = cont.closeCodeSpan(bm.getId(), cm.getData());
-						copyCMarker(cm, code);
+					if ( oriTag.isCode() ) {
+						dstCTag = dstCont.closeCodeSpan(oriTag.getId(), oriCTag.getData());
+						copyCTag(oriCTag, dstCTag);
 					}
 					else {
-						anno = cont.closeMarkerSpan(bm.getId());
+						dstCMrk = dstCont.closeMarkerSpan(oriTag.getId());
 					}
 					break;
 				case OPENING:
-					if ( bm.isCode() ) {
-						code = cont.openCodeSpan(bm.getId(), cm.getData());
-						copyCMarker(cm, code);
+					if ( oriTag.isCode() ) {
+						dstCTag = dstCont.openCodeSpan(oriTag.getId(), oriCTag.getData());
+						copyCTag(oriCTag, dstCTag);
 					}
 					else {
-						MTag am = (MTag)bm;
-						anno = cont.openMarkerSpan(bm.getId(), am.getType());
-						anno.setRef(am.getRef());
-						anno.setValue(am.getValue());
-						anno.setTranslate(am.getTranslate().equals("yes"));
-						copyExtAttributes(anno, am.getExtAttributes());
+						MTag am = (MTag)oriTag;
+						dstCMrk = dstCont.openMarkerSpan(oriTag.getId(), am.getType());
+						dstCMrk.setRef(am.getRef());
+						dstCMrk.setValue(am.getValue());
+						if ( am.getTranslate() != null ) {
+							dstCMrk.setTranslate(am.getTranslate());
+						}
+						copyExtAttributes(dstCMrk, am.getExtAttributes());
 					}
 					break;
 				case STANDALONE: // Always a code
-					code = cont.appendCode(cm.getId(), cm.getData());
-					copyCMarker(cm, code);
+					dstCTag = dstCont.appendCode(oriCTag.getId(), oriCTag.getData());
+					copyCTag(oriCTag, dstCTag);
 					break;
 				}
 			}
 			else {
-				cont.append(ct.charAt(i));
+				dstCont.append(ct.charAt(i));
 			}
 		}
 	}
 	
-	private void copyCMarker (CTag cm,
-		ICTag code)
+	private void copyCTag (CTag oriCTag,
+		ICTag dstCTag)
 	{
-		code.setCanCopy(cm.getCanCopy());
-		code.setCanDelete(cm.getCanDelete());
-		code.setCanOverlap(cm.getCanOverlap());
-		code.setCanReorder(convCanReorder(cm.getCanReorder()));
-		code.setCopyOf(cm.getCopyOf());
-		code.setDataDir(convDir(cm.getDataDir()));
-		code.setDir(convDir(cm.getDir()));
-		code.setDisp(cm.getDisp());
-		code.setEquiv(cm.getEquiv());
-		code.setSubFlows(cm.getSubFlows());
-		code.setSubType(cm.getSubType());
-		code.setType(cm.getType());
+		dstCTag.setCanCopy(oriCTag.getCanCopy());
+		dstCTag.setCanDelete(oriCTag.getCanDelete());
+		dstCTag.setCanOverlap(oriCTag.getCanOverlap());
+		dstCTag.setCanReorder(convCanReorder(oriCTag.getCanReorder()));
+		dstCTag.setCopyOf(oriCTag.getCopyOf());
+		dstCTag.setDataDir(convDir(oriCTag.getDataDir()));
+		dstCTag.setDir(convDir(oriCTag.getDir()));
+		dstCTag.setDisp(oriCTag.getDisp());
+		dstCTag.setEquiv(oriCTag.getEquiv());
+		dstCTag.setSubFlows(oriCTag.getSubFlows());
+		dstCTag.setSubType(oriCTag.getSubType());
+		dstCTag.setType(oriCTag.getType());
 	}
 	
 	private org.oasisopen.xliff.om.v1.CanReorder convCanReorder (CanReorder canReorder) {

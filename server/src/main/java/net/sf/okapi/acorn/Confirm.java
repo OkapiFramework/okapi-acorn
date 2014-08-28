@@ -42,11 +42,12 @@ public class Confirm {
 		}
 		TransRequest treq = DataStore.getInstance().get(id);
 		if ( treq == null ) {
-			return ErrorResponse.create(Response.Status.BAD_REQUEST, id,
+			return ErrorResponse.create(Response.Status.NOT_FOUND, id,
 				String.format("ID '%s' does not exists.", id));
 		}
-		treq.setStatus("confirmed");
+		treq.setStatus(TransRequest.STATUS_CONFIRMED);
 		treq.stamp();
+
 		return Response.ok(treq.toJSON(), MediaType.APPLICATION_JSON).build();
 	}
 

@@ -1,6 +1,7 @@
 package com.mycorp.tmlib;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import net.sf.okapi.acorn.xom.Factory;
 import net.sf.okapi.acorn.xom.Store;
@@ -15,17 +16,17 @@ import org.oasisopen.xliff.om.v1.IUnit;
 import org.oasisopen.xliff.om.v1.IWithStore;
 import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 
-public class SimpleTM implements IWithStore {
+public class SimpleTM implements IWithStore, Iterable<Entry> {
 
 	final private IXLIFFFactory xf = Factory.XOM;
-	final private IStore megastore;
+	final private IStore store;
 	final private ArrayList<Entry> entries;
 	final private JSONReader jr;
 	final private JSONWriter jw;
 	
 	public SimpleTM () {
 		entries = new ArrayList<>();
-		megastore = new Store(null);
+		store = new Store(null);
 		jr = new JSONReader();
 		jw = new JSONWriter();
 	}
@@ -39,11 +40,15 @@ public class SimpleTM implements IWithStore {
 	public int addSegments (IUnit unit) {
 		int count = 0;
 		for ( ISegment seg : unit.getSegments() ) {
-			if ( !seg.hasTarget() ) continue;
+			if ( !seg.hasTarget() ) continue; // Skip segments without target
+			IContent srcContent = seg.getSource();
+			IContent trgContent = seg.getTarget();
+			if ( srcContent.isEmpty() ) continue; // Skip segments with empty source
+			if ( trgContent.isEmpty() ) continue; // Skip segments with empty target
 			// Else: add the segment
 			Entry entry = new Entry(
-				xf.copyContent(megastore, false, seg.getSource()),
-				xf.copyContent(megastore, true, seg.getTarget()));
+				xf.copyContent(store, false, srcContent),
+				xf.copyContent(store, true, trgContent));
 			if ( entries.add(entry) ) count++;
 		}
 		return count;
@@ -52,9 +57,9 @@ public class SimpleTM implements IWithStore {
 	public void addSegment (String srcPlainText,
 		String trgPlainText)
 	{
-		IContent src = xf.createContent(megastore, false);
+		IContent src = xf.createContent(store, false);
 		src.setCodedText(srcPlainText);
-		IContent trg = xf.createContent(megastore, true);
+		IContent trg = xf.createContent(store, true);
 		trg.setCodedText(trgPlainText);
 		entries.add(new Entry(src, trg));
 	}
@@ -91,7 +96,7 @@ public class SimpleTM implements IWithStore {
 
 	@Override
 	public IStore getStore () {
-		return megastore;
+		return store;
 	}
 
 	public void loadDefaultEntries () {
@@ -113,6 +118,15 @@ public class SimpleTM implements IWithStore {
 		addSegment("We have no choice but to follow the rules.",
 			"ᖃᓄᐃᓕᐅᕕᖃᙱᓇᑦᑕ ᑭᓯᐊᓂᓕ ᒪᓕᑦᑕᐅᔭᕆᐊᓖᑦ ᒪᓕᓪᓗᒋᑦ.");
 			// qanuiliuviqannginatta kisianili malittaujarialiit malillugit.
+	}
+
+	public int getCount () {
+		return entries.size();
+	}
+
+	@Override
+	public Iterator<Entry> iterator () {
+		return entries.iterator();
 	}
 
 }

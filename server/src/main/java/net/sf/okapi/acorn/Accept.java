@@ -42,10 +42,10 @@ public class Accept {
 		}
 		TransRequest treq = DataStore.getInstance().get(id);
 		if ( treq == null ) {
-			return ErrorResponse.create(Response.Status.BAD_REQUEST, id,
+			return ErrorResponse.create(Response.Status.NOT_FOUND, id,
 				String.format("ID '%s' does not exists.", id));
 		}
-		treq.setStatus("accepted");
+		treq.setStatus(TransRequest.STATUS_ACCEPTED);
 		treq.stamp();
 		
 		return Response.ok(treq.toJSON(), MediaType.APPLICATION_JSON).build();

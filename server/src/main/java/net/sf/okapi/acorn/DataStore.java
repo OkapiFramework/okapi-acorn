@@ -28,27 +28,31 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.mycorp.tmlib.SimpleTM;
+
 public class DataStore implements Iterable<TransRequest> {
 
 	private static TimeZone timeZone = TimeZone.getTimeZone("UTC");
 	private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
 	private static long errCounter = 0;
 	
+	private SimpleTM tm;
 	private Map<String, TransRequest> requests;
 	
 	private DataStore () {
 		dateFormat.setTimeZone(timeZone);
+		tm = new SimpleTM();
 		requests = new HashMap<>();
 		TransRequest tr = new TransRequest("74b6b0de-540b-48e0-aa39-6244cf22159b");
 		tr.setSource("text 1");
 		tr.setStatus("initial");
 		tr.setSourceLang("en");
-		tr.setTargetLang("fr");
+		tr.setTargetLang("iu");
 		add(tr);
 		tr = new TransRequest("4c529ced-a6d4-4bb9-bb5b-00e6129efdae");
 		tr.setSource("text 2");
 		tr.setSourceLang("en");
-		tr.setTargetLang("fr");
+		tr.setTargetLang("iu");
 		tr.setTarget("texte 2.");
 		tr.setStatus("translated");
 		add(tr);
@@ -79,6 +83,16 @@ public class DataStore implements Iterable<TransRequest> {
 	public static String esc (String text) {
 		if ( text == null ) return null;
 		return text.replaceAll("(\\\"|\\\\|/)", "\\$1");
+	}
+	
+	/**
+	 * Gets the JSON quoted string value or null of a string.
+	 * @param text the text to quote
+	 * @return the quoted and escaped text or null.
+	 */
+	public static String quote (String text) {
+		if ( text == null ) return null;
+		return "\""+text.replaceAll("(\\\"|\\\\|/)", "\\$1")+"\"";
 	}
 
 	public TransRequest get (String id) {

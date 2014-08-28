@@ -42,12 +42,13 @@ public class Cancel {
 		}
 		TransRequest treq = DataStore.getInstance().get(id);
 		if ( treq == null ) {
-			return ErrorResponse.create(Response.Status.BAD_REQUEST, id,
+			return ErrorResponse.create(Response.Status.NOT_FOUND, id,
 				String.format("ID '%s' does not exists.", id));
 		}
-		treq.setStatus("cancelled");
+		treq.setStatus(TransRequest.STATUS_CANCELLED);
 		treq.stamp();
-		//TODO: the API is strange here, nothing is deleted, we shold not return no-content
+		
+		//TODO: the API is strange here, nothing is deleted, we should not return no-content
 		return Response.status(Response.Status.NO_CONTENT).build();
 	}
 

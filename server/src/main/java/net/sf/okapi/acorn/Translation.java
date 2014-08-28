@@ -36,53 +36,61 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.glassfish.jersey.media.multipart.BodyPart;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 @Path("translation")
 public class Translation {
 	
 	private @Context ServletContext context;
+	private final JSONParser parser = new JSONParser();
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response translation_POST (FormDataMultiPart form
-//    	@FormDataParam("translationRequest") List<FormDataBodyPart> tr
-//    	@FormDataParam("id") String id,
-//    	@FormDataParam("sourceLanguage") String srcLang,
-//    	@FormDataParam("targetLanguage") String trgLang,
-//    	@FormDataParam("source") String source
-		)
-	{
+	public Response translation_POST (FormDataMultiPart form) {
+		String id = null;
+		String source = null;
+		String srcLang = null;
+		String trgLang = null;
+		
 		int i=0;
 		for ( BodyPart bp : form.getBodyParts() ) {
 			String bpStr = bp.getEntityAs(String.class);
 			System.out.println(bpStr);
 			if ( i == 0 ) {
-				
+				try {
+					JSONObject o1 = (JSONObject)parser.parse(bpStr);
+					JSONObject o2 = (JSONObject)o1.get("translationRequest");
+					id = (String)o2.get("id");
+					source = (String)o2.get("source");
+					srcLang = (String)o2.get("sourceLanguage");
+					trgLang = (String)o2.get("targetLanguage");
+				}
+				catch ( ParseException e ) {
+					return ErrorResponse.create(Response.Status.BAD_REQUEST, "unknown", "JSON parsing error:\n"+e.getMessage());
+				}
 			}
 			i++;
 		}
-//		FormDataBodyPart tr = form.getField("translationRequest");
-//		System.out.println(tr.getValue());
-//		if (( id == null ) || id.trim().isEmpty() ) {
-//			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "ID must not be null or empty.");
-//		}
-//		if ( DataStore.getInstance().get(id) != null ) {
-//			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "ID exists already.");
-//		}
-//		if (( srcLang == null ) || srcLang.isEmpty() ) {
-//			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "Invalid source language.");
-//		}
-//		if (( trgLang == null ) || trgLang.isEmpty() ) {
-//			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "Invalid target language.");
-//		}
+		if (( id == null ) || id.trim().isEmpty() ) {
+			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "ID must not be null or empty.");
+		}
+		if ( DataStore.getInstance().get(id) != null ) {
+			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "ID exists already.");
+		}
+		if (( srcLang == null ) || srcLang.isEmpty() ) {
+			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "Invalid source language.");
+		}
+		if (( trgLang == null ) || trgLang.isEmpty() ) {
+			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "Invalid target language.");
+		}
 
-		String id="123";
-		String source = "text";
-		
 		TransRequest treq = new TransRequest(id);
+		treq.setSourceLang(srcLang);
+		treq.setTargetLang(trgLang);
 		treq.setSource(source);
 		DataStore.getInstance().add(treq);
 		
@@ -90,6 +98,87 @@ public class Translation {
 		return rb.status(Response.Status.CREATED).build();
 	}
 	
+    @PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("/{id}")
+    public Response translation_id_PUT (FormDataMultiPart form) {
+		String id = null;
+		String source = null;
+		String target = null;
+		String srcLang = null;
+		String trgLang = null;
+		boolean hasData = false;
+
+		int i=0;
+		for ( BodyPart bp : form.getBodyParts() ) {
+			String bpStr = bp.getEntityAs(String.class);
+			System.out.println(bpStr);
+			if ( i == 0 ) {
+				try {
+					JSONObject o1 = (JSONObject)parser.parse(bpStr);
+					JSONObject o2 = (JSONObject)o1.get("translationRequest");
+					id = (String)o2.get("id");
+					if ( o2.containsKey("sourceLanguage") ) {
+						srcLang = (String)o2.get("sourceLanguage");
+						hasData = true;
+					}
+					if ( o2.containsKey("targetLanguage") ) {
+						trgLang = (String)o2.get("targetLanguage");
+						hasData = true;
+					}
+					if ( o2.containsKey("source") ) {
+						source = (String)o2.get("source");
+						hasData = true;
+					}
+					if ( o2.containsKey("target") ) {
+						target = (String)o2.get("target");
+						hasData = true;
+					}
+				}
+				catch ( ParseException e ) {
+					return ErrorResponse.create(Response.Status.BAD_REQUEST, "unknown", "JSON parsing error:\n"+e.getMessage());
+				}
+			}
+			i++;
+		}
+
+		if (( id == null ) || id.trim().isEmpty() ) {
+			return ErrorResponse.create(Response.Status.BAD_REQUEST, id, "ID must not be null or empty.");
+		}
+		TransRequest treq = DataStore.getInstance().get(id);
+		if ( treq == null ) {
+			return ErrorResponse.create(Response.Status.NOT_FOUND, id,
+				String.format("ID '%s' does not exists.", id));
+		}
+		// Update the entry
+		if ( srcLang != null ) {
+			if ( !srcLang.equals(treq.getSourceLang()) ) {
+				treq.setSourceLang(srcLang);
+				treq.setStatus(TransRequest.STATUS_INITIAL); 
+			}
+		}
+		if ( trgLang != null ) {
+			if ( !trgLang.equals(treq.getTargetLang()) ) {
+				treq.setTargetLang(trgLang);
+				treq.setStatus(TransRequest.STATUS_INITIAL); 
+			}
+		}
+		if ( source != null ) {
+			if ( !source.equals(treq.getSource()) ) {
+				treq.setSource(source);
+				treq.setStatus(TransRequest.STATUS_INITIAL);
+			}
+		}
+		if ( target != null ) {
+			treq.setTarget(target);
+		}
+		if ( hasData ) treq.stamp();
+		
+		ResponseBuilder rb = Response.ok(treq.toJSON(), MediaType.APPLICATION_JSON);
+		return rb.status(Response.Status.OK).build();
+    }
+
 	/**
 	 * Gets the list of the existing translation requests. 
 	 * @param srcLang the source language (null for all).
@@ -127,7 +216,7 @@ public class Translation {
 		}
 		TransRequest treq = DataStore.getInstance().get(id);
 		if ( treq == null ) {
-			return ErrorResponse.create(Response.Status.BAD_REQUEST, id,
+			return ErrorResponse.create(Response.Status.NOT_FOUND, id,
 				String.format("ID '%s' does not exists.", id));
 		}
 
@@ -146,33 +235,13 @@ public class Translation {
 		}
 		TransRequest treq = DataStore.getInstance().get(id);
 		if ( treq == null ) {
-			return ErrorResponse.create(Response.Status.BAD_REQUEST, id,
+			return ErrorResponse.create(Response.Status.NOT_FOUND, id,
 				String.format("ID '%s' does not exists.", id));
 		}
 
 		// Delete
 		DataStore.getInstance().remove(id);
 		return Response.status(Response.Status.NO_CONTENT).build();
-    }
-
-    @PUT
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}")
-    public Response translation_id_PUT (
-    	@PathParam("id") String id,
-    	@QueryParam("sourceLanguage") String srcLang,
-    	@QueryParam("targetLanguage") String trgLang,
-    	@QueryParam("source") String source
-    )
-    {
-    	return ErrorResponse.create(Response.Status.NOT_IMPLEMENTED, id, "This method is not implemented.");
-//		TransRequest treq = DataStore.getInstance().get(id);
-//		if ( treq == null ) {
-//			return ErrorResponse.create(Response.Status.BAD_REQUEST, id,
-//				String.format("ID '%s' does not exists.", id));
-//		}
-//
-//		return Response.ok("Found", MediaType.TEXT_PLAIN).build();
     }
 
 }

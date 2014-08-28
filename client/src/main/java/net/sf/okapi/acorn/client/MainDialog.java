@@ -20,9 +20,10 @@
 
 package net.sf.okapi.acorn.client;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -33,23 +34,29 @@ import java.io.File;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.TransferHandler;
 
 import net.sf.okapi.acorn.calais.OpenCalais;
 import net.sf.okapi.lib.xliff2.processor.XLIFFProcessor;
+
+import org.oasisopen.xliff.om.v1.IDocument;
+import org.oasisopen.xliff.om.v1.IFile;
+import org.oasisopen.xliff.om.v1.IGroupOrUnit;
+import org.oasisopen.xliff.om.v1.ISegment;
+import org.oasisopen.xliff.om.v1.IUnit;
+
+import com.mycorp.tmlib.SimpleTM;
 
 public class MainDialog extends JFrame {
 
@@ -58,12 +65,17 @@ public class MainDialog extends JFrame {
 	private JTextField edPath;
 	private JButton btAddFile;
 	private JButton btReqTrans;
-	private JTextPane edLog;
+	private JTextArea edLog;
 	private JTextPane edInput;
 	private Vector inputFiles;
+	private SimpleTM tm;
+	private TMPanel tmPanel;
 
 	public MainDialog () {
+		tm = new SimpleTM();
 		initComponents();
+		showInfo();
+		edLog.requestFocusInWindow();
 	}
 
 	class DocumentTransferhandler extends TransferHandler {
@@ -105,6 +117,9 @@ public class MainDialog extends JFrame {
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Okapi Acorn - Client");
 
+		final String tabStart = "<html><body><table width='150'>";
+		final String tabEnd = "</table></body></html>";
+		
 		//=== Menu
 		
 		JMenuBar menuBar = new JMenuBar();
@@ -123,29 +138,55 @@ public class MainDialog extends JFrame {
 			}
 		});
 		
+		menuItem = new JMenuItem("Import an XLIFF 2 Document...", KeyEvent.VK_I);
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				importXLIFF();
+			}
+		});
+		
+		menuItem = new JMenuItem("Import a DOCX Document...", KeyEvent.VK_D);
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				importDocument();
+			}
+		});
+		
 		//=== Panels
 		
 		JTabbedPane tabPane = new JTabbedPane();
 
-		// Add the API test panel
-		APITestPanel atPanel = new APITestPanel();
-		// Add the tab
-		tabPane.addTab("TAUS API Test", atPanel);
-		
-		// Add the Input Files tab
-		JPanel panel = new JPanel(new BorderLayout());
-		// List of files
-		DefaultListModel<String> model = new DefaultListModel<String>();
-	    JList listbox = new JList(model);
-	    JScrollPane pane = new JScrollPane(listbox);
-		// Add the tab
-//		tabPane.addTab("Input Files", panel);
-		
 		// Add the Log tab
-		edLog = new JTextPane();
-		edLog.setEditable(false);
-		edLog.setBorder(BorderFactory.createLineBorder(Color.gray));
-//		tabPane.addTab("Log", edLog);
+		edLog = new JTextArea();
+		JScrollPane jsp = new JScrollPane(edLog);
+		edLog.setEditable(true);
+		//edLog.setContentType("text/html");
+		//edLog.setBorder(BorderFactory.createLineBorder(Color.gray));
+		Font font = new Font("Gadugi", 0, 20); // Gadugi, Euphemia //new Font("Courier New", 0, 20);
+		edLog.setFont(font);
+		//edLog.setMargin(new Insets(15, 15, 15, 15));
+		tabPane.addTab(tabStart+"Log Console"+tabEnd, jsp);
+		
+		// Add the TM panel
+		tmPanel = new TMPanel(tm);
+		tabPane.addTab(tabStart+"TM Console"+tabEnd, tmPanel);
+		
+		// Add the TAUS API test panel
+		APITestPanel atPanel = new APITestPanel();
+		tabPane.addTab(tabStart+"TAUS API Test"+tabEnd, atPanel);
+		
+//		// Add the Input Files tab
+//		JPanel panel = new JPanel(new BorderLayout());
+//		// List of files
+//		DefaultListModel<String> model = new DefaultListModel<String>();
+//	    JList listbox = new JList(model);
+//	    JScrollPane pane = new JScrollPane(listbox);
+//		// Add the tab
+//		tabPane.addTab("Input Files", panel);
 		
 		add(tabPane);
 		
@@ -216,7 +257,7 @@ public class MainDialog extends JFrame {
 		//
 		 // Set minimum and preferred size for the dialog
 		 setMinimumSize(new Dimension(550, 250));
-		 setPreferredSize(new Dimension(850, 550));
+		 setPreferredSize(new Dimension(950, 700));
 		 pack();
 		//
 		// // Set the drag and drop handlers
@@ -262,6 +303,86 @@ public class MainDialog extends JFrame {
 		proc.run(inputFile, outputFile);
 		
 	}
+
+	private void importDocument () {
+		// Get a document
+		File inputFile;
+    	try {
+    		JFileChooser fc = new JFileChooser();
+    		fc.setDialogTitle("Select a DOCX Document");
+    		int option = fc.showOpenDialog(this);
+    		if ( option == JFileChooser.APPROVE_OPTION ) {
+   				inputFile = fc.getSelectedFile();
+    		}
+    		else {
+    			return;
+    		}
+    	}
+    	catch ( Throwable e ) {
+    		e.printStackTrace();
+    		return;
+    	}
+		
+		// Process it
+    	clearLog();
+    	log("===== Importing DOCX Document");
+    	IntoXLIFF intoXlf = new IntoXLIFF();
+    	IDocument doc = intoXlf.importDocument(inputFile, "okf_openxml");
+		log("Done\n");
+    	
+		addDocumentToTM(doc);
+	}
+	
+	private void importXLIFF () {
+		// Get an XLIFF 2.0 file
+		File inputFile;
+    	try {
+    		JFileChooser fc = new JFileChooser();
+    		fc.setDialogTitle("Select an XLIFF 2 Document");
+    		int option = fc.showOpenDialog(this);
+    		if ( option == JFileChooser.APPROVE_OPTION ) {
+   				inputFile = fc.getSelectedFile();
+    		}
+    		else {
+    			return;
+    		}
+    	}
+    	catch ( Throwable e ) {
+    		e.printStackTrace();
+    		return;
+    	}
+		
+		// Process it
+    	clearLog();
+    	log("===== Importing XLIFF Document");
+		XLIFFImport imp = new XLIFFImport();
+		IDocument doc = imp.importDocument(inputFile);
+		log("Done\n");
+		
+		addDocumentToTM(doc);
+	}
+	
+	private void addDocumentToTM (IDocument doc) {
+    	int count = 0;
+    	log("===== Importing document entries into the TM");
+		for ( IFile file : doc ) {
+			log("== File id="+file.getId()+":");
+			for ( IGroupOrUnit gou : file ) {
+				if ( !gou.isUnit() ) continue;
+				IUnit unit = (IUnit)gou;
+				log("-- Unit id="+unit.getId()+":");
+				for ( ISegment segment : unit.getSegments() ) {
+					log("src: "+segment.getSource().getCodedText());
+					if ( segment.hasTarget() ) {
+						log("trg: "+segment.getTarget().getCodedText());
+					}
+				}
+				count += tm.addSegments(unit);
+			}
+		}
+		log("Entries added: "+count);
+		tmPanel.updateEntries();
+	}
 	
 	private void selectDocument () {
 		try {
@@ -278,9 +399,28 @@ public class MainDialog extends JFrame {
 	}
 
 	private void log (String text) {
-		edLog.setText(edLog.getText() + text + "\n");
+		edLog.setText(edLog.getText()+text+"\n");
 	}
 
+	private void clearLog () {
+		edLog.setText("");
+	}
+	
+	private void showInfo () {
+		clearLog();
+		log("---------------------------------------------------------------");
+		log("Okapi Acorn - Experimental client for various purposes");
+		log("---------------------------------------------------------------");
+		int mb = 1024*1024;
+        Runtime runtime = Runtime.getRuntime();
+        String fmt = "%,1d MB";
+        log("Total Memory = " + String.format(fmt, runtime.totalMemory()/mb));
+        log("Maximum Memory = " + String.format(fmt, runtime.maxMemory()/mb));		
+        log("Used Memory = " + String.format(fmt, (runtime.totalMemory()-runtime.freeMemory())/mb));
+        log("Free Memory = " + String.format(fmt, runtime.freeMemory()/mb));
+		log("---------------------------------------------------------------");
+	}
+	
 	public static void start () {
 		java.awt.EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -289,4 +429,5 @@ public class MainDialog extends JFrame {
 			}
 		});
 	}
+
 }
