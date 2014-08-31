@@ -20,23 +20,35 @@
 
 package net.sf.okapi.acorn.client;
 
+import java.awt.Font;
+
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 public class Main {
 
 	public static void main (String[] originalArgs) {
+
+		// Set the look-and-feel and a larger font size
 		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ( "Nimbus".equals(info.getName()) ) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
+			UIManager.setLookAndFeel(new NimbusLookAndFeel() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				public UIDefaults getDefaults () {
+					UIDefaults ret = super.getDefaults();
+					ret.put("defaultFont", new Font(Font.DIALOG, 0, 16));
+					return ret;
 				}
-			}
+			});
 		}
-		catch ( Exception e ) {
-			// Use default
+		catch (UnsupportedLookAndFeelException e) {
+			// Use the default font
+			e.printStackTrace();
 		}
+
+		MainDialog.start();
 		
 //		TAAS taas = new TAAS();
 //		taas.handleUnit(null);
@@ -58,7 +70,6 @@ public class Main {
 		
 //		proc.handleUnit(new Event(EventType.TEXT_UNIT, null, unit));
 
-		MainDialog.start();
 	}
 
 }

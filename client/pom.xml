@@ -45,6 +45,11 @@
 			<version>${okapiLibVersion}</version>
 		</dependency>        
 		<dependency>
+			<groupId>net.sf.okapi.filters</groupId>
+			<artifactId>okapi-filter-tmx</artifactId>
+			<version>${okapiLibVersion}</version>
+		</dependency>        
+		<dependency>
 			<groupId>net.sf.okapi.lib</groupId>
 			<artifactId>okapi-lib-xliff2</artifactId>
 			<version>${xliff2LibVersion}</version>

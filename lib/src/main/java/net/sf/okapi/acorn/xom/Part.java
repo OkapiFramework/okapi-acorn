@@ -4,6 +4,7 @@ import org.oasisopen.xliff.om.v1.GetTarget;
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IPart;
 import org.oasisopen.xliff.om.v1.IStore;
+import org.oasisopen.xliff.om.v1.InvalidParameterException;
 
 public class Part implements IPart {
 
@@ -146,10 +147,36 @@ public class Part implements IPart {
 	}
 
 	@Override
+	public IContent setSource (IContent content) {
+		if ( content.getTags().getStore() != this.getStore() ) {
+			throw new InvalidParameterException("The new content must be using the same store.");
+		}
+		if ( content.isTarget() ) {
+			throw new InvalidParameterException("The new content must be a source.");
+		}
+		source.clear();
+		source = content;
+		return source;
+	}
+
+	@Override
 	public IContent setTarget (String plainText) {
 		if ( target == null ) target = new Content(store, false);
 		else target.clear();
 		target.append(plainText);
+		return target;
+	}
+
+	@Override
+	public IContent setTarget (IContent content) {
+		if ( target != null ) target.clear();
+		if ( content.getTags().getStore() != this.getStore() ) {
+			throw new InvalidParameterException("The new content must be using the same store.");
+		}
+		if ( !content.isTarget() ) {
+			throw new InvalidParameterException("The new content must be a target.");
+		}
+		target = content;
 		return target;
 	}
 

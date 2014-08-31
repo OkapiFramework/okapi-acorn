@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,8 +34,9 @@ public class TMPanel extends JPanel {
 		this.tm = tm;
 		GridBagLayout layout =  new GridBagLayout();
 		setLayout(layout);
-		GridBagConstraints c = new GridBagConstraints();
+		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
+		GridBagConstraints c = new GridBagConstraints();
 		stEntries = new JLabel();
 		c.gridx = 0; c.gridy = 0; c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.PAGE_START;
@@ -46,7 +48,7 @@ public class TMPanel extends JPanel {
 		//c.gridwidth = GridBagConstraints.REMAINDER;
 		add((edSearch = new JTextField()), c);
 
-		JButton btSearch = new JButton("Search");
+		final JButton btSearch = new JButton("Search");
 		btSearch.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed (ActionEvent event) {
@@ -60,6 +62,8 @@ public class TMPanel extends JPanel {
 		edResult = new JTextArea();
 		Font font = new Font("Gadugi", 0, 20); // Gadugi, Euphemia //new Font("Courier New", 0, 20);
 		edResult.setFont(font);
+		edResult.setLineWrap(true);
+		edResult.setWrapStyleWord(true);
 		JScrollPane scrollPane = new JScrollPane(edResult); 
 		c = new GridBagConstraints(); c.anchor = GridBagConstraints.PAGE_END;
 		c.gridx = 0; c.gridy = 2; c.fill = GridBagConstraints.BOTH;

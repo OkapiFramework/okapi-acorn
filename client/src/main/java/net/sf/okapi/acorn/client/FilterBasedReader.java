@@ -6,7 +6,9 @@ import java.util.Stack;
 import net.sf.okapi.acorn.xom.Factory;
 import net.sf.okapi.common.Event;
 import net.sf.okapi.common.LocaleId;
+import net.sf.okapi.common.filters.FilterConfigurationMapper;
 import net.sf.okapi.common.filters.IFilter;
+import net.sf.okapi.common.filters.IFilterConfigurationMapper;
 import net.sf.okapi.common.resource.Code;
 import net.sf.okapi.common.resource.ITextUnit;
 import net.sf.okapi.common.resource.RawDocument;
@@ -15,7 +17,6 @@ import net.sf.okapi.common.resource.StartGroup;
 import net.sf.okapi.common.resource.TextContainer;
 import net.sf.okapi.common.resource.TextFragment;
 import net.sf.okapi.common.resource.TextPart;
-import net.sf.okapi.filters.openxml.OpenXMLFilter;
 
 import org.oasisopen.xliff.om.v1.GetTarget;
 import org.oasisopen.xliff.om.v1.ICTag;
@@ -28,22 +29,30 @@ import org.oasisopen.xliff.om.v1.IUnit;
 import org.oasisopen.xliff.om.v1.IWithGroupOrUnit;
 import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 
-public class IntoXLIFF {
+public class FilterBasedReader implements IDocumentReader {
 
 	private static final IXLIFFFactory xf = Factory.XOM;
+	
+	private final String filterConfigId;
 	
 	private LocaleId srcLoc = LocaleId.ENGLISH;
 	private LocaleId trgLoc = LocaleId.fromString("iu");
 	
-	public IDocument importDocument (File inputFile,
-		String filterConfigId)
-	{
+	public FilterBasedReader (String filterConfigId) {
+		this.filterConfigId = filterConfigId;
+	}
+	
+	@Override
+	public IDocument load (File inputFile) {
 		RawDocument rd = new RawDocument(inputFile.toURI(), "UTF-8", srcLoc, trgLoc, filterConfigId);
 		IFilter filter = null;
 		IDocument doc = null;
 		
 		try {
-			filter = new OpenXMLFilter();
+			IFilterConfigurationMapper fcm = new FilterConfigurationMapper();
+			fcm.addConfigurations("net.sf.okapi.filters.tmx.TmxFilter");
+			fcm.addConfigurations("net.sf.okapi.filters.openxml.OpenXMLFilter");
+			filter = fcm.createFilter(filterConfigId);
 			filter.open(rd);
 			IFile file;
 			Stack<IWithGroupOrUnit> parents = new Stack<>();
@@ -63,6 +72,11 @@ public class IntoXLIFF {
 					parents.push(file);
 					break;
 				case START_GROUP:
+					if ( parents.isEmpty() ) {
+						file = xf.createFile("f1");
+						doc.add(file);
+						parents.push(file);
+					}
 					StartGroup sg = event.getStartGroup();
 					IGroup parent = null; // Default
 					if ( parents.size() > 1 ) parent = (IGroup)parents.peek();
@@ -70,6 +84,11 @@ public class IntoXLIFF {
 					parents.peek().add(group);
 					break;
 				case TEXT_UNIT:
+					if ( parents.isEmpty() ) {
+						file = xf.createFile("f1");
+						doc.add(file);
+						parents.push(file);
+					}
 					ITextUnit oriUnit = event.getTextUnit();
 					IUnit dstUnit = xf.createUnit(oriUnit.getId());
 					parents.peek().add(dstUnit);
@@ -169,6 +188,5 @@ public class IntoXLIFF {
 		//dstCTag.setSubType(oriCTag.getSubType());
 		//??? dstCTag.setType(oriCode.getType());
 	}
-	
 
 }

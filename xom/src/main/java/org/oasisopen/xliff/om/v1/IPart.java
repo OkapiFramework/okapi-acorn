@@ -97,10 +97,26 @@ public interface IPart {
 	public IContent setSource (String plainText);
 	
 	/**
+	 * Set the source for this part to be a given content.
+	 * The tags of the previous content (if any) are removed from the store.
+	 * @param content the new content (it must be set to use the proper store).
+	 * @return the new source.
+	 */
+	public IContent setSource (IContent content);
+	
+	/**
 	 * Sets the target for this part as a new content made of a plain text string.
 	 * @param plainText the plain text target content to set.
 	 * @return the new target content.
 	 */
 	public IContent setTarget (String plainText);
+
+	/**
+	 * Set the target for this part to be a given content.
+	 * The tags of the previous content (if any) are removed from the store.
+	 * @param content the new content (it must be set to use the proper store).
+	 * @return the new target.
+	 */
+	public IContent setTarget (IContent content);
 
 }

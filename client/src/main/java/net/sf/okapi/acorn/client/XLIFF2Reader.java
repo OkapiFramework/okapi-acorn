@@ -40,11 +40,12 @@ import org.oasisopen.xliff.om.v1.IWithExtFields;
 import org.oasisopen.xliff.om.v1.IWithExtObjects;
 import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 
-public class XLIFFImport {
+public class XLIFF2Reader implements IDocumentReader {
 	
 	final static IXLIFFFactory xf = Factory.XOM;
 
-	public IDocument importDocument (File inputFile) {
+	@Override
+	public IDocument load (File inputFile) {
 		IDocument doc = null;
 		IFile file = null;
 		IGroup group = null;
@@ -117,6 +118,9 @@ public class XLIFFImport {
 			IPart dstPart;
 			if ( oriPart.isSegment() ) dstPart = dstUnit.appendSegment();
 			else dstPart = dstUnit.appendIgnorable();
+			// Part-level data
+			dstPart.setId(oriPart.getId());
+			dstPart.setPreserveWS(oriPart.getPreserveWS());
 			// Source
 			fillContent(dstPart, oriPart.getSource(), false);
 			// Target

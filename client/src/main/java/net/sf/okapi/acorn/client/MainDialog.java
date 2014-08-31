@@ -29,17 +29,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.NumberFormat;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.TransferHandler;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.sf.okapi.acorn.calais.OpenCalais;
 import net.sf.okapi.lib.xliff2.processor.XLIFFProcessor;
@@ -60,6 +65,7 @@ public class MainDialog extends JFrame {
 	private JTextArea edLog;
 	private SimpleTM tm;
 	private TMPanel tmPanel;
+	private DocumentsPanel docPanel;
 
 	public MainDialog () {
 		tm = new SimpleTM();
@@ -107,7 +113,7 @@ public class MainDialog extends JFrame {
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Okapi Acorn - Client");
 
-		final String tabStart = "<html><body><table width='150'>";
+		final String tabStart = "<html><body><table width='160'>";
 		final String tabEnd = "</table></body></html>";
 		
 		//=== Menu
@@ -115,8 +121,8 @@ public class MainDialog extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
-		JMenu menu = new JMenu("File");
-		menu.setMnemonic(KeyEvent.VK_F);
+		JMenu menu = new JMenu("Document");
+		menu.setMnemonic(KeyEvent.VK_D);
 		menuBar.add(menu);
 		
 		JMenuItem menuItem = new JMenuItem("Process an XLIFF 2 Document with Open-Calais...", KeyEvent.VK_P);
@@ -128,24 +134,29 @@ public class MainDialog extends JFrame {
 			}
 		});
 		
-		menuItem = new JMenuItem("Import an XLIFF 2 Document...", KeyEvent.VK_I);
+		menuItem = new JMenuItem("Load a Document...", KeyEvent.VK_L);
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed (ActionEvent event) {
-				importXLIFF();
+				loadDocument(false);
 			}
 		});
 		
-		menuItem = new JMenuItem("Import a DOCX Document...", KeyEvent.VK_D);
+		menu = new JMenu("Translation Memory");
+		menu.setMnemonic(KeyEvent.VK_T);
+		menuBar.add(menu);
+		
+		menuItem = new JMenuItem("Import from a Document...", KeyEvent.VK_I);
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed (ActionEvent event) {
-				importDocument();
+				loadDocument(true);
 			}
 		});
 		
+
 		//=== Panels
 		
 		JTabbedPane tabPane = new JTabbedPane();
@@ -153,13 +164,15 @@ public class MainDialog extends JFrame {
 		// Add the Log tab
 		edLog = new JTextArea();
 		JScrollPane jsp = new JScrollPane(edLog);
-		edLog.setEditable(true);
-		//edLog.setContentType("text/html");
-		//edLog.setBorder(BorderFactory.createLineBorder(Color.gray));
-		Font font = new Font("Gadugi", 0, 20); // Gadugi, Euphemia //new Font("Courier New", 0, 20);
-		edLog.setFont(font);
+		edLog.setLineWrap(true);
+		edLog.setWrapStyleWord(true);
+		edLog.setFont(new Font("Gadugi", 0, 20));
 		//edLog.setMargin(new Insets(15, 15, 15, 15));
-		tabPane.addTab(tabStart+"Log Console"+tabEnd, jsp);
+		tabPane.addTab(tabStart+"Log"+tabEnd, jsp);
+		
+		// Add the Documents panel
+		docPanel = new DocumentsPanel(tm);
+		tabPane.addTab(tabStart+"Document"+tabEnd, docPanel);
 		
 		// Add the TM panel
 		tmPanel = new TMPanel(tm);
@@ -167,7 +180,7 @@ public class MainDialog extends JFrame {
 		
 		// Add the TAUS API test panel
 		TausAPIPanel atPanel = new TausAPIPanel();
-		tabPane.addTab(tabStart+"TAUS API Test"+tabEnd, atPanel);
+		tabPane.addTab(tabStart+"TAUS API Console"+tabEnd, atPanel);
 		
 //		// Add the Input Files tab
 //		JPanel panel = new JPanel(new BorderLayout());
@@ -283,7 +296,7 @@ public class MainDialog extends JFrame {
     		}
     	}
     	catch ( Throwable e ) {
-    		e.printStackTrace();
+    		log(e);
     		return;
     	}
 		
@@ -291,15 +304,28 @@ public class MainDialog extends JFrame {
 		XLIFFProcessor proc = new XLIFFProcessor();
 		proc.add(new OpenCalais());
 		proc.run(inputFile, outputFile);
-		
 	}
 
-	private void importDocument () {
-		// Get a document
+	private void loadDocument (boolean toFeedIntoTheTM) {
+		// Get an input file
 		File inputFile;
     	try {
     		JFileChooser fc = new JFileChooser();
-    		fc.setDialogTitle("Select a DOCX Document");
+    		FileNameExtensionFilter ff;
+    		if ( toFeedIntoTheTM ) {
+    			fc.setDialogTitle("Select the Document to Import into the TM");
+        		ff = new FileNameExtensionFilter("All Supported Files", "xlf", "tmx");
+    		}
+    		else {
+    			fc.setDialogTitle("Select the Document to Load");
+        		fc.addChoosableFileFilter(new FileNameExtensionFilter("DOCX Files", "docx"));
+        		ff = new FileNameExtensionFilter("All Supported Files", "xlf", "docx", "tmx");
+    		}
+    		// In both case:
+    		fc.addChoosableFileFilter(new FileNameExtensionFilter("XLIFF 2.0 Files", "xlf"));
+    		fc.addChoosableFileFilter(new FileNameExtensionFilter("TMX Files", "tmx"));
+    		fc.addChoosableFileFilter(ff);
+    		fc.setFileFilter(ff);
     		int option = fc.showOpenDialog(this);
     		if ( option == JFileChooser.APPROVE_OPTION ) {
    				inputFile = fc.getSelectedFile();
@@ -309,52 +335,52 @@ public class MainDialog extends JFrame {
     		}
     	}
     	catch ( Throwable e ) {
-    		e.printStackTrace();
+    		log(e.toString());
     		return;
     	}
-		
-		// Process it
-    	clearLog();
-    	log("===== Importing DOCX Document");
-    	IntoXLIFF intoXlf = new IntoXLIFF();
-    	IDocument doc = intoXlf.importDocument(inputFile, "okf_openxml");
-		log("Done\n");
     	
-		addDocumentToTM(doc);
-	}
-	
-	private void importXLIFF () {
-		// Get an XLIFF 2.0 file
-		File inputFile;
+    	// Get the extension
+    	String path = inputFile.getPath();
+    	int p = path.lastIndexOf('.');
+    	String ext = "";
+    	if ( p > -1 ) ext = path.substring(p+1).toLowerCase();
+    	
+    	// Instantiate the proper reader based on the type of document
+    	IDocumentReader reader;
+    	switch ( ext ) {
+    	case "xlf":
+    		reader = new XLIFF2Reader();
+    		break;
+    	case "docx":
+    		reader = new FilterBasedReader("okf_openxml");
+    		break;
+    	case "tmx":
+    		reader = new FilterBasedReader("okf_tmx");
+    		break;
+    	default:
+			JOptionPane.showMessageDialog(null, "Unsupported or unknown file format.");
+    		return; // Not supported
+    	}
+    	
     	try {
-    		JFileChooser fc = new JFileChooser();
-    		fc.setDialogTitle("Select an XLIFF 2 Document");
-    		int option = fc.showOpenDialog(this);
-    		if ( option == JFileChooser.APPROVE_OPTION ) {
-   				inputFile = fc.getSelectedFile();
-    		}
-    		else {
-    			return;
-    		}
+    		// Load the document
+    		clearLog();
+    		log("===== Load document");
+    		IDocument doc = reader.load(inputFile);
+    		log("Done");
+
+    		// Feed it to the TM or set it as the current document
+    		if ( toFeedIntoTheTM ) addDocumentToTM(doc);
+    		else docPanel.setDocument(doc);
     	}
     	catch ( Throwable e ) {
-    		e.printStackTrace();
-    		return;
+    		log(e);
     	}
-		
-		// Process it
-    	clearLog();
-    	log("===== Importing XLIFF Document");
-		XLIFFImport imp = new XLIFFImport();
-		IDocument doc = imp.importDocument(inputFile);
-		log("Done\n");
-		
-		addDocumentToTM(doc);
 	}
 	
 	private void addDocumentToTM (IDocument doc) {
     	int count = 0;
-    	log("===== Importing document entries into the TM");
+    	log("===== Import document entries into the TM");
 		for ( IFile file : doc ) {
 			log("== File id="+file.getId()+":");
 			for ( IGroupOrUnit gou : file ) {
@@ -377,6 +403,13 @@ public class MainDialog extends JFrame {
 	private void log (String text) {
 		edLog.setText(edLog.getText()+text+"\n");
 	}
+	
+	private void log (Throwable e) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw); 
+		e.printStackTrace(pw);
+		log(sw.toString());
+	}
 
 	private void clearLog () {
 		edLog.setText("");
@@ -384,17 +417,24 @@ public class MainDialog extends JFrame {
 	
 	private void showInfo () {
 		clearLog();
-		log("---------------------------------------------------------------");
+		log("-------------------------------------------------------------------------------");
 		log("Okapi Acorn - Experimental client for various purposes");
-		log("---------------------------------------------------------------");
-		int mb = 1024*1024;
-        Runtime runtime = Runtime.getRuntime();
-        String fmt = "%,1d MB";
-        log("Total Memory = " + String.format(fmt, runtime.totalMemory()/mb));
-        log("Maximum Memory = " + String.format(fmt, runtime.maxMemory()/mb));		
-        log("Used Memory = " + String.format(fmt, (runtime.totalMemory()-runtime.freeMemory())/mb));
-        log("Free Memory = " + String.format(fmt, runtime.freeMemory()/mb));
-		log("---------------------------------------------------------------");
+		log("https://code.google.com/p/okapi-acorn");
+		log("-------------------------------------------------------------------------------");
+		Runtime rt = Runtime.getRuntime();
+		rt.runFinalization();
+		rt.gc();
+        log("Java version: " + System.getProperty("java.version"));
+        log(String.format("Platform: %s, %s, %s",
+			System.getProperty("os.name"), //$NON-NLS-1$ 
+			System.getProperty("os.arch"), //$NON-NLS-1$
+			System.getProperty("os.version")));
+		NumberFormat nf = NumberFormat.getInstance();
+        log(String.format("Java VM memory: free=%s KB, total=%s KB",
+			nf.format(rt.freeMemory()/1024),
+			nf.format(rt.totalMemory()/1024)));
+		log("-------------------------------------------------------------------------------");
+	
 	}
 	
 	public static void start () {

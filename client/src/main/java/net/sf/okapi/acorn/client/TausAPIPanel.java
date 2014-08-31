@@ -3,9 +3,11 @@ package net.sf.okapi.acorn.client;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -32,6 +34,7 @@ public class TausAPIPanel extends JPanel {
 	private final TransAPIClient ttapi;
 	
 	private JList<String> lbMethods;
+	private JTextField edBaseURL;
 	private JTextField edId;
 	private JTextField edCallbackUrl;
 	private JTextField edSrcLang;
@@ -43,6 +46,8 @@ public class TausAPIPanel extends JPanel {
 	public TausAPIPanel () {
 		GridBagLayout layout =  new GridBagLayout();
 		setLayout(layout);
+		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+		
 		ttapi = new TransAPIClient(BASEURL);
 		
 		String[] methods = {
@@ -81,68 +86,85 @@ public class TausAPIPanel extends JPanel {
 		});
 		c = new GridBagConstraints();
 		c.gridx = 3; c.gridy = 0;
-		//c.weightx = 0.90;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		add(btExecute, c);
 		
 		c = new GridBagConstraints();
 		c.gridx = 0; c.gridy = 1; c.anchor = GridBagConstraints.LINE_START;
 		c.weightx = 0.10;
-		add(new JLabel("Request ID:"), c);
+		c.insets = new Insets(10, 0, 0, 0);
+		add(new JLabel("Service URL:"), c);
 		c = new GridBagConstraints();
 		c.gridx = 1; c.gridy = 1; c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 0.90; c.gridwidth = GridBagConstraints.REMAINDER;
+		c.insets = new Insets(10, -4, 0, 0);
+		add((edBaseURL = new JTextField()), c);
+		edBaseURL.setText(BASEURL);
+		
+		c = new GridBagConstraints();
+		c.gridx = 0; c.gridy = 2; c.anchor = GridBagConstraints.LINE_START;
+		c.weightx = 0.10;
+		add(new JLabel("Request ID:"), c);
+		c = new GridBagConstraints();
+		c.insets = new Insets(0, -4, 0, 0);
+		c.gridx = 1; c.gridy = 2; c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 0.90; c.gridwidth = GridBagConstraints.REMAINDER;
 		add((edId = new JTextField()), c);
 		
 		c = new GridBagConstraints();
-		c.gridx = 0; c.gridy = 2; c.anchor = GridBagConstraints.LINE_START;
+		c.gridx = 0; c.gridy = 3; c.anchor = GridBagConstraints.LINE_START;
 		add(new JLabel("Callback URL:"), c);
 		c = new GridBagConstraints();
-		c.gridx = 1; c.gridy = 2; c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(0, -4, 0, 0);
+		c.gridx = 1; c.gridy = 3; c.fill = GridBagConstraints.HORIZONTAL;
 		 c.gridwidth = GridBagConstraints.REMAINDER;
 		add((edCallbackUrl = new JTextField()), c);
 		
 		c = new GridBagConstraints();
-		c.gridx = 0; c.gridy = 3; c.anchor = GridBagConstraints.LINE_START;
+		c.gridx = 0; c.gridy = 4; c.anchor = GridBagConstraints.LINE_START;
 		add(new JLabel("Source language:"), c);
 		c = new GridBagConstraints();
-		c.gridx = 1; c.gridy = 3; c.fill = GridBagConstraints.HORIZONTAL;
-		 c.gridwidth = GridBagConstraints.REMAINDER;
+		c.insets = new Insets(0, -4, 0, 0);
+		c.gridx = 1; c.gridy = 4; c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = GridBagConstraints.REMAINDER;
 		add((edSrcLang = new JTextField()), c);
 		edSrcLang.setText("en");
 		
 		c = new GridBagConstraints();
-		c.gridx = 0; c.gridy = 4; c.anchor = GridBagConstraints.LINE_START;
+		c.gridx = 0; c.gridy = 5; c.anchor = GridBagConstraints.LINE_START;
 		add(new JLabel("Target language:"), c);
 		c = new GridBagConstraints();
-		c.gridx = 1; c.gridy = 4; c.fill = GridBagConstraints.HORIZONTAL;
-		 c.gridwidth = GridBagConstraints.REMAINDER;
+		c.gridx = 1; c.gridy = 5; c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.insets = new Insets(0, -4, 0, 0);
 		add((edTrgLang = new JTextField()), c);
 		edTrgLang.setText("iu");
 
 		c = new GridBagConstraints();
-		c.gridx = 0; c.gridy = 5; c.anchor = GridBagConstraints.LINE_START;
+		c.gridx = 0; c.gridy = 6; c.anchor = GridBagConstraints.LINE_START;
 		add(new JLabel("Source text:"), c);
 		c = new GridBagConstraints();
-		c.gridx = 1; c.gridy = 5; c.fill = GridBagConstraints.HORIZONTAL;
-		 c.gridwidth = GridBagConstraints.REMAINDER;
+		c.insets = new Insets(0, -4, 0, 0);
+		c.gridx = 1; c.gridy = 6; c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = GridBagConstraints.REMAINDER;
 		add((edSource = new JTextField()), c);
 
 		c = new GridBagConstraints();
-		c.gridx = 0; c.gridy = 6; c.anchor = GridBagConstraints.LINE_START;
+		c.gridx = 0; c.gridy = 7; c.anchor = GridBagConstraints.LINE_START;
 		add(new JLabel("Target text:"), c);
 		c = new GridBagConstraints();
-		c.gridx = 1; c.gridy = 6; c.fill = GridBagConstraints.HORIZONTAL;
-		 c.gridwidth = GridBagConstraints.REMAINDER;
+		c.insets = new Insets(0, -4, 10, 0);
+		c.gridx = 1; c.gridy = 7; c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = GridBagConstraints.REMAINDER;
 		add((edTarget = new JTextField()), c);
 		
 		edResult = new JTextArea();
 		JScrollPane scrollPane = new JScrollPane(edResult);
 		edResult.setLineWrap(true);
 		edResult.setWrapStyleWord(true);
-		Font font = new Font("Gadugi", 0, 20); // Gadugi, Euphemia //new Font("Courier New", 0, 20);
-		edResult.setFont(font);
+		edResult.setFont(new Font("Gadugi", 0, 20));
 		c = new GridBagConstraints(); c.anchor = GridBagConstraints.PAGE_END;
-		c.gridx = 0; c.gridy = 7; c.fill = GridBagConstraints.BOTH;
+		c.gridx = 0; c.gridy = 8; c.fill = GridBagConstraints.BOTH;
 		c.weighty = 1.0;
 		 c.gridwidth = GridBagConstraints.REMAINDER;
 		add(scrollPane, c);
@@ -179,7 +201,6 @@ public class TausAPIPanel extends JPanel {
 	}
 
 	private void execute () {
-		edResult.setText("Executing the command...");
 		ISegment seg;
 		try {
 			switch ( lbMethods.getSelectedIndex() ) {
@@ -222,10 +243,10 @@ public class TausAPIPanel extends JPanel {
 			}
 
 			Response resp = ttapi.getResponse();
-			StringBuilder tmp = new StringBuilder();
-			tmp.append("Result: "+resp.getStatus()+"\n");
-			tmp.append(resp.readEntity(String.class));
-			edResult.setText(tmp.toString());
+			edResult.setText("Result: "
+				+ resp.getStatus()
+				+ "\n"
+				+ resp.readEntity(String.class));
 		}
 		catch ( Throwable e ) {
 			edResult.setText("Exception:\n"+e.getMessage());
