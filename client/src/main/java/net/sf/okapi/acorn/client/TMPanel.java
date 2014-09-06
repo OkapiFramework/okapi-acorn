@@ -14,6 +14,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import net.sf.okapi.acorn.common.Util;
 import net.sf.okapi.acorn.xom.Factory;
 
 import org.oasisopen.xliff.om.v1.ISegment;
@@ -86,8 +87,8 @@ public class TMPanel extends JPanel {
 		clearLog();
 		if ( text.isEmpty() ) {
 			for ( Entry entry : tm ) {
-				log("src: " + entry.getSource().getPlainText());
-				log("trg: " + entry.getTarget().getPlainText()+"\n");
+				log("src: " + Util.fmt(entry.getSource()));
+				log("trg: " + Util.fmt(entry.getTarget())+"\n");
 			}
 		}
 		else {
@@ -96,8 +97,8 @@ public class TMPanel extends JPanel {
 			Entry res = tm.search(seg.getSource());
 			if ( res == null ) log("No match found");
 			else {
-				log("src: " + res.getSource().getPlainText());
-				log("trg: " + res.getTarget().getPlainText());
+				log("src: " + Util.fmt(res.getSource()));
+				log("trg: " + Util.fmt(res.getTarget()));
 			}
 		}
 	}

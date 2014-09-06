@@ -1,5 +1,7 @@
 package net.sf.okapi.acorn.taus;
 
+import java.io.IOException;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -7,16 +9,25 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import net.sf.okapi.acorn.xom.Factory;
+import net.sf.okapi.acorn.xom.json.JSONReader;
 import net.sf.okapi.acorn.xom.json.JSONWriter;
 
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.oasisopen.xliff.om.v1.IContent;
+import org.oasisopen.xliff.om.v1.ISegment;
 
 public class TransAPIClient {
 
+	private final JSONParser parser = new JSONParser();
 	private final static JSONWriter jw = new JSONWriter();
+	private final static JSONReader jr = new JSONReader();
 	
 	private String baseURL;
 	private Client clientSP;
@@ -39,6 +50,10 @@ public class TransAPIClient {
 		clientMP = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
 	}
 	
+	public void setBaseURL (String baseURL) {
+		this.baseURL = baseURL;
+	}
+
 	public Response getResponse () {
 		return response;
 	}
@@ -64,19 +79,32 @@ public class TransAPIClient {
 		String targetLang,
 		IContent source)
 	{
-		StringBuilder jtmp = new StringBuilder("{\"translationRequest\"{");
-		jtmp.append("\"id\":\""+id+"\",");
-		jtmp.append("\"sourceLanguage\":\""+sourceLang+"\",");
-		jtmp.append("\"targetLanguage\":\""+targetLang+"\",");
-		jtmp.append("\"source\":"+quote(source.getPlainText())+",");
-		// XLIFF content
-		jtmp.append("\"xlfSource\":"+jw.fromContent(source).toJSONString());
+		StringBuilder tmp = new StringBuilder("{\"translationRequest\"{");
+		tmp.append("\"id\":\""+id+"\",");
+		tmp.append("\"sourceLanguage\":\""+sourceLang+"\",");
+		tmp.append("\"targetLanguage\":\""+targetLang+"\",");
+		// Content
+		tmp.append("\"source\":"+quote(source.getPlainText())+",");
+		tmp.append("\"xlfSource\":"+jw.fromContent(source).toJSONString());
 		// End of payload
-		jtmp.append("}}");
+		tmp.append("}}");
 		WebTarget target = clientMP.target(baseURL).path("translation");
-		MultiPart multiPartEntity = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE).bodyPart(
-			new BodyPart(jtmp.toString(), MediaType.APPLICATION_JSON_TYPE));
-		response = target.request().post(Entity.entity(multiPartEntity, multiPartEntity.getMediaType()));
+		MultiPart multiPartEntity = null;
+		try {
+			multiPartEntity = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE).bodyPart(
+				new BodyPart(tmp.toString(), MediaType.APPLICATION_JSON_TYPE));
+			response = target.request().post(Entity.entity(multiPartEntity, multiPartEntity.getMediaType()));
+		}
+		finally {
+			if ( multiPartEntity != null ) {
+				try {
+					multiPartEntity.close();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		return response.getStatus();
 	}
 	
@@ -86,26 +114,39 @@ public class TransAPIClient {
 		IContent source,
 		IContent target)
 	{
-		StringBuilder jtmp = new StringBuilder("{\"translationRequest\"{");
-		jtmp.append("\"id\":\""+id+"\",");
-		jtmp.append("\"sourceLanguage\":\""+sourceLang+"\",");
-		jtmp.append("\"targetLanguage\":\""+targetLang+"\",");
-		// XLIFF content
+		StringBuilder tmp = new StringBuilder("{\"translationRequest\"{");
+		tmp.append("\"id\":\""+id+"\",");
+		tmp.append("\"sourceLanguage\":\""+sourceLang+"\",");
+		tmp.append("\"targetLanguage\":\""+targetLang+"\",");
+		// Content
 		if ( source != null ) {
-			jtmp.append("\"source\":"+quote(source.getPlainText())+",");
-			jtmp.append("\"xlfSource\":"+jw.fromContent(source).toJSONString());
+			tmp.append("\"source\":"+quote(source.getPlainText())+",");
+			tmp.append("\"xlfSource\":"+jw.fromContent(source).toJSONString());
 		}
 		if ( target != null ) {
-			if ( source != null ) jtmp.append(",");
-			jtmp.append("\"target\":"+quote(target.getPlainText())+",");
-			jtmp.append("\"xlfTarget\":"+jw.fromContent(target).toJSONString());
+			if ( source != null ) tmp.append(",");
+			tmp.append("\"target\":"+quote(target.getPlainText())+",");
+			tmp.append("\"xlfTarget\":"+jw.fromContent(target).toJSONString());
 		}
 		// End of payload
-		jtmp.append("}}");
+		tmp.append("}}");
 		WebTarget wt = clientMP.target(baseURL).path("translation/"+id);
-		MultiPart multiPartEntity = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE).bodyPart(
-			new BodyPart(jtmp.toString(), MediaType.APPLICATION_JSON_TYPE));
-		response = wt.request().put(Entity.entity(multiPartEntity, multiPartEntity.getMediaType())); 
+		MultiPart multiPartEntity = null;
+		try {
+			multiPartEntity = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE).bodyPart(
+				new BodyPart(tmp.toString(), MediaType.APPLICATION_JSON_TYPE));
+			response = wt.request().put(Entity.entity(multiPartEntity, multiPartEntity.getMediaType()));
+		}
+		finally {
+			if ( multiPartEntity != null ) {
+				try {
+					multiPartEntity.close();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		return response.getStatus();
 	}
 	
@@ -143,6 +184,25 @@ public class TransAPIClient {
 		WebTarget target = clientSP.target(baseURL).path("reject/"+id);
 		response = target.request(MediaType.APPLICATION_JSON_TYPE).put(Entity.text(""));
 		return response.getStatus();
+	}
+
+	public IContent getTargetContent (String jsonText) {
+		ISegment seg = Factory.XOM.createLoneSegment();
+		try {
+			JSONObject o1 = (JSONObject)parser.parse(jsonText);
+			JSONObject o2 = (JSONObject)o1.get("translationRequest");
+			if ( o2.containsKey("xlfTarget") ) {
+				seg.setTarget(jr.readContent(seg.getStore(), true, (JSONArray)o2.get("xlfTarget")));
+			}
+			else {
+				seg.setTarget((String)o2.get("target"));
+			}
+		}
+		catch ( ParseException e ) {
+			//TODO: handle it
+			e.printStackTrace();
+		}
+		return seg.getTarget();
 	}
 
 }

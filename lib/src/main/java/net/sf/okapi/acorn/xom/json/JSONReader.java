@@ -123,11 +123,23 @@ public class JSONReader {
 					if ( o.containsKey("canc") ) ctag.setCanCopy((boolean)o.get("canc"));
 					if ( o.containsKey("cand") ) ctag.setCanDelete((boolean)o.get("cand"));
 					if ( o.containsKey("cano") ) ctag.setCanOverlap((boolean)o.get("cano"));
-					String canr = (String)o.get("canr");
-					if ( canr != null ) ctag.setCanReorder(CanReorder.valueOf(canr));
+					tmp = (String)o.get("canr");
+					if ( tmp != null ) ctag.setCanReorder(CanReorder.valueOf(tmp));
 					ctag.setCopyOf((String)o.get("copy"));
-					String dir = (String)o.get("dir");
-					if ( dir != null ) ctag.setDir(Direction.valueOf(dir));
+					tmp = (String)o.get("dir");
+					if ( tmp != null ) ctag.setDir(Direction.valueOf(tmp));
+					tmp = (String)o.get("disp");
+					if ( tmp != null ) ctag.setDisp(tmp);
+					tmp = (String)o.get("equi");
+					if ( tmp != null ) ctag.setEquiv(tmp);
+				}
+				else if ( mtag != null ) {
+					mtag.setType(type);
+					tmp = (String)o.get("val");
+					if ( tmp != null ) mtag.setValue(tmp);
+					tmp = (String)o.get("ref");
+					if ( tmp != null ) mtag.setRef(tmp);
+					if ( o.containsKey("tran") ) mtag.setTranslate((boolean)o.get("tran"));
 				}
 			}
 		}

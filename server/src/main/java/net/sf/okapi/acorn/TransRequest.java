@@ -23,7 +23,9 @@ package net.sf.okapi.acorn;
 import java.util.Date;
 
 import net.sf.okapi.acorn.xom.Factory;
+import net.sf.okapi.acorn.xom.json.JSONWriter;
 
+import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.ISegment;
 
 public class TransRequest {
@@ -35,6 +37,8 @@ public class TransRequest {
 	public final static String STATUS_CANCELLED = "cancelled";
 	
 	private final String id;
+	private final JSONWriter jw = new JSONWriter();
+
 	private String status = STATUS_INITIAL;
 	private int updateCounter;
 	private String callbackUrl;
@@ -234,6 +238,10 @@ public class TransRequest {
 		tmp.append("\"status\":"+DataStore.quote(status)+",");
 		tmp.append("\"source\":"+DataStore.quote(getSource())+",");
 		tmp.append("\"target\":"+DataStore.quote(getTarget())+"");
+		IContent cont = getSegment().getTarget();
+		if ( cont != null ) {
+			tmp.append(",\"xlfTarget\":"+jw.fromContent(cont).toJSONString());
+		}
 		tmp.append("}}");
 		return tmp.toString();
 	}

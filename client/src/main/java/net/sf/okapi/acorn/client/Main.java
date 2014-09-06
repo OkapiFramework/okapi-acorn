@@ -27,6 +27,10 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
+import org.oasisopen.xliff.om.v1.ICTag;
+import org.oasisopen.xliff.om.v1.IContent;
+import org.oasisopen.xliff.om.v1.TagType;
+
 public class Main {
 
 	public static void main (String[] originalArgs) {

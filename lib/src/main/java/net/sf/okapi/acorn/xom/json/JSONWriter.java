@@ -64,13 +64,17 @@ public class JSONWriter {
 		switch ( tag.getTagType() ) {
 		case CLOSING:
 			kind = "" + (tag.isCode() ? Const.CODE_CLOSING : Const.MARKER_CLOSING);
-			end = (ICTag)tag;
-			start = (ICTag)tags.getOpeningTag(end.getId());
+			if ( tag.isCode() ) {
+				end = (ICTag)tag;
+				start = (ICTag)tags.getOpeningTag(end.getId());
+			}
 			break;
 		case OPENING:
 			kind = "" + (tag.isCode() ? Const.CODE_OPENING : Const.MARKER_OPENING);
-			start = (ICTag)tag;
-			end = (ICTag)tags.getClosingTag(start.getId());
+			if ( tag.isCode() ) {
+				start = (ICTag)tag;
+				end = (ICTag)tags.getClosingTag(start.getId());
+			}
 			break;
 		case STANDALONE:
 			kind = "" + Const.CODE_STANDALONE;
@@ -80,12 +84,12 @@ public class JSONWriter {
 		LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 		map.put("kind", kind);
 		map.put("id", tag.getId());
+		map.put("type", tag.getType());
 		if ( tag.isCode() ) { // Original code
 			ICTag code = (ICTag)tag;
 			if ( code.getTagType() == TagType.CLOSING ) {
 				if ( start == null ) {
 					// If there is no start code: use the end code to output the common info
-					if ( code.getType() != null ) map.put("type", code.getType());
 					if ( code.getSubType() != null ) map.put("subt", code.getSubType());
 					if ( !code.getCanCopy() ) map.put("canc", code.getCanCopy());
 					if ( !code.getCanDelete() ) map.put("cand", code.getCanDelete());
@@ -96,7 +100,6 @@ public class JSONWriter {
 				}
 			}
 			else { // opening or placeholder code
-				if ( code.getType() != null ) map.put("type", code.getType());
 				if ( code.getSubType() != null ) map.put("subt", code.getSubType());
 				if ( !code.getCanCopy() ) map.put("canc", code.getCanCopy());
 				if ( !code.getCanDelete() ) map.put("cand", code.getCanDelete());

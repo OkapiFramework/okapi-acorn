@@ -1,4 +1,4 @@
-package net.sf.okapi.acorn.client;
+package net.sf.okapi.acorn.common;
 
 import java.io.File;
 

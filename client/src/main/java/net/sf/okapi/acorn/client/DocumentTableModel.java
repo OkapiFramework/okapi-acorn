@@ -5,14 +5,13 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import org.oasisopen.xliff.om.v1.ICTag;
-import org.oasisopen.xliff.om.v1.IContent;
+import net.sf.okapi.acorn.common.Util;
+
 import org.oasisopen.xliff.om.v1.IDocument;
 import org.oasisopen.xliff.om.v1.IFile;
 import org.oasisopen.xliff.om.v1.IGroupOrUnit;
 import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.IUnit;
-import org.oasisopen.xliff.om.v1.TagType;
 
 public class DocumentTableModel extends AbstractTableModel {
 
@@ -76,33 +75,12 @@ public class DocumentTableModel extends AbstractTableModel {
 			return seg.getStore().getParent().getId() + "-"
 				+ ((seg.getId() == null) ? "row"+(row+1) : seg.getId());
 		case 1:
-			return fmt(seg.getSource());
+			return Util.fmt(seg.getSource());
 		case 2:
-			if ( seg.hasTarget() ) return fmt(seg.getTarget());
+			if ( seg.hasTarget() ) return Util.fmt(seg.getTarget());
 			else return "";
 		}
 		return null;
 	}
 
-	private String fmt (IContent content) {
-		if ( content == null ) return "null";
-		StringBuilder tmp = new StringBuilder();
-		for ( Object obj : content ) {
-			if ( obj instanceof String ) {
-				tmp.append((String)obj);
-			}
-			else if ( obj instanceof ICTag ) {
-				ICTag ctag = (ICTag)obj;
-				tmp.append("<");
-				if ( ctag.getTagType() == TagType.CLOSING ) tmp.append("/");
-				tmp.append("CODE-id:"+ctag.getId());
-				if ( ctag.getTagType() == TagType.STANDALONE ) tmp.append("/");
-				tmp.append(">");
-			}
-			else {
-				tmp.append("[ERR!]");
-			}
-		}
-		return tmp.toString();
-	}
 }

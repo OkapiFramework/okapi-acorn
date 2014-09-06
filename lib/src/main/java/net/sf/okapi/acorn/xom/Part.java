@@ -142,7 +142,7 @@ public class Part implements IPart {
 	@Override
 	public IContent setSource (String plainText) {
 		source.clear();
-		source.append(plainText);
+		if ( plainText != null ) source.append(plainText);
 		return source;
 	}
 
@@ -163,7 +163,7 @@ public class Part implements IPart {
 	public IContent setTarget (String plainText) {
 		if ( target == null ) target = new Content(store, false);
 		else target.clear();
-		target.append(plainText);
+		if ( plainText != null ) target.append(plainText);
 		return target;
 	}
 

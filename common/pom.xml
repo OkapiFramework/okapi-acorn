@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.mycorp</groupId>
-	<artifactId>tmlib</artifactId>
+	<groupId>net.sf.okapi.acorn</groupId>
+	<artifactId>common</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>mycorp-tmlib</name>
 	<packaging>jar</packaging>
+	<name>okapi-acorn-common</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<okapiLibVersion>0.26-SNAPSHOT</okapiLibVersion>
@@ -40,13 +40,28 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>net.sf.okapi.acorn</groupId>
-			<artifactId>xom-v1</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<groupId>net.sf.okapi.filters</groupId>
+			<artifactId>okapi-filter-openxml</artifactId>
+			<version>${okapiLibVersion}</version>
+		</dependency>        
+		<dependency>
+			<groupId>net.sf.okapi.filters</groupId>
+			<artifactId>okapi-filter-tmx</artifactId>
+			<version>${okapiLibVersion}</version>
+		</dependency>        
+		<dependency>
+			<groupId>net.sf.okapi.lib</groupId>
+			<artifactId>okapi-lib-xliff2</artifactId>
+			<version>${xliff2LibVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.okapi.acorn</groupId>
-			<artifactId>common</artifactId>
+			<artifactId>xom-v1</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<!-- Test only dependencies -->

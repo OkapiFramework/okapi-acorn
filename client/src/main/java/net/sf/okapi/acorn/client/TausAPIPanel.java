@@ -43,12 +43,12 @@ public class TausAPIPanel extends JPanel {
 	private JTextField edTarget;
 	private JTextArea edResult;
 	
-	public TausAPIPanel () {
+	public TausAPIPanel (TransAPIClient ttapi) {
 		GridBagLayout layout =  new GridBagLayout();
 		setLayout(layout);
 		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 		
-		ttapi = new TransAPIClient(BASEURL);
+		this.ttapi = ttapi;
 		
 		String[] methods = {
 			/* 0 */ "GET translation - get a list of all translation requests",
@@ -57,10 +57,10 @@ public class TausAPIPanel extends JPanel {
 			/* 3 */ "PUT translation/{id} - modify an existing translation request",
 			/* 4 */ "DELETE translation/{id} - delete an existing translation request",
 			/* 5 */ "GET status/{id} - get the status of a translation request",
-			/* 6 */ "PUT accept/{id}",
-			/* 7 */ "PUT reject/{id}",
-			/* 8 */ "PUT confirm/{id}",
-			/* 9 */ "PUT cancel/{id}"};
+			/* 6 */ "PUT accept/{id} - change the status to 'accepted'",
+			/* 7 */ "PUT reject/{id} - change the status to 'rejected'",
+			/* 8 */ "PUT confirm/{id} - change the status to 'confirmed'",
+			/* 9 */ "PUT cancel/{id} - change the status to 'cancelled'"};
 		lbMethods = new JList<>(methods);
 		lbMethods.setSelectedIndex(0);
 		lbMethods.addListSelectionListener(new ListSelectionListener() {
@@ -99,7 +99,9 @@ public class TausAPIPanel extends JPanel {
 		c.weightx = 0.90; c.gridwidth = GridBagConstraints.REMAINDER;
 		c.insets = new Insets(10, -4, 0, 0);
 		add((edBaseURL = new JTextField()), c);
+		
 		edBaseURL.setText(BASEURL);
+		ttapi.setBaseURL(edBaseURL.getText());
 		
 		c = new GridBagConstraints();
 		c.gridx = 0; c.gridy = 2; c.anchor = GridBagConstraints.LINE_START;
@@ -172,6 +174,10 @@ public class TausAPIPanel extends JPanel {
 		updateCommand();
 	}
 
+	public String getBaseURL () {
+		return edBaseURL.getText();
+	}
+
 	private void updateCommand () {
 		switch ( lbMethods.getSelectedIndex() ) {
 		case 0: // GET translation
@@ -201,6 +207,7 @@ public class TausAPIPanel extends JPanel {
 	}
 
 	private void execute () {
+		ttapi.setBaseURL(edBaseURL.getText());
 		ISegment seg;
 		try {
 			switch ( lbMethods.getSelectedIndex() ) {

@@ -1,6 +1,7 @@
-package net.sf.okapi.acorn.client;
+package net.sf.okapi.acorn.common;
 
 import java.io.File;
+import java.util.UUID;
 
 import net.sf.okapi.acorn.xom.Factory;
 import net.sf.okapi.lib.xliff2.core.CTag;
@@ -119,7 +120,7 @@ public class XLIFF2Reader implements IDocumentReader {
 			if ( oriPart.isSegment() ) dstPart = dstUnit.appendSegment();
 			else dstPart = dstUnit.appendIgnorable();
 			// Part-level data
-			dstPart.setId(oriPart.getId());
+			dstPart.setId(UUID.randomUUID().toString()); //oriPart.getId());
 			dstPart.setPreserveWS(oriPart.getPreserveWS());
 			// Source
 			fillContent(dstPart, oriPart.getSource(), false);

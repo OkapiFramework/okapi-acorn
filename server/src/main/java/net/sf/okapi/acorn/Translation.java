@@ -69,7 +69,6 @@ public class Translation {
 		int i=0;
 		for ( BodyPart bp : form.getBodyParts() ) {
 			String bpStr = bp.getEntityAs(String.class);
-			System.out.println(bpStr);
 			if ( i == 0 ) {
 				try {
 					JSONObject o1 = (JSONObject)parser.parse(bpStr);
@@ -80,7 +79,7 @@ public class Translation {
 					trgLang = (String)o2.get("targetLanguage");
 					if ( o2.containsKey("xlfSource") ) {
 						seg = Factory.XOM.createLoneSegment();
-						jr.readContent(seg.getStore(), false, (JSONArray)o2.get("xlfSource"));
+						seg.setSource(jr.readContent(seg.getStore(), false, (JSONArray)o2.get("xlfSource")));
 					}
 				}
 				catch ( ParseException e ) {
@@ -105,8 +104,12 @@ public class Translation {
 		TransRequest treq = new TransRequest(id);
 		treq.setSourceLang(srcLang);
 		treq.setTargetLang(trgLang);
-		if ( source != null ) treq.setSource(source);
-		if ( seg != null ) treq.setSegment(seg);
+		if ( seg != null ) {
+			treq.setSegment(seg);
+		}
+		else if ( source != null ) {
+			treq.setSource(source);
+		}
 		DataStore.getInstance().add(treq);
 		
 		ResponseBuilder rb = Response.ok(treq.toJSON(), MediaType.APPLICATION_JSON);
@@ -133,7 +136,6 @@ public class Translation {
 		int i=0;
 		for ( BodyPart bp : form.getBodyParts() ) {
 			String bpStr = bp.getEntityAs(String.class);
-			System.out.println(bpStr);
 			if ( i == 0 ) {
 				try {
 					JSONObject o1 = (JSONObject)parser.parse(bpStr);
@@ -266,12 +268,12 @@ public class Translation {
 
     private void triggerTranslation (TransRequest treq) {
     	ISegment seg = treq.getSegment();
-    	
     	Entry res = DataStore.getInstance().getTM().search(seg.getSource());
-    	if ( res == null ) return;
+    	if ( res == null ) {
+    		return;
+    	}
     	// Else: set the translation and update the status
-    	// TODO: set content
-    	seg.setTarget(res.getTarget().getPlainText());
+    	seg.setTarget(res.getTarget());
     	treq.setStatus(TransRequest.STATUS_CONFIRMED);
     	treq.stamp();
     }

@@ -47,13 +47,13 @@ import javax.swing.TransferHandler;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.sf.okapi.acorn.calais.OpenCalais;
+import net.sf.okapi.acorn.common.FilterBasedReader;
+import net.sf.okapi.acorn.common.IDocumentReader;
+import net.sf.okapi.acorn.common.XLIFF2Reader;
+import net.sf.okapi.acorn.taus.TransAPIClient;
 import net.sf.okapi.lib.xliff2.processor.XLIFFProcessor;
 
 import org.oasisopen.xliff.om.v1.IDocument;
-import org.oasisopen.xliff.om.v1.IFile;
-import org.oasisopen.xliff.om.v1.IGroupOrUnit;
-import org.oasisopen.xliff.om.v1.ISegment;
-import org.oasisopen.xliff.om.v1.IUnit;
 
 import com.mycorp.tmlib.SimpleTM;
 
@@ -64,11 +64,13 @@ public class MainDialog extends JFrame {
 	private JTextField edPath;
 	private JTextArea edLog;
 	private SimpleTM tm;
+	private TransAPIClient ttapi;
 	private TMPanel tmPanel;
 	private DocumentsPanel docPanel;
 
 	public MainDialog () {
 		tm = new SimpleTM();
+		ttapi = new TransAPIClient(null);
 		initComponents();
 		showInfo();
 		edLog.requestFocusInWindow();
@@ -156,7 +158,6 @@ public class MainDialog extends JFrame {
 			}
 		});
 		
-
 		//=== Panels
 		
 		JTabbedPane tabPane = new JTabbedPane();
@@ -171,7 +172,7 @@ public class MainDialog extends JFrame {
 		tabPane.addTab(tabStart+"Log"+tabEnd, jsp);
 		
 		// Add the Documents panel
-		docPanel = new DocumentsPanel(tm);
+		docPanel = new DocumentsPanel(tm, ttapi);
 		tabPane.addTab(tabStart+"Document"+tabEnd, docPanel);
 		
 		// Add the TM panel
@@ -179,94 +180,15 @@ public class MainDialog extends JFrame {
 		tabPane.addTab(tabStart+"TM Console"+tabEnd, tmPanel);
 		
 		// Add the TAUS API test panel
-		TausAPIPanel atPanel = new TausAPIPanel();
+		TausAPIPanel atPanel = new TausAPIPanel(ttapi);
 		tabPane.addTab(tabStart+"TAUS API Console"+tabEnd, atPanel);
-		
-//		// Add the Input Files tab
-//		JPanel panel = new JPanel(new BorderLayout());
-//		// List of files
-//		DefaultListModel<String> model = new DefaultListModel<String>();
-//	    JList listbox = new JList(model);
-//	    JScrollPane pane = new JScrollPane(listbox);
-//		// Add the tab
-//		tabPane.addTab("Input Files", panel);
 		
 		add(tabPane);
 		
-		// setLayout(new GridBagLayout());
-		//
-		// JLabel lbPath = new
-		// JLabel("Enter, select or drag & drop the XLIFF document to process");
-		// GridBagConstraints c = new GridBagConstraints();
-		// c.anchor = GridBagConstraints.FIRST_LINE_START;
-		// c.gridx = 0; c.gridwidth = 2;
-		// c.gridy = 0;
-		// c.insets = new Insets(5, 5, 5, 5);
-		// add(lbPath, c);
-		//
-		// edPath = new JTextField();
-		// edPath.requestFocusInWindow();
-		// c = new GridBagConstraints();
-		// c.anchor = GridBagConstraints.LINE_START;
-		// c.gridx = 0;
-		// c.gridy = 1;
-		// c.fill = GridBagConstraints.HORIZONTAL;
-		// c.weightx = 1.0;
-		// c.insets = new Insets(0, 5, 5, 5);
-		// add(edPath, c);
-		// pack();
-		//
-		// btGetPath = new JButton();
-		// btGetPath.setText("...");
-		// c = new GridBagConstraints();
-		// c.anchor = GridBagConstraints.LINE_END;
-		// c.gridx = 1;
-		// c.gridy = 1;
-		// c.insets = new Insets(0, 0, 5, 5);
-		// //btGetPath.setPreferredSize(new Dimension(35, edPath.getHeight()));
-		// add(btGetPath, c);
-		//
-		// btValidate = new JButton();
-		// btValidate.setText("Validate");
-		// c = new GridBagConstraints();
-		// c.anchor = GridBagConstraints.LINE_START;
-		// c.gridx = 0;
-		// c.gridy = 2;
-		// c.insets = new Insets(0, 5, 5, 5);
-		// add(btValidate, c);
-		//
-		// // Set the actions
-		// btGetPath.addActionListener(new ActionListener() {
-		// public void actionPerformed(ActionEvent event) {
-		// selectDocument();
-		// }
-		// });
-		// btValidate.addActionListener(new ActionListener() {
-		// public void actionPerformed(ActionEvent event) {
-		// //validateDocument();
-		// }
-		// });
-		//
-		//
-		//
-		// lbPath = new
-		// JLabel("For additional functions use Lynx in command-line mode (-h option to see all commands)");
-		// c = new GridBagConstraints();
-		// c.anchor = GridBagConstraints.LAST_LINE_START;
-		// c.gridx = 0; c.gridwidth = 2;
-		// c.gridy = 4;
-		// c.insets = new Insets(0, 5, 5, 5);
-		// add(lbPath, c);
-		//
-		 // Set minimum and preferred size for the dialog
-		 setMinimumSize(new Dimension(550, 250));
-		 setPreferredSize(new Dimension(950, 700));
-		 pack();
-		//
-		// // Set the drag and drop handlers
-		// final DocumentTransferhandler dth = new DocumentTransferhandler();
-		// setTransferHandler(dth);
-		// edLog.setTransferHandler(dth);
+		// Set minimum and preferred size for the dialog
+		setMinimumSize(new Dimension(550, 250));
+		setPreferredSize(new Dimension(950, 700));
+		pack();
 
 		// Center the dialog
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -335,69 +257,56 @@ public class MainDialog extends JFrame {
     		}
     	}
     	catch ( Throwable e ) {
-    		log(e.toString());
+    		log(e);
     		return;
     	}
-    	
-    	// Get the extension
-    	String path = inputFile.getPath();
-    	int p = path.lastIndexOf('.');
-    	String ext = "";
-    	if ( p > -1 ) ext = path.substring(p+1).toLowerCase();
-    	
-    	// Instantiate the proper reader based on the type of document
-    	IDocumentReader reader;
-    	switch ( ext ) {
-    	case "xlf":
-    		reader = new XLIFF2Reader();
-    		break;
-    	case "docx":
-    		reader = new FilterBasedReader("okf_openxml");
-    		break;
-    	case "tmx":
-    		reader = new FilterBasedReader("okf_tmx");
-    		break;
-    	default:
-			JOptionPane.showMessageDialog(null, "Unsupported or unknown file format.");
-    		return; // Not supported
-    	}
-    	
-    	try {
-    		// Load the document
-    		clearLog();
-    		log("===== Load document");
-    		IDocument doc = reader.load(inputFile);
-    		log("Done");
 
-    		// Feed it to the TM or set it as the current document
-    		if ( toFeedIntoTheTM ) addDocumentToTM(doc);
-    		else docPanel.setDocument(doc);
+    	clearLog();
+
+    	try {
+    		// Import into TM if it is the option selected
+    		if ( toFeedIntoTheTM ) {
+    			log("===== Import document entries into the TM");
+    			int count = tm.importSegments(inputFile);
+    			log("Entries added: "+count);
+    			tmPanel.updateEntries();
+        		log("Done");
+    			return;
+    		}
+    	
+    		// Or: load the document
+    		log("===== Load document");
+    	
+    		// Get the extension
+    		String path = inputFile.getPath();
+    		int p = path.lastIndexOf('.');
+    		String ext = "";
+    		if ( p > -1 ) ext = path.substring(p+1).toLowerCase();
+    	
+    		// Instantiate the proper reader based on the type of document
+    		IDocumentReader reader;
+	    	switch ( ext ) {
+	    	case "xlf":
+	    		reader = new XLIFF2Reader();
+	    		break;
+	    	case "docx":
+	    		reader = new FilterBasedReader("okf_openxml");
+	    		break;
+	    	case "tmx":
+	    		reader = new FilterBasedReader("okf_tmx");
+	    		break;
+	    	default:
+				JOptionPane.showMessageDialog(null, "Unsupported or unknown file format.");
+	    		return; // Not supported
+	    	}
+    	
+    		IDocument doc = reader.load(inputFile);
+    		docPanel.setDocument(doc);
+    		log("Done");
     	}
     	catch ( Throwable e ) {
     		log(e);
     	}
-	}
-	
-	private void addDocumentToTM (IDocument doc) {
-    	int count = 0;
-    	log("===== Import document entries into the TM");
-		for ( IFile file : doc ) {
-			log("== File id="+file.getId()+":");
-			for ( IGroupOrUnit gou : file ) {
-				if ( !gou.isUnit() ) continue;
-				IUnit unit = (IUnit)gou;
-				log("-- Unit id="+unit.getId()+":");
-				for ( ISegment segment : unit.getSegments() ) {
-					log("src: "+segment.getSource().getCodedText());
-					if ( segment.hasTarget() ) {
-						log("trg: "+segment.getTarget().getCodedText());
-					}
-				}
-				count += tm.addSegments(unit);
-			}
-		}
-		log("Entries added: "+count);
-		tmPanel.updateEntries();
 	}
 	
 	private void log (String text) {

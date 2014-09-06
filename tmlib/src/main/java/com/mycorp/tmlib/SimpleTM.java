@@ -1,8 +1,12 @@
 package com.mycorp.tmlib;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import net.sf.okapi.acorn.common.FilterBasedReader;
+import net.sf.okapi.acorn.common.IDocumentReader;
+import net.sf.okapi.acorn.common.XLIFF2Reader;
 import net.sf.okapi.acorn.xom.Factory;
 import net.sf.okapi.acorn.xom.Store;
 import net.sf.okapi.acorn.xom.Unit;
@@ -10,6 +14,9 @@ import net.sf.okapi.acorn.xom.json.JSONReader;
 import net.sf.okapi.acorn.xom.json.JSONWriter;
 
 import org.oasisopen.xliff.om.v1.IContent;
+import org.oasisopen.xliff.om.v1.IDocument;
+import org.oasisopen.xliff.om.v1.IFile;
+import org.oasisopen.xliff.om.v1.IGroupOrUnit;
 import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.IStore;
 import org.oasisopen.xliff.om.v1.IUnit;
@@ -129,4 +136,40 @@ public class SimpleTM implements IWithStore, Iterable<Entry> {
 		return entries.iterator();
 	}
 
+	public int importSegments (File inputFile) {
+    	int count = 0;
+    	// Get the extension
+    	String path = inputFile.getPath();
+    	int p = path.lastIndexOf('.');
+    	String ext = "";
+    	if ( p > -1 ) ext = path.substring(p+1).toLowerCase();
+
+    	// Instantiate the proper reader based on the type of document
+    	IDocumentReader reader;
+    	switch ( ext ) {
+    	case "xlf":
+    		reader = new XLIFF2Reader();
+    		break;
+    	case "tmx":
+    		reader = new FilterBasedReader("okf_tmx");
+    		break;
+    	default:
+			throw new RuntimeException("Unsupported or unknown file format: ."+ext);
+    	}
+    	
+    	IDocument doc = reader.load(inputFile);
+		for ( IFile file : doc ) {
+			for ( IGroupOrUnit gou : file ) {
+				if ( !gou.isUnit() ) continue;
+				IUnit unit = (IUnit)gou;
+				for ( ISegment segment : unit.getSegments() ) {
+					if ( segment.hasTarget() ) {
+					}
+				}
+				count += addSegments(unit);
+			}
+		}
+		
+		return count;
+	}
 }

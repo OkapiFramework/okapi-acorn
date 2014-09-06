@@ -1,7 +1,8 @@
-package net.sf.okapi.acorn.client;
+package net.sf.okapi.acorn.common;
 
 import java.io.File;
 import java.util.Stack;
+import java.util.UUID;
 
 import net.sf.okapi.acorn.xom.Factory;
 import net.sf.okapi.common.Event;
@@ -12,7 +13,6 @@ import net.sf.okapi.common.filters.IFilterConfigurationMapper;
 import net.sf.okapi.common.resource.Code;
 import net.sf.okapi.common.resource.ITextUnit;
 import net.sf.okapi.common.resource.RawDocument;
-import net.sf.okapi.common.resource.StartDocument;
 import net.sf.okapi.common.resource.StartGroup;
 import net.sf.okapi.common.resource.TextContainer;
 import net.sf.okapi.common.resource.TextFragment;
@@ -61,7 +61,6 @@ public class FilterBasedReader implements IDocumentReader {
 				Event event = filter.next();
 				switch ( event.getEventType() ) {
 				case START_DOCUMENT:
-					StartDocument sd = event.getStartDocument();
 					doc = xf.createDocument();
 					doc.setSourceLanguage(srcLoc.toString());
 					doc.setTargetLanguage(trgLoc.toString());
@@ -119,7 +118,10 @@ public class FilterBasedReader implements IDocumentReader {
 		int i = 0;
 		for ( TextPart srcPart : oriUnit.getSource().getParts() ) {
 			IPart dstPart;
-			if ( srcPart.isSegment() ) dstPart = dstUnit.appendSegment();
+			if ( srcPart.isSegment() ) {
+				dstPart = dstUnit.appendSegment();
+				dstPart.setId(UUID.randomUUID().toString());
+			}
 			else dstPart = dstUnit.appendIgnorable();
 			// Source
 			fillContent(dstPart, srcPart, false);

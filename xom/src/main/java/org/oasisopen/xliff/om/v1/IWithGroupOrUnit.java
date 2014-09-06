@@ -46,5 +46,5 @@ public interface IWithGroupOrUnit extends Iterable<IGroupOrUnit> {
 	 * @return the added unit (same as the parameter).
 	 */
 	public IUnit add (IUnit unit);
-	
+
 }
