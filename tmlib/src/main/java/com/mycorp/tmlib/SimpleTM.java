@@ -3,6 +3,7 @@ package com.mycorp.tmlib;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.UUID;
 
 import net.sf.okapi.acorn.common.FilterBasedReader;
 import net.sf.okapi.acorn.common.IDocumentReader;
@@ -25,17 +26,20 @@ import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 
 public class SimpleTM implements IWithStore, Iterable<Entry> {
 
-	final private IXLIFFFactory xf = Factory.XOM;
-	final private IStore store;
-	final private ArrayList<Entry> entries;
-	final private JSONReader jr;
-	final private JSONWriter jw;
+	private static final IXLIFFFactory XFIMPL2 = Factory.XOM;
+	
+	private final String tmId;
+	private final IStore store;
+	private final ArrayList<Entry> entries;
+	private final JSONReader jr;
+	private final JSONWriter jw;
 	
 	public SimpleTM () {
 		entries = new ArrayList<>();
 		store = new Store(null);
 		jr = new JSONReader();
 		jw = new JSONWriter();
+		tmId = UUID.randomUUID().toString();
 	}
 	
 	/**
@@ -54,8 +58,8 @@ public class SimpleTM implements IWithStore, Iterable<Entry> {
 			if ( trgContent.isEmpty() ) continue; // Skip segments with empty target
 			// Else: add the segment
 			Entry entry = new Entry(
-				xf.copyContent(store, false, srcContent),
-				xf.copyContent(store, true, trgContent));
+				XFIMPL2.copyContent(store, false, srcContent),
+				XFIMPL2.copyContent(store, true, trgContent));
 			if ( entries.add(entry) ) count++;
 		}
 		return count;
@@ -64,9 +68,9 @@ public class SimpleTM implements IWithStore, Iterable<Entry> {
 	public void addSegment (String srcPlainText,
 		String trgPlainText)
 	{
-		IContent src = xf.createContent(store, false);
+		IContent src = XFIMPL2.createContent(store, false);
 		src.setCodedText(srcPlainText);
-		IContent trg = xf.createContent(store, true);
+		IContent trg = XFIMPL2.createContent(store, true);
 		trg.setCodedText(trgPlainText);
 		entries.add(new Entry(src, trg));
 	}
@@ -97,8 +101,7 @@ public class SimpleTM implements IWithStore, Iterable<Entry> {
 	
 	@Override
 	public String getId () {
-		// TODO Auto-generated method stub
-		return null;
+		return tmId;
 	}
 
 	@Override
@@ -172,4 +175,10 @@ public class SimpleTM implements IWithStore, Iterable<Entry> {
 		
 		return count;
 	}
+
+	@Override
+	public boolean isIdUsed (String id) {
+		return tmId.equals(id);
+	}
+
 }

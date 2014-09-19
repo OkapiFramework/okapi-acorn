@@ -18,9 +18,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class OpenCalais extends DefaultEventHandler {
+public class olib_OpenCalais extends DefaultEventHandler {
 
-	private class Occurrence implements Annotator.IInfoSpan, Comparable<Occurrence> {
+	private class Occurrence implements olib_Annotator.IInfoSpan, Comparable<Occurrence> {
 		
 		int start;
 		int end;
@@ -69,7 +69,7 @@ public class OpenCalais extends DefaultEventHandler {
 	private JSONParser parser;
 	private HttpClient client;
 	
-	public OpenCalais () {
+	public olib_OpenCalais () {
 		client = new HttpClient();
         client.getParams().setParameter("http.useragent", "Okapi-Acorn");
         parser = new JSONParser();
@@ -135,7 +135,7 @@ public class OpenCalais extends DefaultEventHandler {
 	{
 		try {
 			Object o1 = parser.parse(result);
-			ArrayList<Annotator.IInfoSpan> occs = new ArrayList<>();
+			ArrayList<olib_Annotator.IInfoSpan> occs = new ArrayList<>();
 			
 			if ( o1 instanceof HashMap ) {
 				HashMap<String, Object> map = (HashMap<String, Object>)o1;
@@ -157,7 +157,7 @@ public class OpenCalais extends DefaultEventHandler {
 				}
 			}
 
-			Annotator ann = new Annotator();
+			olib_Annotator ann = new olib_Annotator();
 			ann.annotates(fragment, occs);
 			
 //			if ( occs.isEmpty() ) return;

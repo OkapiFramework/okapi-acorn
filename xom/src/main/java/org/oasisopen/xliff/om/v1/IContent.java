@@ -171,4 +171,32 @@ public interface IContent extends Iterable<Object> {
 	public ICTag insert (int pos,
 		ICTag code);
 
+	/**
+	 * Annotates a span of content in this fragment.
+	 * @param start the start position (in the coded text)
+	 * @param end the position just after the last character of the span (in the coded text).
+	 * You can use -1 to indicate the end of the fragment.
+	 * @param type the type of the annotation.
+	 * @param value the value of the <code>value</code> attribute (can be null).
+	 * @param ref the value of the <code>ref</code> attribute (can be null).
+	 * @return the number of characters added to the coded text.
+	 */
+	public int annotate (int start,
+		int end,
+		String type,
+		String value,
+		String ref);
+	
+	/**
+	 * Annotates a span of content in this fragment.
+	 * @param start the start position (in the coded text)
+	 * @param end the position just after the last character of the span (in the coded text).
+	 * You can use -1 to indicate the end of the fragment.
+	 * @param opening the start tag of the marker. The end tag will be generated from this tag.
+	 * @return the number of characters added to the coded text. 
+	 */
+	public int annotate (int start,
+		int end,
+		IMTag opening);
+
 }

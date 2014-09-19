@@ -279,4 +279,9 @@ public class Unit extends BaseData3 implements IUnit {
 		return true;
 	}
 
+	@Override
+	public boolean isIdUsed (String id) {
+		return (getObject(id) != null);
+	}
+
 }

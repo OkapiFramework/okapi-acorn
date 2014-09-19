@@ -7,7 +7,7 @@ import java.util.List;
 import net.sf.okapi.lib.xliff2.core.Fragment;
 import net.sf.okapi.lib.xliff2.core.MTag;
 
-public class Annotator {
+public class olib_Annotator {
 
 	public interface IInfoSpan {
 		public int getStart ();

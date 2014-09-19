@@ -11,6 +11,8 @@ public class Store implements IStore {
 
 	private Tags srcTags;
 	private Tags trgTags;
+	private int lastSuggested;
+	private int lastSegSuggested;
 
 	public Store (IWithStore parent) {
 		//TODO: check for not null
@@ -57,6 +59,21 @@ public class Store implements IStore {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public String suggestId (boolean forSegment) {
+		String id;
+		while ( true ) {
+			if ( forSegment ) {
+				id = "s"+String.valueOf(++lastSegSuggested);
+			}
+			else {
+				id = String.valueOf(++lastSuggested);
+			}
+			if ( !parent.isIdUsed(id) ) return id;
+			// Else: try another one
+		}
 	}
 
 }

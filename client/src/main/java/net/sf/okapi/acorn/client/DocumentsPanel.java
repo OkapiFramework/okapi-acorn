@@ -7,13 +7,12 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import net.sf.okapi.acorn.calais.OpenCalais;
 import net.sf.okapi.acorn.taus.TransAPIClient;
-import net.sf.okapi.acorn.xom.Factory;
 
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IDocument;
@@ -21,7 +20,6 @@ import org.oasisopen.xliff.om.v1.IFile;
 import org.oasisopen.xliff.om.v1.IGroupOrUnit;
 import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.IUnit;
-import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 
 import com.mycorp.tmlib.Entry;
 import com.mycorp.tmlib.SimpleTM;
@@ -29,18 +27,20 @@ import com.mycorp.tmlib.SimpleTM;
 public class DocumentsPanel extends JPanel {
 
 	private final static long serialVersionUID = 1L;
-	private final static IXLIFFFactory xf = Factory.XOM;
 	
 	private final SimpleTM tm;
 	private final TransAPIClient ttapi;
 	private final JTable table;
 	private final DocumentTableModel tableModel;
+	private final MainDialog main;
 
 	public DocumentsPanel (SimpleTM tm,
-		TransAPIClient ttapi)
+		TransAPIClient ttapi,
+		MainDialog main)
 	{
 		this.tm = tm;
 		this.ttapi = ttapi;
+		this.main = main;
 		GridBagLayout layout = new GridBagLayout();
 		setLayout(layout);
 		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
@@ -136,7 +136,7 @@ public class DocumentsPanel extends JPanel {
 					if ( seg.getSource().isEmpty() ) continue;
 					Entry res = tm.search(seg.getSource());
 					if ( res == null ) continue;
-					seg.setTarget(xf.copyContent(seg.getStore(), true, res.getTarget()));
+					seg.copyTarget(res.getTarget());
 				}
 			}
 		}
@@ -144,7 +144,15 @@ public class DocumentsPanel extends JPanel {
 	}
 	
 	private void applyOpenCalais () {
-		//TODO
+		IDocument doc = tableModel.getDocument();
+		if ( doc == null ) return;
+		
+		OpenCalais oc = new OpenCalais();
+		for ( IFile file : doc ) {
+			for ( IGroupOrUnit gou : file ) {
+				if ( gou.isUnit() ) oc.process((IUnit)gou);
+			}
+		}
 		tableModel.refreshDisplay();
 	}
 	
@@ -153,10 +161,6 @@ public class DocumentsPanel extends JPanel {
 //		tableModel.refreshDisplay();
 //	}
 
-	private void log (String text) {
-		JOptionPane.showMessageDialog(null, text);
-	}
-	
 	private void doTAUSPostRequests () {
 		IDocument doc = tableModel.getDocument();
 		if ( doc == null ) return;
@@ -173,7 +177,7 @@ public class DocumentsPanel extends JPanel {
 						doc.getSourceLanguage(), doc.getTargetLanguage(),
 						seg.getSource()) >= 400 )
 					{
-						log("Error "+ttapi.getResponseString());
+						main.log("Error "+ttapi.getResponseString());
 						return;
 					}
 				}
@@ -194,13 +198,13 @@ public class DocumentsPanel extends JPanel {
 					if ( seg.hasTarget() ) continue;
 					if ( seg.getSource().isEmpty() ) continue;
 					if ( ttapi.translation_id_get(seg.getId()) >= 400 ) {
-						log("Error "+ttapi.getResponseString());
+						main.log("Error "+ttapi.getResponseString());
 						return;
 					}
 					// Else: parse the result back to the target content
 					IContent target = ttapi.getTargetContent(ttapi.getResponseString());
 					if ( target != null ) {
-						seg.setTarget(Factory.XOM.copyContent(seg.getStore(), true, target));
+						seg.copyTarget(target);
 					}
 					// Remove the translation request from the server
 					ttapi.translation_id_delete(seg.getId());

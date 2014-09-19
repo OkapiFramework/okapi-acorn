@@ -371,4 +371,38 @@ public class Content implements IContent {
 		return (new ContentIterable<Object>(Object.class)).iterator();
 	}
 
+	@Override
+	public int annotate (int start,
+		int end,
+		String type,
+		String value,
+		String ref)
+	{
+		MTag tag = new MTag(true, this.getTags().getStore().suggestId(false), type);
+		tag.setValue(value);
+		tag.setRef(ref);
+		return annotate(start, end, tag);
+	}
+	
+	@Override
+	public int annotate (int start,
+		int end,
+		IMTag opening)
+	{
+		int initial = ctext.length();
+		if ( end == -1 ) end = ctext.length();
+		checkPosition(start);
+		checkPosition(end);
+		// Auto-generate the id
+		int key = tags.add(opening);
+		ctext.insert(start, Util.toRef(key));
+		
+		// Create and insert the end tag
+		MTag closing = new MTag((MTag)opening);
+		key = tags.add(closing);
+		ctext.insert(end+2, Util.toRef(key));
+		// Return the length difference
+		return ctext.length()-initial;
+	}	
+
 }

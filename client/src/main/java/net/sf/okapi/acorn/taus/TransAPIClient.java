@@ -26,8 +26,8 @@ import org.oasisopen.xliff.om.v1.ISegment;
 public class TransAPIClient {
 
 	private final JSONParser parser = new JSONParser();
-	private final static JSONWriter jw = new JSONWriter();
-	private final static JSONReader jr = new JSONReader();
+	private final static JSONWriter JW = new JSONWriter();
+	private final static JSONReader JR = new JSONReader();
 	
 	private String baseURL;
 	private Client clientSP;
@@ -78,16 +78,19 @@ public class TransAPIClient {
 		String sourceLang,
 		String targetLang,
 		IContent source)
-	{
+	{ //contentType 
 		StringBuilder tmp = new StringBuilder("{\"translationRequest\"{");
 		tmp.append("\"id\":\""+id+"\",");
 		tmp.append("\"sourceLanguage\":\""+sourceLang+"\",");
 		tmp.append("\"targetLanguage\":\""+targetLang+"\",");
 		// Content
 		tmp.append("\"source\":"+quote(source.getPlainText())+",");
-		tmp.append("\"xlfSource\":"+jw.fromContent(source).toJSONString());
+		tmp.append("\"xlfSource\":"+JW.fromContent(source).toJSONString());
 		// End of payload
 		tmp.append("}}");
+		
+		System.out.println("POST translation: "+tmp.toString());
+		
 		WebTarget target = clientMP.target(baseURL).path("translation");
 		MultiPart multiPartEntity = null;
 		try {
@@ -121,12 +124,12 @@ public class TransAPIClient {
 		// Content
 		if ( source != null ) {
 			tmp.append("\"source\":"+quote(source.getPlainText())+",");
-			tmp.append("\"xlfSource\":"+jw.fromContent(source).toJSONString());
+			tmp.append("\"xlfSource\":"+JW.fromContent(source).toJSONString());
 		}
 		if ( target != null ) {
 			if ( source != null ) tmp.append(",");
 			tmp.append("\"target\":"+quote(target.getPlainText())+",");
-			tmp.append("\"xlfTarget\":"+jw.fromContent(target).toJSONString());
+			tmp.append("\"xlfTarget\":"+JW.fromContent(target).toJSONString());
 		}
 		// End of payload
 		tmp.append("}}");
@@ -192,14 +195,13 @@ public class TransAPIClient {
 			JSONObject o1 = (JSONObject)parser.parse(jsonText);
 			JSONObject o2 = (JSONObject)o1.get("translationRequest");
 			if ( o2.containsKey("xlfTarget") ) {
-				seg.setTarget(jr.readContent(seg.getStore(), true, (JSONArray)o2.get("xlfTarget")));
+				seg.setTarget(JR.readContent(seg.getStore(), true, (JSONArray)o2.get("xlfTarget")));
 			}
 			else {
 				seg.setTarget((String)o2.get("target"));
 			}
 		}
 		catch ( ParseException e ) {
-			//TODO: handle it
 			e.printStackTrace();
 		}
 		return seg.getTarget();

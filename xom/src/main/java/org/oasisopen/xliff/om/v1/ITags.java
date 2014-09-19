@@ -84,4 +84,5 @@ public interface ITags extends Iterable<ITag> {
 	 * @return the added tag (same as the parameter).
 	 */
 	public int add (ITag tag);
+
 }

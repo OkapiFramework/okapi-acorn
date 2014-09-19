@@ -119,4 +119,11 @@ public interface IPart {
 	 */
 	public IContent setTarget (IContent content);
 
+	/**
+	 * Creates a copy of a given content and set it as the target for this part.
+	 * @param content the existing content to copy.
+	 * @return the new content, copy of the parameter.
+	 */
+	public IContent copyTarget (IContent content);
+
 }

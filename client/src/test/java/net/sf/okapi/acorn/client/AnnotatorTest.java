@@ -3,7 +3,7 @@ package net.sf.okapi.acorn.client;
 import static org.junit.Assert.*;
 import java.util.ArrayList;
 
-import net.sf.okapi.acorn.calais.Annotator;
+import net.sf.okapi.acorn.calais.olib_Annotator;
 import net.sf.okapi.lib.xliff2.core.Fragment;
 import net.sf.okapi.lib.xliff2.core.MTag;
 import net.sf.okapi.lib.xliff2.core.Unit;
@@ -12,9 +12,9 @@ import org.junit.Test;
 
 public class AnnotatorTest {
 
-	private Annotator annotaror = new Annotator();
+	private olib_Annotator annotaror = new olib_Annotator();
 	
-	private class Info implements Annotator.IInfoSpan {
+	private class Info implements olib_Annotator.IInfoSpan {
 
 		private int start;
 		private int end;
@@ -48,7 +48,7 @@ public class AnnotatorTest {
 		Fragment frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
-		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
+		ArrayList<olib_Annotator.IInfoSpan> spans = new ArrayList<>();
 		spans.add(new Info(6, 11, "t:1"));
 		spans.add(new Info(6, 11, "t:2"));
 		spans.add(new Info(6, 11, "t:3"));
@@ -61,7 +61,7 @@ public class AnnotatorTest {
 		Fragment frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
-		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
+		ArrayList<olib_Annotator.IInfoSpan> spans = new ArrayList<>();
 		spans.add(new Info(0, 11, "t:1"));
 		spans.add(new Info(0, 5, "t:2"));
 		annotaror.annotates(frag, spans);
@@ -73,7 +73,7 @@ public class AnnotatorTest {
 		Fragment frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
-		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
+		ArrayList<olib_Annotator.IInfoSpan> spans = new ArrayList<>();
 		spans.add(new Info(0, 11, "t:1"));
 		spans.add(new Info(6, 11, "t:2"));
 		annotaror.annotates(frag, spans);
@@ -85,7 +85,7 @@ public class AnnotatorTest {
 		Fragment frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
-		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
+		ArrayList<olib_Annotator.IInfoSpan> spans = new ArrayList<>();
 		spans.add(new Info(0, 11, "t:1"));
 		spans.add(new Info(6, 11, "t:2"));
 		spans.add(new Info(0, 5, "t:3"));

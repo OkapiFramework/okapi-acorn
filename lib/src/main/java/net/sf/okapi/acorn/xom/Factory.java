@@ -137,5 +137,11 @@ public enum Factory implements IXLIFFFactory {
 		return new ExtObject(nsUri, name);
 	}
 
+	@Override
+	public IMTag createOpeningMTag (String id,
+		String type)
+	{
+		return new MTag(true, id, type);
+	}
 	
 }

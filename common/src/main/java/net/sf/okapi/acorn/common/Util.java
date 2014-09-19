@@ -22,6 +22,7 @@ package net.sf.okapi.acorn.common;
 
 import org.oasisopen.xliff.om.v1.ICTag;
 import org.oasisopen.xliff.om.v1.IContent;
+import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.TagType;
 
 public class Util {
@@ -37,8 +38,16 @@ public class Util {
 				ICTag ctag = (ICTag)obj;
 				tmp.append("<");
 				if ( ctag.getTagType() == TagType.CLOSING ) tmp.append("/");
-				tmp.append("CODE-id:"+ctag.getId());
+				tmp.append("C:"+ctag.getId());
 				if ( ctag.getTagType() == TagType.STANDALONE ) tmp.append("/");
+				tmp.append(">");
+			}
+			else if ( obj instanceof IMTag ) {
+				IMTag mtag = (IMTag)obj;
+				tmp.append("<");
+				if ( mtag.getTagType() == TagType.CLOSING ) tmp.append("/");
+				tmp.append("M:"+mtag.getId());
+				if ( mtag.getTagType() == TagType.STANDALONE ) tmp.append("/");
 				tmp.append(">");
 			}
 			else {

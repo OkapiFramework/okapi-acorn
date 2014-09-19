@@ -46,7 +46,7 @@ import javax.swing.JTextField;
 import javax.swing.TransferHandler;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import net.sf.okapi.acorn.calais.OpenCalais;
+import net.sf.okapi.acorn.calais.olib_OpenCalais;
 import net.sf.okapi.acorn.common.FilterBasedReader;
 import net.sf.okapi.acorn.common.IDocumentReader;
 import net.sf.okapi.acorn.common.XLIFF2Reader;
@@ -172,7 +172,7 @@ public class MainDialog extends JFrame {
 		tabPane.addTab(tabStart+"Log"+tabEnd, jsp);
 		
 		// Add the Documents panel
-		docPanel = new DocumentsPanel(tm, ttapi);
+		docPanel = new DocumentsPanel(tm, ttapi, this);
 		tabPane.addTab(tabStart+"Document"+tabEnd, docPanel);
 		
 		// Add the TM panel
@@ -224,7 +224,7 @@ public class MainDialog extends JFrame {
 		
 		// Process it
 		XLIFFProcessor proc = new XLIFFProcessor();
-		proc.add(new OpenCalais());
+		proc.add(new olib_OpenCalais());
 		proc.run(inputFile, outputFile);
 	}
 
@@ -295,6 +295,9 @@ public class MainDialog extends JFrame {
 	    	case "tmx":
 	    		reader = new FilterBasedReader("okf_tmx");
 	    		break;
+	    	case "html":
+	    		reader = new FilterBasedReader("okf_html");
+	    		break;
 	    	default:
 				JOptionPane.showMessageDialog(null, "Unsupported or unknown file format.");
 	    		return; // Not supported
@@ -309,18 +312,18 @@ public class MainDialog extends JFrame {
     	}
 	}
 	
-	private void log (String text) {
+	public void log (String text) {
 		edLog.setText(edLog.getText()+text+"\n");
 	}
 	
-	private void log (Throwable e) {
+	public void log (Throwable e) {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw); 
 		e.printStackTrace(pw);
 		log(sw.toString());
 	}
 
-	private void clearLog () {
+	public void clearLog () {
 		edLog.setText("");
 	}
 	

@@ -52,6 +52,7 @@ public class FilterBasedReader implements IDocumentReader {
 			IFilterConfigurationMapper fcm = new FilterConfigurationMapper();
 			fcm.addConfigurations("net.sf.okapi.filters.tmx.TmxFilter");
 			fcm.addConfigurations("net.sf.okapi.filters.openxml.OpenXMLFilter");
+			fcm.addConfigurations("net.sf.okapi.filters.html.HtmlFilter");
 			filter = fcm.createFilter(filterConfigId);
 			filter.open(rd);
 			IFile file;

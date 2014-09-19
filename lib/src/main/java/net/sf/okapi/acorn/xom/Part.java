@@ -180,4 +180,9 @@ public class Part implements IPart {
 		return target;
 	}
 
+	@Override
+	public IContent copyTarget (IContent original) {
+		return setTarget(Factory.XOM.copyContent(store, true, original));
+	}
+
 }

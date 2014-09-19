@@ -45,4 +45,11 @@ public interface IStore {
 	 */
 	public ITag getTag (String id);
 
+	/**
+	 * Gets a suggested id for code, annotation, ignorable or segment.
+	 * @param forSegment true for a segment id, false for other elements.
+	 * @return a suggested id which does not exist in this unit.
+	 */
+	public String suggestId (boolean forSegment);
+
 }

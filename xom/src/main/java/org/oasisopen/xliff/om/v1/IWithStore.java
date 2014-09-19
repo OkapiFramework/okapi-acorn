@@ -17,4 +17,11 @@ public interface IWithStore {
 	 */
 	IStore getStore ();
 
+	/**
+	 * Indicates if a given id value is already in use in the object.
+	 * @param id the id value to lookup.
+	 * @return true if the value is already used, false otherwise.
+	 */
+	public boolean isIdUsed (String id);
+
 }

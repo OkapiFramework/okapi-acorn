@@ -54,7 +54,6 @@ public class Translation {
 	private @Context ServletContext context;
 	private final JSONParser parser = new JSONParser();
 	private final JSONReader jr = new JSONReader();
-	
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
@@ -273,7 +272,7 @@ public class Translation {
     		return;
     	}
     	// Else: set the translation and update the status
-    	seg.setTarget(res.getTarget());
+    	seg.copyTarget(res.getTarget());
     	treq.setStatus(TransRequest.STATUS_CONFIRMED);
     	treq.stamp();
     }

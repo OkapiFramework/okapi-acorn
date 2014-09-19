@@ -111,4 +111,13 @@ public interface IXLIFFFactory {
 	public IExtObject createExtObject (String nsUri,
 		String name);
 	
+	/**
+	 * Creates a new opening tag for a marker.
+	 * @param id the id of the marker.
+	 * @param type the type of the marker.
+	 * @return the new tag.
+	 */
+	public IMTag createOpeningMTag (String id,
+		String type);
+
 }
