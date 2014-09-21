@@ -3,8 +3,11 @@ package net.sf.okapi.acorn.xom;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.ICTag;
@@ -403,6 +406,50 @@ public class Content implements IContent {
 		ctext.insert(end+2, Util.toRef(key));
 		// Return the length difference
 		return ctext.length()-initial;
+	}
+
+	@Override
+	public Map<ITag, Integer> getOwnTagsStatus () {
+		List<ITag> ownTags = getOwnTags();
+		Map<ITag, Integer> status = new HashMap<>(ownTags.size());
+		Stack<ITag> stack = new Stack<>();
+		for ( int i=0; i<ownTags.size(); i++ ) {
+			ITag tag = ownTags.get(i);
+			switch ( tag.getTagType() ) {
+			case OPENING:
+				stack.push(tag);
+				status.put(tag, 0); // Default
+				break;
+			case CLOSING:
+				if ( !stack.isEmpty() && stack.peek().getId().equals(tag.getId()) ) {
+					status.put(stack.pop(), 2); // Well-formed element
+					status.put(tag, 2);
+				}
+				else { // Can be isolated or not-well-formed
+					if ( tags.getOpeningTag(tag.getId()) != null ) {
+						status.put(tag, 1); // Not-well-formed
+					}
+					else { // Else: no opening within the unit means isolated
+						status.put(tag, 0);
+					}
+				}
+				break;
+			case STANDALONE:
+				// Nothing to do
+				break;
+			}
+		}
+		
+		// Now look at what is left in the stack
+		while ( !stack.isEmpty() ) {
+			ITag tag = stack.pop();
+			if ( tags.getClosingTag(tag.getId()) != null ) {
+				status.put(tag, 1); // Not-well-formed
+			}
+			// Else: no closing within the unit means isolated
+			// Which is the default status for opening tags
+		}
+		return status;
 	}	
 
 }

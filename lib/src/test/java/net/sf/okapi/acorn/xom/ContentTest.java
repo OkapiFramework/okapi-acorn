@@ -2,6 +2,8 @@ package net.sf.okapi.acorn.xom;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Map;
+
 import org.junit.Test;
 import org.oasisopen.xliff.om.v1.CanReorder;
 import org.oasisopen.xliff.om.v1.ICTag;
@@ -104,6 +106,35 @@ public class ContentTest {
 		newSc.setSubType("x:test");
 		assertEquals("x:test", ((ICTag)cont.getTags().get(U.kOC(1))).getSubType());
 		assertEquals("x:test", sc.getSubType());
+	}
+
+	@Test
+	public void testOwnTagsStatus () {
+		IContent cont = new Content(new Unit("id").getStore(), true);
+		ITag t1o = cont.openCodeSpan("1", "<1>"); // 2
+		ITag t1c = cont.closeCodeSpan("1", "</1>"); // 2
+		cont.appendCode("2", "<2/>"); // -
+		ITag t3o = cont.openCodeSpan("3", "<3>"); // 1
+		ITag t4o = cont.openCodeSpan("4", "<4>"); // 1
+		ITag t3c = cont.closeCodeSpan("3", "</3>"); // 1
+		ITag t5o = cont.openCodeSpan("5", "<5>"); // 2
+		cont.openCodeSpan("6", "<6>"); // will be deleted
+		ITag t6c = cont.closeCodeSpan("6", "</6>"); // will be 0
+		ITag t5c = cont.closeCodeSpan("5", "</5>"); // 2
+		ITag t4c = cont.closeCodeSpan("4", "</4>"); // 1
+		ITag t7o = cont.openCodeSpan("7", "<7>"); // 0
+		cont.delete(14, 16); // Delete t6o
+		Map<ITag, Integer> map = cont.getOwnTagsStatus();
+		assertEquals(2, (int)map.get(t1o));
+		assertEquals(2, (int)map.get(t1c));
+		assertEquals(1, (int)map.get(t3o));
+		assertEquals(2, (int)map.get(t4o));
+		assertEquals(1, (int)map.get(t3c));
+		assertEquals(2, (int)map.get(t5o));
+		assertEquals(0, (int)map.get(t6c));
+		assertEquals(2, (int)map.get(t5c));
+		assertEquals(2, (int)map.get(t4c));
+		assertEquals(0, (int)map.get(t7o));
 	}
 
 }

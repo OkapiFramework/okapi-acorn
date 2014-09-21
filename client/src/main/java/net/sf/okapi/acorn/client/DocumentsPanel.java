@@ -124,6 +124,10 @@ public class DocumentsPanel extends JPanel {
 		tableModel.setDocument(doc);
 	}
 
+	public IDocument getDocument () {
+		return tableModel.getDocument();
+	}
+
 	private void doTMLeveraging () {
 		IDocument doc = tableModel.getDocument();
 		if ( doc == null ) return;

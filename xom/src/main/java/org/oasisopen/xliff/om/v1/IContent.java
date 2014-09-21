@@ -1,6 +1,7 @@
 package org.oasisopen.xliff.om.v1;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents the inline content of an extracted original document.
@@ -61,8 +62,9 @@ public interface IContent extends Iterable<Object> {
 	
 	/**
 	 * Creates a list of the tags that have a reference in this content.
-	 * The tag are listed in the order they occur in the coded text.
-	 * To get the collection of all tags associated with this content and the other content of
+	 * The tag are listed in the order they occur in the coded text. The tags are the live objects,
+	 * but the list is not live (not updated if tags are added/removed).
+	 * To get the collection of all tags associated with this content and the other contents of
 	 * the unit use {@link #getTags()}.
 	 * @return a new list of the tags that have a reference in this content (can be empty but never null).
 	 * @see #getTags()
@@ -199,4 +201,14 @@ public interface IContent extends Iterable<Object> {
 		int end,
 		IMTag opening);
 
+	/**
+	 * Creates a map of the opening and closing tags in this fragment and their corresponding
+	 * status as tag: (0=isolated, 1=not-well-formed or 2=well-formed).
+	 * <p>isolated means to counterpart tag within the parent unit.
+	 * <p>(not-)well-formed means (not-)well-formed within this fragment.  
+	 * @return a map of the opening and closing tags and their status, the map
+	 * may be empty but never null.
+	 */
+	public Map<ITag, Integer> getOwnTagsStatus ();
+	
 }

@@ -26,6 +26,65 @@ import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.TagType;
 
 public class Util {
+	
+	public static final String NS_XLIFF_CORE20 = "urn:oasis:names:tc:xliff:document:2.0";
+
+	public static String toXML (String text,
+		boolean attribute)
+	{
+		if ( text == null ) return "null";
+		StringBuilder tmp = new StringBuilder(text.length());
+		for ( int i=0; i<text.length(); i++ ) {
+			char ch = text.charAt(i);
+			if ( ch == '&' ) tmp.append("&amp;");
+			else if ( ch == '<' ) tmp.append("&lt;");
+			else if ( attribute && ( ch == '"' )) tmp.append("&quot;");
+			else tmp.append(ch);
+		}
+		return tmp.toString();
+	}
+
+	public static String toSafeXML (String text) {
+		if ( text == null ) return "null";
+		// In XML 1.0 the valid characters are:
+		// #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+		StringBuilder tmp = new StringBuilder(text.length());
+		for ( int i=0; i<text.length(); i++ ) {
+			int cp = text.codePointAt(i);
+			switch ( cp ) {
+			case '&':
+				tmp.append("&amp;");
+				break;
+			case '<':
+				tmp.append("&lt;");
+				break;
+			case 0x0009:
+			case 0x000A:
+			case 0x000D:
+				tmp.append((char)cp);
+				continue;
+			default:
+				if (( cp > 0x001F ) && ( cp < 0xD800 )) {
+					tmp.append((char)cp);
+					continue;
+				}
+				if ( cp > 0xD7FF ) {
+					if (( cp < 0xE000 ) || ( cp == 0xFFFE ) || ( cp == 0xFFFF )) {
+						tmp.append(String.format("<cp hex=\"%04X\"/>", cp));
+					}
+					else {
+						tmp.append(Character.toChars(cp));
+						i++; // Skip second char of the pair
+					}
+					continue;
+				}
+				// Else: control characters
+				tmp.append(String.format("<cp hex=\"%04X\"/>", cp));
+				continue;
+			}
+		}
+		return tmp.toString();
+	}
 
 	public static String fmt (IContent content) {
 		if ( content == null ) return "null";
@@ -56,4 +115,5 @@ public class Util {
 		}
 		return tmp.toString();
 	}
+
 }

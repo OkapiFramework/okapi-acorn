@@ -50,6 +50,7 @@ import net.sf.okapi.acorn.calais.olib_OpenCalais;
 import net.sf.okapi.acorn.common.FilterBasedReader;
 import net.sf.okapi.acorn.common.IDocumentReader;
 import net.sf.okapi.acorn.common.XLIFF2Reader;
+import net.sf.okapi.acorn.common.XLIFFWriter;
 import net.sf.okapi.acorn.taus.TransAPIClient;
 import net.sf.okapi.lib.xliff2.processor.XLIFFProcessor;
 
@@ -145,6 +146,15 @@ public class MainDialog extends JFrame {
 			}
 		});
 		
+		menuItem = new JMenuItem("Save As XLIFF...", KeyEvent.VK_S);
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				saveAsXLIFF();
+			}
+		});
+		
 		menu = new JMenu("Translation Memory");
 		menu.setMnemonic(KeyEvent.VK_T);
 		menuBar.add(menu);
@@ -228,6 +238,37 @@ public class MainDialog extends JFrame {
 		proc.run(inputFile, outputFile);
 	}
 
+	private void saveAsXLIFF () {
+		IDocument doc = docPanel.getDocument();
+		if ( doc == null ) return;
+    	try {
+    		File outputFile;
+    		JFileChooser fc = new JFileChooser();
+    		FileNameExtensionFilter ff;
+   			fc.setDialogTitle("Save As XLIFF");
+        	fc.addChoosableFileFilter(new FileNameExtensionFilter("XLIFF 2.0 Files", "xlf"));
+        	ff = new FileNameExtensionFilter("All Supported Files", "xlf");
+    		
+    		// In both case:
+    		fc.addChoosableFileFilter(ff);
+    		fc.setFileFilter(ff);
+    		int option = fc.showSaveDialog(this);
+    		if ( option == JFileChooser.APPROVE_OPTION ) {
+   				outputFile = fc.getSelectedFile();
+    		}
+    		else {
+    			return;
+    		}
+
+        	clearLog();
+    		XLIFFWriter.saveAs(doc, outputFile);
+    		log("Done");
+    	}
+    	catch ( Throwable e ) {
+    		log(e);
+    	}
+	}
+	
 	private void loadDocument (boolean toFeedIntoTheTM) {
 		// Get an input file
 		File inputFile;
@@ -262,7 +303,6 @@ public class MainDialog extends JFrame {
     	}
 
     	clearLog();
-
     	try {
     		// Import into TM if it is the option selected
     		if ( toFeedIntoTheTM ) {

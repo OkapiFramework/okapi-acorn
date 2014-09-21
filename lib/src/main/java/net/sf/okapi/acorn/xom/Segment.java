@@ -8,8 +8,8 @@ public class Segment extends Part implements ISegment {
 
 	public final TargetState DEFSTATE_DEFAULT = TargetState.INITIAL;
 	
-	private boolean canResegment;
-	private TargetState state;
+	private boolean canResegment = true;
+	private TargetState state = DEFSTATE_DEFAULT;
 	private String subState;
 	
 	/**
