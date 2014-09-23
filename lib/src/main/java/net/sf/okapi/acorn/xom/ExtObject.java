@@ -17,7 +17,7 @@ import org.oasisopen.xliff.om.v1.IExtObjectItem;
 public class ExtObject extends BaseData1 implements IExtObject {
 
 	private QName qname;
-	private List<IExtObjectItem> items;
+	private List<IExtObjectItem> items = new ArrayList<IExtObjectItem>(1);
 
 	/**
 	 * Creates a new {@link IExtObject} object.
@@ -52,13 +52,11 @@ public class ExtObject extends BaseData1 implements IExtObject {
 
 	@Override
 	public boolean isEmpty () {
-		if ( items == null ) return false;
 		return items.isEmpty();
 	}
 
 	@Override
 	public List<IExtObjectItem> getItems () {
-		if ( items == null ) items = new ArrayList<IExtObjectItem>(2);
 		return items;
 	}
 

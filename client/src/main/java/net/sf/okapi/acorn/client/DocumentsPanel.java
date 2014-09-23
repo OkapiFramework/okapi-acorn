@@ -12,7 +12,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import net.sf.okapi.acorn.calais.OpenCalais;
+import net.sf.okapi.acorn.dbpedia.DBpediaSpotlight;
 import net.sf.okapi.acorn.taus.TransAPIClient;
+import net.sf.okapi.acorn.yahoo.YahooAnalyzer;
 
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IDocument;
@@ -55,7 +57,7 @@ public class DocumentsPanel extends JPanel {
 		GridBagConstraints c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.PAGE_START;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.25;
+		c.weightx = 0.16;
 		c.gridx = 0; c.gridy = 0;
 		add(btApplyTM, c);
 		
@@ -69,9 +71,37 @@ public class DocumentsPanel extends JPanel {
 		c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.PAGE_START;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.25;
+		c.weightx = 0.16;
 		c.gridx = 1; c.gridy = 0;
 		add(btApplyOC, c);
+		
+		final JButton btApplyYA = new JButton("Apply Yahoo Analyzer");
+		btApplyYA.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				applyYahooAnalyzer();
+			}
+		});
+		c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.PAGE_START;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 0.16;
+		c.gridx = 2; c.gridy = 0;
+		add(btApplyYA, c);
+		
+		final JButton btApplyDP = new JButton("Apply DBpedia");
+		btApplyDP.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				applyDBpedia();
+			}
+		});
+		c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.PAGE_START;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 0.16;
+		c.gridx = 3; c.gridy = 0;
+		add(btApplyDP, c);
 		
 		final JButton btTausGetReq = new JButton("TAUS: Request Translations");
 		btTausGetReq.addActionListener(new ActionListener() {
@@ -83,8 +113,8 @@ public class DocumentsPanel extends JPanel {
 		c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.PAGE_START;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.25;
-		c.gridx = 2; c.gridy = 0;
+		c.weightx = 0.16;
+		c.gridx = 4; c.gridy = 0;
 		add(btTausGetReq, c);
 		
 		final JButton btTausPostReq = new JButton("TAUS: Retrieve Translations");
@@ -97,8 +127,8 @@ public class DocumentsPanel extends JPanel {
 		c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.PAGE_START;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.25;
-		c.gridx = 3; c.gridy = 0;
+		c.weightx = 0.16;
+		c.gridx = 5; c.gridy = 0;
 		add(btTausPostReq, c);
 		
 		c = new GridBagConstraints();
@@ -129,94 +159,120 @@ public class DocumentsPanel extends JPanel {
 	}
 
 	private void doTMLeveraging () {
-		IDocument doc = tableModel.getDocument();
-		if ( doc == null ) return;
-		for ( IFile file : doc ) {
-			for ( IGroupOrUnit gou : file ) {
-				if ( !gou.isUnit() ) continue;
-				IUnit unit = (IUnit)gou;
-				for ( ISegment seg : unit.getSegments() ) {
-					if ( seg.hasTarget() ) continue;
-					if ( seg.getSource().isEmpty() ) continue;
-					Entry res = tm.search(seg.getSource());
-					if ( res == null ) continue;
-					seg.copyTarget(res.getTarget());
-				}
-			}
-		}
-		tableModel.refreshDisplay();
-	}
-	
-	private void applyOpenCalais () {
-		IDocument doc = tableModel.getDocument();
-		if ( doc == null ) return;
-		
-		OpenCalais oc = new OpenCalais();
-		for ( IFile file : doc ) {
-			for ( IGroupOrUnit gou : file ) {
-				if ( gou.isUnit() ) oc.process((IUnit)gou);
-			}
-		}
-		tableModel.refreshDisplay();
-	}
-	
-//	private void applyTAAS () {
-//		//TODO
-//		tableModel.refreshDisplay();
-//	}
-
-	private void doTAUSPostRequests () {
-		IDocument doc = tableModel.getDocument();
-		if ( doc == null ) return;
-		
-		// First: post the translation requests for each segment
-		for ( IFile file : doc ) {
-			for ( IGroupOrUnit gou : file ) {
-				if ( !gou.isUnit() ) continue;
-				IUnit unit = (IUnit)gou;
-				for ( ISegment seg : unit.getSegments() ) {
-					if ( seg.hasTarget() ) continue;
-					if ( seg.getSource().isEmpty() ) continue;
-					if ( ttapi.translation_post(seg.getId(),
-						doc.getSourceLanguage(), doc.getTargetLanguage(),
-						seg.getSource()) >= 400 )
-					{
-						main.log("Error "+ttapi.getResponseString());
-						return;
+		try {
+			IDocument doc = tableModel.getDocument();
+			if ( doc == null ) return;
+			// Try to find TM matches
+			for ( IFile file : doc ) {
+				for ( IGroupOrUnit gou : file ) {
+					if ( !gou.isUnit() ) continue;
+					IUnit unit = (IUnit)gou;
+					for ( ISegment seg : unit.getSegments() ) {
+						if ( seg.hasTarget() ) continue;
+						if ( seg.getSource().isEmpty() ) continue;
+						Entry res = tm.search(seg.getSource());
+						if ( res != null ) {
+							seg.copyTarget(res.getTarget());
+						}
 					}
 				}
 			}
+			tableModel.refreshDisplay();
+		}
+		catch ( Throwable e ) {
+			main.log(e);
+		}
+	}
+	
+	private void applyOpenCalais () {
+		try {
+			new OpenCalais().process(tableModel.getDocument());
+			tableModel.refreshDisplay();
+		}
+		catch ( Throwable e ) {
+			main.log(e);
+		}
+	}
+	
+	private void applyYahooAnalyzer () {
+		try {
+			new YahooAnalyzer().process(tableModel.getDocument());
+			tableModel.refreshDisplay();
+		}
+		catch ( Throwable e ) {
+			main.log(e);
+		}
+	}
+	
+	private void applyDBpedia () {
+		try {
+			new DBpediaSpotlight("iu").process(tableModel.getDocument());
+			tableModel.refreshDisplay();
+		}
+		catch ( Throwable e ) {
+			main.log(e);
+		}
+	}
+	
+	private void doTAUSPostRequests () {
+		try {
+			IDocument doc = tableModel.getDocument();
+			if ( doc == null ) return;
+			// Post the translation requests for each segment
+			for ( IFile file : doc ) {
+				for ( IGroupOrUnit gou : file ) {
+					if ( !gou.isUnit() ) continue;
+					IUnit unit = (IUnit)gou;
+					for ( ISegment seg : unit.getSegments() ) {
+						if ( seg.hasTarget() ) continue;
+						if ( seg.getSource().isEmpty() ) continue;
+						if ( ttapi.translation_post(seg.getId(),
+							doc.getSourceLanguage(), doc.getTargetLanguage(),
+							seg.getSource()) >= 400 )
+						{
+							main.log("Error "+ttapi.getResponseString());
+							return;
+						}
+					}
+				}
+			}
+		}
+		catch ( Throwable e ) {
+			main.log(e);
 		}
 	}
 	
 	private void doTAUSRetrieveAndClean () {
-		IDocument doc = tableModel.getDocument();
-		if ( doc == null ) return;
-	
-		// Then get back the translation
-		for ( IFile file : doc ) {
-			for ( IGroupOrUnit gou : file ) {
-				if ( !gou.isUnit() ) continue;
-				IUnit unit = (IUnit)gou;
-				for ( ISegment seg : unit.getSegments() ) {
-					if ( seg.hasTarget() ) continue;
-					if ( seg.getSource().isEmpty() ) continue;
-					if ( ttapi.translation_id_get(seg.getId()) >= 400 ) {
-						main.log("Error "+ttapi.getResponseString());
-						return;
+		try {
+			IDocument doc = tableModel.getDocument();
+			if ( doc == null ) return;
+			// Get back the translations
+			for ( IFile file : doc ) {
+				for ( IGroupOrUnit gou : file ) {
+					if ( !gou.isUnit() ) continue;
+					IUnit unit = (IUnit)gou;
+					for ( ISegment seg : unit.getSegments() ) {
+						if ( seg.hasTarget() ) continue;
+						if ( seg.getSource().isEmpty() ) continue;
+						if ( ttapi.translation_id_get(seg.getId()) >= 400 ) {
+							main.log("Error "+ttapi.getResponseString());
+							return;
+						}
+						// Else: parse the result back to the target content
+						IContent target = ttapi.getTargetContent(ttapi.getResponseString());
+						if ( target != null ) {
+							seg.copyTarget(target);
+						}
+						// Remove the translation request from the server
+						ttapi.translation_id_delete(seg.getId());
 					}
-					// Else: parse the result back to the target content
-					IContent target = ttapi.getTargetContent(ttapi.getResponseString());
-					if ( target != null ) {
-						seg.copyTarget(target);
-					}
-					// Remove the translation request from the server
-					ttapi.translation_id_delete(seg.getId());
 				}
 			}
+			tableModel.refreshDisplay();
 		}
-		
-		tableModel.refreshDisplay();
+		catch ( Throwable e ) {
+			main.log(e);
+		}
 	}
 	
 }

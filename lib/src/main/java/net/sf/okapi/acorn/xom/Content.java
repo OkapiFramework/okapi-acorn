@@ -1,6 +1,5 @@
 package net.sf.okapi.acorn.xom;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +14,7 @@ import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IStore;
 import org.oasisopen.xliff.om.v1.ITag;
 import org.oasisopen.xliff.om.v1.ITags;
+import org.oasisopen.xliff.om.v1.InvalidParameterException;
 import org.oasisopen.xliff.om.v1.InvalidPositionException;
 import org.oasisopen.xliff.om.v1.TagType;
 
@@ -452,4 +452,65 @@ public class Content implements IContent {
 		return status;
 	}	
 
+	/**
+	 * Get or create an annotation marker for a given span of content.
+	 * @param start the start position (in the coded text)
+	 * @param end the position just after the last character of the span (in the coded text).
+	 * You can use -1 to indicate the end of the fragment.
+	 * @param matchingType the type of marker that can be reused. Use null to reuse any marker.
+	 * @param typeForNew the type of the marker to create of none reusable is found (must not be null).
+	 * @return the opening tag of the marker found or created.
+	 */
+	@Override
+	public IMTag getOrCreateMTag (int start,
+		int end,
+		String matchingType,
+		String typeForNew)
+	{
+		if ( end == -1 ) end = ctext.length();
+		checkPosition(start);
+		checkPosition(end);
+
+		// Try to find reusable markers
+		boolean found = false;
+		IMTag opening = null;
+		ITag closing = null;
+		if (( start > 1 ) && ( ctext.charAt(start-2) == Const.MARKER_OPENING )) {
+			// The start is just after an opening tag
+			opening = (IMTag)tags.get(ctext, start-2);
+		}
+		else if ( ctext.charAt(start) == Const.MARKER_OPENING ) {
+			// The start is just on an opening tag
+			opening = (IMTag)tags.get(ctext, start);
+		}
+		
+		if ( opening != null ) { 
+			// Check the corresponding closing tag (if any)
+			closing = tags.getClosingTag(opening.getId());
+			if ( closing != null ) {
+				int pos = ctext.indexOf(Util.toRef(tags.getKey(closing)));
+				if (( end == pos ) || ( end == pos+2 )) { // End is just before or before the closing tag
+					// We can reuse this annotation
+					if ( matchingType != null ) {
+						found = matchingType.equals(opening.getType());
+					}
+					else found = true;
+				}
+			}
+		}
+
+		// Create a new annotation if none reusable is found
+		if ( !found ) {
+			if ( typeForNew == null ) {
+				throw new InvalidParameterException("You must define the typeForNew parameter.");
+			}
+			// Create a new annotation if none reusable one is found
+			opening = new MTag(true, tags.getStore().suggestId(false), typeForNew);
+			annotate(start, end, opening);
+		}
+		
+		return opening;
+	}
+	
+	
 }

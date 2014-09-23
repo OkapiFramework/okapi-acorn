@@ -115,6 +115,12 @@ public interface IUnit extends IGroupOrUnit, IWithStore, Iterable<IPart> {
 	public IPart getPart (String id);
 
 	/**
+	 * Indicates if this unit has at least one target part not in the same order as the source.
+	 * @return true if there is a target-specific order for this unit, false otherwise
+	 */
+	public boolean hasTargetOrder ();
+
+	/**
 	 * Creates a list of all the parts (segments and ignorable parts) in this unit in the sequence set by the target order.
 	 * @return a new list of the parts (segments and ignorable parts) in the target order. 
 	 */
@@ -142,5 +148,24 @@ public interface IUnit extends IGroupOrUnit, IWithStore, Iterable<IPart> {
 	 * @return the new {@link IPart} object.
 	 */
 	public IPart appendIgnorable ();
+
+	/**
+	 * Splits a segment.
+	 * @param partIndex the part index of the segment to split.
+	 * @param srcStart the start position of the middle new segment for the source (inclusive, in coded text).
+	 * @param srcEnd the end position of the middle new segment for the source (exclusive, in coded text),
+	 * use -1 for the end of the current segment.
+	 * @param trgStart the start position of the middle new segment for the target (inclusive, in coded text).
+	 * @param trgEnd the end position of the middle new segment for the target (exclusive, in coded text).
+	 * @param changeState true to change the state and possibly the subState attributes for the modified or added
+	 * segments if the initial segment as a target and its state is other than "initial" and "translated".
+	 * Use false to keep the same state and subState. 
+	 */
+	public void split (int partIndex,
+		int srcStart,
+		int srcEnd,
+		int trgStart,
+		int trgEnd,
+		boolean changeState);
 
 }

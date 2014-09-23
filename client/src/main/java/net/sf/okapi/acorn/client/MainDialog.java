@@ -46,13 +46,12 @@ import javax.swing.JTextField;
 import javax.swing.TransferHandler;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import net.sf.okapi.acorn.calais.olib_OpenCalais;
 import net.sf.okapi.acorn.common.FilterBasedReader;
 import net.sf.okapi.acorn.common.IDocumentReader;
+import net.sf.okapi.acorn.common.Segmenter;
 import net.sf.okapi.acorn.common.XLIFF2Reader;
 import net.sf.okapi.acorn.common.XLIFFWriter;
 import net.sf.okapi.acorn.taus.TransAPIClient;
-import net.sf.okapi.lib.xliff2.processor.XLIFFProcessor;
 
 import org.oasisopen.xliff.om.v1.IDocument;
 
@@ -128,16 +127,7 @@ public class MainDialog extends JFrame {
 		menu.setMnemonic(KeyEvent.VK_D);
 		menuBar.add(menu);
 		
-		JMenuItem menuItem = new JMenuItem("Process an XLIFF 2 Document with Open-Calais...", KeyEvent.VK_P);
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed (ActionEvent event) {
-				applyOpenCalais();
-			}
-		});
-		
-		menuItem = new JMenuItem("Load a Document...", KeyEvent.VK_L);
+		JMenuItem menuItem = new JMenuItem("Load a Document...", KeyEvent.VK_L);
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener() {
 			@Override
@@ -206,38 +196,6 @@ public class MainDialog extends JFrame {
 			(dim.height - getSize().height) / 2);
 	}
 
-	private void applyOpenCalais () {
-		// Get an XLIFF 2.0 file
-		File inputFile;
-		File outputFile;
-    	try {
-    		JFileChooser fc = new JFileChooser();
-    		fc.setDialogTitle("Select an XLIFF 2 Document");
-    		int option = fc.showOpenDialog(this);
-    		if ( option == JFileChooser.APPROVE_OPTION ) {
-   				inputFile = fc.getSelectedFile();
-   				// Set the output
-   				StringBuilder path = new StringBuilder(inputFile.getAbsolutePath());
-   				int p = path.lastIndexOf(".");
-   				if ( p == -1 ) path.append(".out");
-   				else path.insert(p, ".out");
-   				outputFile = new File(path.toString());
-    		}
-    		else {
-    			return;
-    		}
-    	}
-    	catch ( Throwable e ) {
-    		log(e);
-    		return;
-    	}
-		
-		// Process it
-		XLIFFProcessor proc = new XLIFFProcessor();
-		proc.add(new olib_OpenCalais());
-		proc.run(inputFile, outputFile);
-	}
-
 	private void saveAsXLIFF () {
 		IDocument doc = docPanel.getDocument();
 		if ( doc == null ) return;
@@ -282,7 +240,8 @@ public class MainDialog extends JFrame {
     		else {
     			fc.setDialogTitle("Select the Document to Load");
         		fc.addChoosableFileFilter(new FileNameExtensionFilter("DOCX Files", "docx"));
-        		ff = new FileNameExtensionFilter("All Supported Files", "xlf", "docx", "tmx");
+        		fc.addChoosableFileFilter(new FileNameExtensionFilter("HTML Files", "html"));
+        		ff = new FileNameExtensionFilter("All Supported Files", "xlf", "docx", "html", "tmx");
     		}
     		// In both case:
     		fc.addChoosableFileFilter(new FileNameExtensionFilter("XLIFF 2.0 Files", "xlf"));
@@ -296,14 +255,8 @@ public class MainDialog extends JFrame {
     		else {
     			return;
     		}
-    	}
-    	catch ( Throwable e ) {
-    		log(e);
-    		return;
-    	}
 
-    	clearLog();
-    	try {
+    		clearLog();
     		// Import into TM if it is the option selected
     		if ( toFeedIntoTheTM ) {
     			log("===== Import document entries into the TM");
@@ -344,6 +297,7 @@ public class MainDialog extends JFrame {
 	    	}
     	
     		IDocument doc = reader.load(inputFile);
+    		new Segmenter().process(doc);
     		docPanel.setDocument(doc);
     		log("Done");
     	}

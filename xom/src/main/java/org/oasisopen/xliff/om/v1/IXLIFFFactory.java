@@ -62,6 +62,16 @@ public interface IXLIFFFactory {
 		IContent original);
 	
 	/**
+	 * Creates a copy of a {@link ISegment} object, with all its core metadata but with an empty content.
+	 * The method will create a new ID for the new segment.
+	 * @param store the store that should be associated with the new segment.
+	 * @param original the original object to copy.
+	 * @return the new segment.
+	 */
+	public ISegment copyEmptySegment (IStore store,
+		ISegment original);
+	
+	/**
 	 * Creates a new {@link IPart} object with an empty source.
 	 * @param store the store associated with the new part (cannot be null).
 	 * @return the new part.

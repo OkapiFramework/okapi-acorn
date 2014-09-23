@@ -8,11 +8,17 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 import org.oasisopen.xliff.om.v1.ICTag;
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IDocument;
+import org.oasisopen.xliff.om.v1.IExtField;
+import org.oasisopen.xliff.om.v1.IExtFields;
+import org.oasisopen.xliff.om.v1.IExtObject;
+import org.oasisopen.xliff.om.v1.IExtObjectData;
+import org.oasisopen.xliff.om.v1.IExtObjectItem;
 import org.oasisopen.xliff.om.v1.IExtObjects;
 import org.oasisopen.xliff.om.v1.IFile;
 import org.oasisopen.xliff.om.v1.IGroup;
@@ -24,12 +30,14 @@ import org.oasisopen.xliff.om.v1.IPart;
 import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.ITag;
 import org.oasisopen.xliff.om.v1.IUnit;
+import org.oasisopen.xliff.om.v1.IWithExtFields;
 import org.oasisopen.xliff.om.v1.TargetState;
 
 public class XLIFFWriter implements AutoCloseable {
 
 	private PrintWriter pw = null;
 	private String lb = "\n";
+	private NSContext nsCtx;
 	
 	public static void saveAs (IDocument doc,
 		File outputFile)
@@ -47,6 +55,9 @@ public class XLIFFWriter implements AutoCloseable {
 		Writer wrt = new OutputStreamWriter(
 			new BufferedOutputStream(new FileOutputStream(outputFile)), StandardCharsets.UTF_8);
 		pw = new PrintWriter(wrt);
+
+		nsCtx = new NSContext();
+		nsCtx.add(null, Util.NS_XLIFF_CORE20);
 		
 		pw.print("<?xml version=\"1.0\"?>"+lb);
 		pw.print("<xliff xmlns=\""+Util.NS_XLIFF_CORE20+"\" version=\""+doc.getVersion()+"\"");
@@ -64,7 +75,11 @@ public class XLIFFWriter implements AutoCloseable {
 	}
 	
 	private void process (IFile file) {
+		nsCtx.pushLevel();
 		pw.print("<file id=\""+Util.toXML(file.getId(), true)+"\"");
+		// Extension attributes
+		pw.print(outputExtFields(file));
+		//TODO
 		pw.print(">"+lb);
 		// Skeleton
 		//TODO
@@ -79,9 +94,11 @@ public class XLIFFWriter implements AutoCloseable {
 			else process((IGroup)gou);
 		}
 		pw.print("</file>"+lb);
+		nsCtx.popLevel();
 	}
 	
 	private void process (IUnit unit) {
+		nsCtx.pushLevel();
 		pw.print("<unit id=\""+Util.toXML(unit.getId(), true)+"\"");
 		//TODO: other attributes
 		pw.print(">"+lb);
@@ -96,9 +113,11 @@ public class XLIFFWriter implements AutoCloseable {
 			process(part);
 		}
 		pw.print("</unit>"+lb);
+		nsCtx.popLevel();
 	}
 	
 	private void process (IGroup group) {
+		nsCtx.pushLevel();
 		pw.print("<group id=\""+Util.toXML(group.getId(), true)+"\"");
 		if ( group.getName() != null )
 			pw.print(" name=\""+Util.toXML(group.getName(), true)+"\"");
@@ -113,18 +132,22 @@ public class XLIFFWriter implements AutoCloseable {
 			else process((IGroup)gou);
 		}
 		pw.print("</group>"+lb);
+		nsCtx.popLevel();
 	}
 
 	private void process (INotes notes) {
 		if (( notes == null ) || notes.isEmpty() ) return;
+		nsCtx.pushLevel();
 		pw.print("<notes>"+lb);
 		for ( INote note : notes ) {
 			process(note);
 		}
 		pw.print("</notes>"+lb);
+		nsCtx.popLevel();
 	}
 	
 	private void process (INote note) {
+		nsCtx.pushLevel();
 		pw.print("<note");
 		if ( note.getId() != null )
 			pw.print(" id=\""+Util.toXML(note.getId(), true)+"\"");
@@ -135,6 +158,7 @@ public class XLIFFWriter implements AutoCloseable {
 		pw.print(">"+lb);
 		pw.print(Util.toXML(note.getText(), false));
 		pw.print("</note>"+lb);
+		nsCtx.popLevel();
 	}
 
 	private void process (IPart part) {
@@ -257,9 +281,11 @@ public class XLIFFWriter implements AutoCloseable {
 				switch ( mtag.getTagType() ) {
 				case OPENING:
 					if ( status == 2 ) {
+						nsCtx.pushLevel();
 						sb.append("<mrk id=\""+mtag.getId()+"\"");
 					}
 					else {
+						nsCtx.pushLevel();
 						sb.append("<sm id=\""+mtag.getId()+"\"");
 					}
 					if ( !mtag.getType().equals("generic") )
@@ -269,13 +295,18 @@ public class XLIFFWriter implements AutoCloseable {
 					if ( mtag.getRef() != null ) 
 						sb.append(" ref=\""+Util.toXML(mtag.getRef(), true)+"\"");
 					// Extension attributes
+					sb.append(outputExtFields(mtag));
 					//TODO
 					if ( status == 2 ) sb.append(">");
-					else sb.append("/>");
+					else {
+						sb.append("/>");
+						nsCtx.popLevel();
+					}
 					break;
 				case CLOSING:
 					if ( status == 2 ) {
 						sb.append("</mrk>");
+						nsCtx.popLevel();
 					}
 					else {
 						sb.append("<em startRef=\""+mtag.getId()+"\"/>");
@@ -295,10 +326,91 @@ public class XLIFFWriter implements AutoCloseable {
 	
 	private void process (IExtObjects extObjs) {
 		if (( extObjs == null ) || extObjs.isEmpty() ) return;
-		//TODO
-//		for ( IExtObject extObj : extObjs ) {
-//			//TODOextObj.
-//		}
+		for ( IExtObject extObj : extObjs ) {
+			nsCtx.pushLevel();
+			outputStartTag(extObj);
+			process(extObj.getItems());
+			pw.print("</"+nsCtx.getPrefix(extObj.getNSUri())+":"+extObj.getName()+">");
+			nsCtx.popLevel();
+		}
+	}
+	
+	private void process (List<IExtObjectItem> items) {
+		for ( IExtObjectItem item : items ) {
+			switch ( item.getType() ) {
+			case INSTRUCTION:
+				pw.print("<?"+((IExtObjectData)item).getContent()+"?>");
+				break;
+			case OBJECT:
+				IExtObject eo = (IExtObject)item;
+				nsCtx.pushLevel();
+				outputStartTag(eo);
+				process(((IExtObject)item).getItems());
+				pw.print("</"+nsCtx.getPrefix(eo.getNSUri())+":"+eo.getName()+">");
+				nsCtx.popLevel();
+				break;
+			case TEXT:
+				IExtObjectData eod = ((IExtObjectData)item);
+				if ( eod.getRaw() ) {
+					pw.print("<![CDATA["+eod.getContent()+"]]>");
+				}
+				else {
+					pw.print(Util.toXML(eod.getContent(), false));
+				}
+				break;
+			}
+		}
+	}
+	
+	private void outputStartTag (IExtObject extObj) {
+		String eoUri = extObj.getNSUri();
+		String ep = nsCtx.getPrefix(eoUri);
+		String decl = null;
+		if ( ep == null ) {
+			ep = getPreferredPrefix(eoUri);
+			ep = nsCtx.add(ep, eoUri);
+			decl = " xmlns:"+ep+"=\""+eoUri+"\"";
+		}
+		pw.print("<"+ep+":"+extObj.getName());
+		if ( decl != null ) pw.print(decl);
+		pw.print(outputExtFields(extObj));
+		pw.print(">");
+	}
+	
+	private String outputExtFields (IWithExtFields parent) {
+		if ( !parent.hasExtField() ) return "";
+		StringBuilder tmp = new StringBuilder();
+		IExtFields efs = parent.getExtFields();
+		// Namespaces
+		for ( String uri : efs.getNSUris() ) {
+			if ( !nsCtx.exists(uri) ) {
+				String prefix = efs.getNSShorthand(uri);
+				prefix = nsCtx.add(prefix, uri);
+				tmp.append(" xmlns:"+prefix+"=\""+uri+"\"");
+			}
+		}
+		// Fields
+		for ( IExtField ef : efs ) {
+			String uri = ef.getNSUri();
+			String ap = "";
+			if ( !uri.equals(parent.getNSUri()) ) {
+				ap = nsCtx.getPrefix(uri);
+				if ( !Util.isNoE(ap) ) ap = ap+":";
+			}
+			tmp.append(" "+ap+ef.getName()+"=\""+Util.toXML(ef.getValue(), true)+"\"");
+		}
+		return tmp.toString();
+	}
+
+	private String getPreferredPrefix (String uri) {
+		switch ( uri ) {
+		case Util.NS_XLIFF_CORE20:
+			return "x";
+		case Util.NS_XLIFF20_GLOSSARY:
+			return "gls";
+		default:
+			return "x1";
+		}
 	}
 	
 	@Override

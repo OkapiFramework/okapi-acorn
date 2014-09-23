@@ -226,7 +226,7 @@ public class ExtFields implements IExtFields {
 					else break;
 				}
 			}
-			setNS(newShorthand, nsUri);
+			setNS(nsUri, newShorthand);
 		}
 	}
 

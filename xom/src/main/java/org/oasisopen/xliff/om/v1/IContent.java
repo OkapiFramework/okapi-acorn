@@ -211,4 +211,18 @@ public interface IContent extends Iterable<Object> {
 	 */
 	public Map<ITag, Integer> getOwnTagsStatus ();
 	
+	/**
+	 * Get or create an annotation marker tag for a given span of content.
+	 * @param start the start position (in the coded text)
+	 * @param end the position just after the last character of the span (in the coded text).
+	 * You can use -1 to indicate the end of the fragment.
+	 * @param matchingType the type of marker that can be reused. Use null to reuse any marker.
+	 * @param typeForNew the type of the marker to create of none reusable is found (must not be null).
+	 * @return the opening tag of the marker found or created.
+	 */
+	public IMTag getOrCreateMTag (int start,
+		int end,
+		String matchingType,
+		String typeForNew);
+
 }

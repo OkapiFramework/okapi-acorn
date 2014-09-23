@@ -1,5 +1,6 @@
 package net.sf.okapi.acorn.xom;
 
+import org.oasisopen.xliff.om.v1.GetTarget;
 import org.oasisopen.xliff.om.v1.ICTag;
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IDocument;
@@ -82,6 +83,30 @@ public enum Factory implements IXLIFFFactory {
 		}
 		dest.setCodedText(tmp.toString());
 		return dest;
+	}
+	
+	@Override
+	public ISegment copyEmptySegment (IStore store,
+		ISegment original)
+	{
+		ISegment seg = createSegment(store);
+		// Copy the metadata for the source
+//TODO		seg.getSource().setDir(original.getSource().getDir());
+		// Make sure we have a target if the original segment has one
+		if ( original.hasTarget() ) {
+			// Create the target
+			// and at the same time copy the metadata for the target
+			seg.getTarget(GetTarget.CREATE_EMPTY); //TODO .setDir(original.getTarget().getDir());
+		}
+		// Copy xml:space info (source/target level in XLIFF but stored in part in library)
+		seg.setPreserveWS(original.getPreserveWS());
+		// Copy the metadata for the segment
+		seg.setCanResegment(original.getCanResegment());
+		seg.setState(original.getState());
+		seg.setSubState(original.getSubState());
+		// Update ID value
+		seg.setId(seg.getStore().suggestId(true));
+		return seg;
 	}
 
 	@Override

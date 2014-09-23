@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.sf.okapi.acorn.common.BaseXLIFFProcessor;
 import net.sf.okapi.acorn.xom.Factory;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -18,7 +19,7 @@ import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.IUnit;
 
-public class OpenCalais {
+public class OpenCalais extends BaseXLIFFProcessor {
 
 	private class Occurrence implements Annotator.IInfoSpan, Comparable<Occurrence> {
 		
@@ -73,6 +74,7 @@ public class OpenCalais {
         parser = new JSONParser();
 	}
 	
+	@Override
 	public void process (IUnit unit) {
 		for ( ISegment segment : unit.getSegments() ) {
 			process(segment);

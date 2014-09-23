@@ -30,7 +30,8 @@ public class ExtObjectsTest {
 		IExtObjects xobjs = unit.getExtObjects();
 		IExtObject xo1 = xobjs.add("nsuri", "name");
 		assertEquals("name", xo1.getName());
-		assertFalse(xo1.isEmpty());
+		assertFalse(xobjs.isEmpty());
+		assertTrue(xo1.isEmpty());
 		assertEquals("nsuri", xo1.getNSUri());
 		assertFalse(xo1.isModule());
 		// Get the object

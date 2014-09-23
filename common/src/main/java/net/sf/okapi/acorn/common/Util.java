@@ -28,7 +28,8 @@ import org.oasisopen.xliff.om.v1.TagType;
 public class Util {
 	
 	public static final String NS_XLIFF_CORE20 = "urn:oasis:names:tc:xliff:document:2.0";
-
+	public static final String NS_XLIFF20_GLOSSARY = "urn:oasis:names:tc:xliff:glossary:2.0";
+	
 	public static String toXML (String text,
 		boolean attribute)
 	{
@@ -114,6 +115,10 @@ public class Util {
 			}
 		}
 		return tmp.toString();
+	}
+
+	public static boolean isNoE (String text) {
+		return (( text == null ) || text.isEmpty() );
 	}
 
 }
