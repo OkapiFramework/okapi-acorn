@@ -89,7 +89,7 @@ public class SimpleTM implements IWithStore, Iterable<Entry> {
 		}
 		return null;
 	}
-
+	
 	public String search (String sourceInJson) {
 		Unit unit = new Unit("tmp");
 		IContent src = jr.readContent(unit.getStore(), false, sourceInJson);
@@ -98,6 +98,37 @@ public class SimpleTM implements IWithStore, Iterable<Entry> {
 		// Else: serialize to JSON and return
 		return jw.fromContent(res.getTarget()).toJSONString();
 	}
+	
+//	public IContent createAdaptedTarget (IStore store,
+//		IContent source,
+//		IContent match)
+//	{
+//		// Create a copy
+//		IContent fixed = Factory.XOM.copyContent(store, true, match);
+//		// Go through the codes
+//		List<ITag> srcTags = source.getOwnTags();
+//		ITags trgTags = fixed.getTags();
+//		for ( ITag tag : srcTags ) {
+//			if ( tag instanceof IMTag ) continue;
+//			String id = tag.getId();
+//			switch ( tag.getTagType() ) {
+//			case OPENING:
+//				ICTag ctag = trgTags.getOpeningCTag(id);
+//				if ( ctag == null ) {
+//					
+//				}
+//				else {
+//					
+//				}
+//				break;
+//			case CLOSING:
+//				break;
+//			case STANDALONE:
+//				break;
+//			}
+//		}
+//		return null;
+//	}
 	
 	@Override
 	public String getId () {

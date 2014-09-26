@@ -1,104 +1,98 @@
 package net.sf.okapi.acorn.common;
 
-import java.util.HashMap;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
 
-public class NSContext {
+/**
+ * Represents the context of the namespaces at a specific point during reading or writing of an XLIFF document.
+ * The namespaces http://www.w3.org/XML/1998/namespace and http://www.w3.org/2000/xmlns/ are pre-defined.
+ * This class implements the {@link NamespaceContext} interface. 
+ */
+public class NSContext implements NamespaceContext, Cloneable {
+	
+	private Hashtable<String, String> table;
 
-	private HashMap<String, String> map;
-	private int level;
-	private HashMap<String, Integer> levels;
-
+	/**
+	 * Creates a new object.
+	 */
 	public NSContext () {
-		map = new HashMap<>();
-		levels = new HashMap<>();
-	}
-
-	/**
-	 * Push the context by incrementing the current level.
-	 */
-	public void pushLevel () {
-		level++;
+		table = new Hashtable<String, String>();
 	}
 	
 	/**
-	 * Pops the context. This removes all namespaces that have been
-	 * added at the current level and then decrement the level.
-	 * Nothing happens if the current level is zero.
+	 * Creates a new context object and add one namespace to it.
+	 * @param prefix the prefix of the namespace to add.
+	 * @param uri the namespace URI.
 	 */
-	public void popLevel () {
-		if ( level == 0 ) return; // Too many pops
-		Iterator<String> iter = map.keySet().iterator();
-		while ( iter.hasNext() ) {
-			String prefix = iter.next();
-			Integer lev = levels.get(prefix);
-			if ( lev == level ) {
-				levels.remove(prefix);
-				iter.remove();
-			}
-		}
-		level--;
-	}
-	
-	/**
-	 * Adds a prefix/namespace-URI mapping. If the namespace is already declared the method
-	 * returns the prefix it uses and does not add a new mapping. If the namespace does not
-	 * exists yet, it is added and if the given prefix is already used, a new automated one is used.
-	 * @param prefix the prefix of the namespace. If the given prefix is null it is treated as an empty string.
-	 * Only one namespace can be mapped to the empty prefix.
-	 * @param uri the URI of the namespace.
-	 * @return the prefix used for the given namespace (it may be different from the given prefix).
-	 */
-	public String add (String prefix,
+	public NSContext (String prefix,
 		String uri)
 	{
-		// If the namespace exists: returns the prefix used in the context
-		// And do not add the mapping
-		if ( map.containsValue(uri) ) {
-			for ( Map.Entry<String, String> kv : map.entrySet() ) {
-				if ( kv.getValue().equals(uri) ) return kv.getKey();
-			}
-		}
-		// Else: add the namespace
-		// First check if the prefix is used
-		if ( prefix == null ) prefix = "";
-		if ( map.containsKey(prefix) ) {
-			// If the prefix is used: Get a new automated prefix
-			int i = 0;
-			while ( map.containsKey(prefix) ) {
-				prefix = "x"+i;
-			}
-		}
-		// Now add the information
-		map.put(prefix, uri);
-		levels.put(prefix, level);
-		// And return the prefix used
-		return prefix;
+		this();
+		put(prefix, uri);
 	}
 	
-	public boolean exists (String uri) {
-		return map.containsValue(uri);
+	@Override
+	public String toString () {
+		return table.toString();
 	}
 	
-	public String getPrefix (String uri) {
-		for ( Map.Entry<String, String> kv : map.entrySet() ) {
-			if ( kv.getValue().equals(uri) ) return kv.getKey();
-		}
-		return null;
+	@SuppressWarnings("unchecked")
+	@Override
+	public NSContext clone () {
+		NSContext copy = new NSContext();
+		copy.table = (Hashtable<String, String>)table.clone();
+		return copy;
 	}
-	
+
+	@Override
 	public String getNamespaceURI (String prefix) {
-		if ( map.containsKey(prefix) )
-			return map.get(prefix);
+		if ( table.containsKey(prefix) )
+			return table.get(prefix);
 		if ( prefix.equals(XMLConstants.XML_NS_PREFIX) )
 			return XMLConstants.XML_NS_URI;
 		if ( prefix.equals(XMLConstants.XMLNS_ATTRIBUTE) )
 			return XMLConstants.XMLNS_ATTRIBUTE_NS_URI;
 		else
 			return XMLConstants.NULL_NS_URI;
+	}
+
+	@Override
+	public String getPrefix (String uri) {
+		Enumeration<String> E = table.keys();
+		String key;
+		while ( E.hasMoreElements() ) {
+			key = E.nextElement();
+			if ( table.get(key).equals(uri) )
+				return key;
+		}
+		if ( uri.equals(XMLConstants.XML_NS_URI))
+			return XMLConstants.XML_NS_PREFIX;
+		if ( uri.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI) )
+			return XMLConstants.XMLNS_ATTRIBUTE;
+		else
+			return null;
+	}
+
+	@Override
+	public Iterator<String> getPrefixes (String uri) {
+		// Not implemented
+		return null;
+	} 
+
+	/**
+	 * Sets a prefix/uri pair to this context. No checking is done for existing
+	 * prefix: If the same is already defined, it will be overwritten.
+	 * @param prefix the prefix of the namespace.
+	 * @param uri the URI of the namespace.
+	 */
+	public void put (String prefix,
+		String uri)
+	{
+		table.put(prefix, uri);
 	}
 
 }

@@ -45,20 +45,6 @@ public class DataStore implements Iterable<TransRequest> {
 	private DataStore () {
 		dateFormat.setTimeZone(timeZone);
 		requests = new HashMap<>();
-//		TransRequest tr = new TransRequest("74b6b0de-540b-48e0-aa39-6244cf22159b");
-//		tr.setSource("text 1");
-//		tr.setStatus("initial");
-//		tr.setSourceLang("en");
-//		tr.setTargetLang("iu");
-//		add(tr);
-//		tr = new TransRequest("4c529ced-a6d4-4bb9-bb5b-00e6129efdae");
-//		tr.setSource("text 2");
-//		tr.setSourceLang("en");
-//		tr.setTargetLang("iu");
-//		tr.setTarget("texte 2.");
-//		tr.setStatus("translated");
-//		add(tr);
-
 		tm = new SimpleTM();
 		// Load the default data
 		URL url = getClass().getResource("data.tmx");
@@ -66,7 +52,9 @@ public class DataStore implements Iterable<TransRequest> {
 			//File inputFile = new File("C:\\Dev\\OkapiAcorn\\dev\\trunk\\server\\src\\main\\resources\\net\\sf\\okapi\\acorn\\data.tmx"); //url.toURI());
 			File inputFile = new File(url.toURI());
 			int count = tm.importSegments(inputFile);
-			System.out.println("Entries imported = "+count);
+			for ( int i=0; i<50; i++ ) System.out.println("");
+			System.out.println("Okapi-Acorn Server for TAUS Translation API");
+			System.out.println("Entries imported = "+count+"\n");
 		}
 		catch ( URISyntaxException e ) {
 			e.printStackTrace();

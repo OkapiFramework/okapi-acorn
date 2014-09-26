@@ -23,8 +23,6 @@ package net.sf.okapi.acorn.client;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -38,12 +36,10 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.TransferHandler;
+import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.sf.okapi.acorn.common.FilterBasedReader;
@@ -61,12 +57,25 @@ public class MainDialog extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private JTextField edPath;
+	public static final int TAB_LOG = 0;
+	public static final int TAB_XOM = 1;
+	public static final int TAB_TM = 2;
+	public static final int TAB_TAUS = 3;
+	
 	private JTextArea edLog;
 	private SimpleTM tm;
 	private TransAPIClient ttapi;
+	private JTabbedPane tabPane;
 	private TMPanel tmPanel;
 	private DocumentsPanel docPanel;
+	private JMenuItem miSaveAsXLF;
+	private JMenuItem miApplyTM;
+	private JMenuItem miApplyDBpedia;
+	private JMenuItem miApplyYahoo;
+	private JMenuItem miApplyOpenCalais;
+	private JMenuItem miApplyTAAS;
+	private JMenuItem miPostTAUSRequests;
+	private JMenuItem miRetrieveTAUSRequests;
 
 	public MainDialog () {
 		tm = new SimpleTM();
@@ -74,41 +83,6 @@ public class MainDialog extends JFrame {
 		initComponents();
 		showInfo();
 		edLog.requestFocusInWindow();
-	}
-
-	class DocumentTransferhandler extends TransferHandler {
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public boolean canImport (TransferHandler.TransferSupport support) {
-			if ( !support.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ) {
-				return false;
-			}
-			boolean copySupported = (COPY & support.getSourceDropActions()) == COPY;
-			if ( !copySupported ) {
-				return false;
-			}
-			support.setDropAction(COPY);
-			return true;
-		}
-
-		@Override
-		public boolean importData (TransferHandler.TransferSupport support) {
-			if ( !canImport(support) ) {
-				return false;
-			}
-			Transferable t = support.getTransferable();
-			try {
-				@SuppressWarnings("unchecked")
-				java.util.List<File> l = (java.util.List<File>)t.getTransferData(DataFlavor.javaFileListFlavor);
-				edPath.setText(l.get(0).getAbsolutePath());
-			}
-			catch (Throwable e) {
-				return false;
-			}
-			return true;
-		}
 	}
 
 	private void initComponents () {
@@ -123,25 +97,95 @@ public class MainDialog extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
-		JMenu menu = new JMenu("Document");
-		menu.setMnemonic(KeyEvent.VK_D);
+		JMenu menu = new JMenu("Object Model");
+		menu.setMnemonic(KeyEvent.VK_O);
 		menuBar.add(menu);
 		
-		JMenuItem menuItem = new JMenuItem("Load a Document...", KeyEvent.VK_L);
+		JMenuItem menuItem = new JMenuItem("Import File into XLIFF Object Model...", KeyEvent.VK_I);
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed (ActionEvent event) {
-				loadDocument(false);
+				importFile(false);
 			}
 		});
 		
-		menuItem = new JMenuItem("Save As XLIFF...", KeyEvent.VK_S);
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener() {
+		miSaveAsXLF = new JMenuItem("Save As XLIFF File...", KeyEvent.VK_S);
+		miSaveAsXLF.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		menu.add(miSaveAsXLF);
+		miSaveAsXLF.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed (ActionEvent event) {
 				saveAsXLIFF();
+			}
+		});
+		
+		menu.addSeparator();
+		
+		miApplyTM = new JMenuItem("Apply Translation Memory", KeyEvent.VK_T);
+		menu.add(miApplyTM);
+		miApplyTM.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				docPanel.applyTM();
+			}
+		});
+		
+		menu.addSeparator();
+		
+		miApplyOpenCalais = new JMenuItem("Apply Open-Calais Web Service", KeyEvent.VK_O);
+		menu.add(miApplyOpenCalais);
+		miApplyOpenCalais.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				docPanel.applyOpenCalais();
+			}
+		});
+		
+		miApplyYahoo = new JMenuItem("Apply Yahoo Analyzer Web Service", KeyEvent.VK_Y);
+		menu.add(miApplyYahoo);
+		miApplyYahoo.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				docPanel.applyYahooAnalyzer();
+			}
+		});
+		
+		miApplyDBpedia = new JMenuItem("Apply DBpedia Spotlight Web Service", KeyEvent.VK_D);
+		menu.add(miApplyDBpedia);
+		miApplyDBpedia.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				docPanel.applyDBpediaSpotlight();
+			}
+		});
+		
+		miApplyTAAS = new JMenuItem("Apply TAAS Web Service", KeyEvent.VK_T);
+		menu.add(miApplyTAAS);
+		miApplyTAAS.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				docPanel.applyTAAS();
+			}
+		});
+		
+		menu.addSeparator();
+		
+		miPostTAUSRequests = new JMenuItem("Send Translation Requests to TAUS Server", KeyEvent.VK_P);
+		menu.add(miPostTAUSRequests);
+		miPostTAUSRequests.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				docPanel.doTAUSPostRequests();
+			}
+		});
+		
+		miRetrieveTAUSRequests = new JMenuItem("Retrieve Translation Requests from TAUS Server", KeyEvent.VK_P);
+		menu.add(miRetrieveTAUSRequests);
+		miRetrieveTAUSRequests.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				docPanel.doTAUSRetrieveAndClean();
 			}
 		});
 		
@@ -149,18 +193,18 @@ public class MainDialog extends JFrame {
 		menu.setMnemonic(KeyEvent.VK_T);
 		menuBar.add(menu);
 		
-		menuItem = new JMenuItem("Import from a Document...", KeyEvent.VK_I);
+		menuItem = new JMenuItem("Import from a File...", KeyEvent.VK_I);
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed (ActionEvent event) {
-				loadDocument(true);
+				importFile(true);
 			}
 		});
 		
 		//=== Panels
 		
-		JTabbedPane tabPane = new JTabbedPane();
+		tabPane = new JTabbedPane();
 
 		// Add the Log tab
 		edLog = new JTextArea();
@@ -173,7 +217,7 @@ public class MainDialog extends JFrame {
 		
 		// Add the Documents panel
 		docPanel = new DocumentsPanel(tm, ttapi, this);
-		tabPane.addTab(tabStart+"Document"+tabEnd, docPanel);
+		tabPane.addTab(tabStart+"XLIFF Object Model"+tabEnd, docPanel);
 		
 		// Add the TM panel
 		tmPanel = new TMPanel(tm);
@@ -189,6 +233,7 @@ public class MainDialog extends JFrame {
 		setMinimumSize(new Dimension(550, 250));
 		setPreferredSize(new Dimension(950, 700));
 		pack();
+		updateMenu();
 
 		// Center the dialog
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -227,18 +272,18 @@ public class MainDialog extends JFrame {
     	}
 	}
 	
-	private void loadDocument (boolean toFeedIntoTheTM) {
+	private void importFile (boolean toFeedIntoTheTM) {
 		// Get an input file
 		File inputFile;
     	try {
     		JFileChooser fc = new JFileChooser();
     		FileNameExtensionFilter ff;
     		if ( toFeedIntoTheTM ) {
-    			fc.setDialogTitle("Select the Document to Import into the TM");
+    			fc.setDialogTitle("Import into the TM");
         		ff = new FileNameExtensionFilter("All Supported Files", "xlf", "tmx");
     		}
     		else {
-    			fc.setDialogTitle("Select the Document to Load");
+    			fc.setDialogTitle("Import into the XLIFF Object Model");
         		fc.addChoosableFileFilter(new FileNameExtensionFilter("DOCX Files", "docx"));
         		fc.addChoosableFileFilter(new FileNameExtensionFilter("HTML Files", "html"));
         		ff = new FileNameExtensionFilter("All Supported Files", "xlf", "docx", "html", "tmx");
@@ -259,16 +304,17 @@ public class MainDialog extends JFrame {
     		clearLog();
     		// Import into TM if it is the option selected
     		if ( toFeedIntoTheTM ) {
-    			log("===== Import document entries into the TM");
+    			log("===== Import file into the TM");
     			int count = tm.importSegments(inputFile);
     			log("Entries added: "+count);
     			tmPanel.updateEntries();
         		log("Done");
+    			setTab(TAB_TM);
     			return;
     		}
     	
     		// Or: load the document
-    		log("===== Load document");
+    		log("===== Import file into XLIFF Object Model");
     	
     		// Get the extension
     		String path = inputFile.getPath();
@@ -292,17 +338,23 @@ public class MainDialog extends JFrame {
 	    		reader = new FilterBasedReader("okf_html");
 	    		break;
 	    	default:
-				JOptionPane.showMessageDialog(null, "Unsupported or unknown file format.");
+				log("Unsupported or unknown file format.");
+				setTab(TAB_LOG);
 	    		return; // Not supported
 	    	}
     	
     		IDocument doc = reader.load(inputFile);
     		new Segmenter().process(doc);
-    		docPanel.setDocument(doc);
+    		docPanel.setDocument(doc, path);
     		log("Done");
+			setTab(TAB_XOM);
     	}
     	catch ( Throwable e ) {
     		log(e);
+			setTab(TAB_LOG);
+   	}
+    	finally {
+    		updateMenu();
     	}
 	}
 	
@@ -343,6 +395,22 @@ public class MainDialog extends JFrame {
 	
 	}
 	
+	private void updateMenu () {
+		boolean enabled = (docPanel.getDocument() != null);
+		miSaveAsXLF.setEnabled(enabled);
+		miApplyDBpedia.setEnabled(enabled);
+		miApplyTM.setEnabled(enabled);
+		miApplyYahoo.setEnabled(enabled);
+		miApplyOpenCalais.setEnabled(enabled);
+		miPostTAUSRequests.setEnabled(enabled);
+		miRetrieveTAUSRequests.setEnabled(enabled);
+		miApplyTAAS.setEnabled(enabled);
+	}
+
+	public void setTab (int tabIndex) {
+		tabPane.setSelectedIndex(tabIndex);
+	}
+
 	public static void start () {
 		java.awt.EventQueue.invokeLater(new Runnable() {
 			@Override

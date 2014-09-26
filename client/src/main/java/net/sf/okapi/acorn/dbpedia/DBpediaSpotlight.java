@@ -117,12 +117,9 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 	@Override
 	public void process (IUnit unit) {
 		unitEntries = new HashMap<>();
-//		System.out.println("-- Unit id="+unit.getId());
-		int segIndex = 1;
 		int transCount = 0;
 		for ( ISegment segment : unit.getSegments() ) {
-			transCount += annotate(unit, segment, segIndex);
-			segIndex++;
+			transCount += annotate(unit, segment);
 		}
 		// Add the glossary entry if needed
 		if ( transCount > 0 ) {
@@ -131,10 +128,8 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 	}
 	
 	private int annotate (IUnit unit,
-		ISegment segment,
-		int segIndex)
+		ISegment segment)
 	{
-//		System.out.println(String.format("- Segment %d:", segIndex));
 		int transCount = 0;
 		try {
 			IContent content = segment.getSource();
@@ -159,31 +154,19 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 			}
 
 			// Try to get the Wikidata q-values for the new Resource objects
-//			System.out.println("Try to find translations for the new Resource objects:");
-			int count;
+			int count = 0;
 			for ( Resource res : newEntries.values() ) {
-//				System.out.println(" For Resource uri="+res.uri+":");
 				// Try to get the Q-value
 				String qvalue = getWikiDataQValue(res.uri);
 				if ( qvalue != null ) {
 					res.qvalue = qvalue;
-//					System.out.print("  Found Q-value="+res.qvalue);
 					// Try to get a translation from Wikidata (from the q-value)
 					count = getTranslationFromWikiData(res);
-//					System.out.println(" - Wikidata translations: "+count);
 					transCount += count;
 				}
-//				else {
-//					System.out.println("  No Q-value found - No Wikidata translation possible");
-//				}
-				// try to get translations from BabelNet (from the name)
-				count = 0; //getTranslationFromBabelNet(res);
 				transCount += count;
 			}
 
-//			System.out.println(String.format("Total for segment %d: Occurences=%d, New resources=%d, Translation=%d",
-//				segIndex, list.size(), newEntries.size(), transCount));
-			
 			// Add the new entries to the unit-level entries
 			unitEntries.putAll(newEntries);
 			
@@ -194,20 +177,15 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 			int add = 0;
 			for ( Occurrence occurrence : list ) {
 				Resource res = unitEntries.get(occurrence.uriAndName);
-				//IMTag am = Factory.XOM.createOpeningMTag(content.getTags().getStore().suggestId(false), "its:any");
 				int before = content.getCodedText().length();
-				IMTag am = content.getOrCreateMTag(occurrence.start+add, occurrence.start+add+res.name.length(), null, "its:any");
+				IMTag am = content.getOrCreateMTag(occurrence.start+add,
+					occurrence.start+add+res.name.length(), null, "its:any");
 				add += (content.getCodedText().length()-before);
-				//am.setRef("http://dbpedia.org/resource/"+res.uri);
 				am.getExtFields().set(ITS20_URI, "taIdentRef", "http://dbpedia.org/resource/"+res.uri);
-//				ta.setTaConfidence(res.score);
-//				ta.setAnnotatorRef(dbpslBaseURL);
 				if ( !Util.isNoE(res.types) ) {
 					am.getExtFields().set(DBP_URI, "types", res.types);
 				}
-				// Annotate the coded text with the term
-				//content.annotate(occurrence.start+add, occurrence.start+add+res.name.length(), am);
-				//add += 4; // Additional characters for the added markers
+//				am.getExtFields().set(DBP_URI, "score", res.score.toString());
 			}
 
 		}
@@ -231,12 +209,12 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 		String name = (String)o3.get("@name");
 		// Use URI+name to store same URI found based on different spans of content
 		occurrence.uriAndName = uri+"_"+name;
-		System.out.println("New Occurence: name="+name+" start="+occurrence.start);
+//		System.out.println("New Occurence: name="+name+" start="+occurrence.start);
 		// Do we have it yet?
 		if ( unitEntries.containsKey(occurrence.uriAndName)
 			|| newEntries.containsKey(occurrence.uriAndName) ) {
 			// We already have the data, move to the next one
-			System.out.println(" Resource exists already");
+//			System.out.println(" Resource exists already");
 			return;
 		}
 		// Else: create a new resource
@@ -246,7 +224,7 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 		res.types = (String)o4.get("@types");
 		res.score = Double.parseDouble(o4.get("@finalScore").toString());
 		newEntries.put(occurrence.uriAndName, res);
-		System.out.println(" New Resource: uri="+res.uri);
+//		System.out.println(" New Resource: uri="+res.uri);
 	}
 	
 	private void addGlossaryEntries (IUnit unit) {

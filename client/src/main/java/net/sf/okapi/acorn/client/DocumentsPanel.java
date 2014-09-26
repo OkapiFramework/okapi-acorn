@@ -2,17 +2,16 @@ package net.sf.okapi.acorn.client;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 
 import net.sf.okapi.acorn.calais.OpenCalais;
 import net.sf.okapi.acorn.dbpedia.DBpediaSpotlight;
+import net.sf.okapi.acorn.taas.TAAS;
 import net.sf.okapi.acorn.taus.TransAPIClient;
 import net.sf.okapi.acorn.yahoo.YahooAnalyzer;
 
@@ -32,6 +31,7 @@ public class DocumentsPanel extends JPanel {
 	
 	private final SimpleTM tm;
 	private final TransAPIClient ttapi;
+	private final JTextField edPath;
 	private final JTable table;
 	private final DocumentTableModel tableModel;
 	private final MainDialog main;
@@ -47,95 +47,20 @@ public class DocumentsPanel extends JPanel {
 		setLayout(layout);
 		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-		final JButton btApplyTM = new JButton("Apply TM");
-		btApplyTM.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed (ActionEvent event) {
-				doTMLeveraging();
-			}
-		});
 		GridBagConstraints c = new GridBagConstraints();
+		edPath = new JTextField();
+		edPath.setEditable(false);
 		c.anchor = GridBagConstraints.PAGE_START;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.16;
-		c.gridx = 0; c.gridy = 0;
-		add(btApplyTM, c);
-		
-		final JButton btApplyOC = new JButton("Apply Open-Calais");
-		btApplyOC.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed (ActionEvent event) {
-				applyOpenCalais();
-			}
-		});
-		c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.PAGE_START;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.16;
-		c.gridx = 1; c.gridy = 0;
-		add(btApplyOC, c);
-		
-		final JButton btApplyYA = new JButton("Apply Yahoo Analyzer");
-		btApplyYA.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed (ActionEvent event) {
-				applyYahooAnalyzer();
-			}
-		});
-		c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.PAGE_START;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.16;
-		c.gridx = 2; c.gridy = 0;
-		add(btApplyYA, c);
-		
-		final JButton btApplyDP = new JButton("Apply DBpedia");
-		btApplyDP.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed (ActionEvent event) {
-				applyDBpedia();
-			}
-		});
-		c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.PAGE_START;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.16;
-		c.gridx = 3; c.gridy = 0;
-		add(btApplyDP, c);
-		
-		final JButton btTausGetReq = new JButton("TAUS: Request Translations");
-		btTausGetReq.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed (ActionEvent event) {
-				doTAUSPostRequests();
-			}
-		});
-		c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.PAGE_START;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.16;
-		c.gridx = 4; c.gridy = 0;
-		add(btTausGetReq, c);
-		
-		final JButton btTausPostReq = new JButton("TAUS: Retrieve Translations");
-		btTausPostReq.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed (ActionEvent event) {
-				doTAUSRetrieveAndClean();
-			}
-		});
-		c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.PAGE_START;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.16;
-		c.gridx = 5; c.gridy = 0;
-		add(btTausPostReq, c);
+		c.gridx = 0; c.gridy = 0; c.fill = GridBagConstraints.HORIZONTAL;
+		add(edPath, c);
 		
 		c = new GridBagConstraints();
 		tableModel = new DocumentTableModel();
 		table = new JTable(tableModel);
-		JScrollPane scrollPane = new JScrollPane(table); 
-		c.gridx = 0; c.gridy = 1; c.fill = GridBagConstraints.BOTH;
+		JScrollPane scrollPane = new JScrollPane(table);
+		c.anchor = GridBagConstraints.PAGE_END;
+		c.gridx = 0; c.gridy = 1;
+		c.fill = GridBagConstraints.BOTH;
 		c.weighty = 1.0; c.weightx = 1.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = GridBagConstraints.REMAINDER;
@@ -150,15 +75,20 @@ public class DocumentsPanel extends JPanel {
 		tableModel.setDocument(null);
 	}
 
-	public void setDocument (IDocument doc) {
+	public void setDocument (IDocument doc,
+		String path)
+	{
 		tableModel.setDocument(doc);
+		edPath.setText(path);
 	}
 
 	public IDocument getDocument () {
 		return tableModel.getDocument();
 	}
 
-	private void doTMLeveraging () {
+	public void applyTM () {
+		main.clearLog();
+		main.log("=== Applying TM");
 		try {
 			IDocument doc = tableModel.getDocument();
 			if ( doc == null ) return;
@@ -178,43 +108,78 @@ public class DocumentsPanel extends JPanel {
 				}
 			}
 			tableModel.refreshDisplay();
+			main.log("Done");
+			main.setTab(MainDialog.TAB_XOM);
 		}
 		catch ( Throwable e ) {
 			main.log(e);
+			main.setTab(MainDialog.TAB_LOG);
 		}
 	}
 	
-	private void applyOpenCalais () {
+	public void applyOpenCalais () {
+		main.clearLog();
+		main.log("=== Applying Open-Calais Web services");
 		try {
 			new OpenCalais().process(tableModel.getDocument());
 			tableModel.refreshDisplay();
+			main.log("Done");
+			main.setTab(MainDialog.TAB_XOM);
 		}
 		catch ( Throwable e ) {
 			main.log(e);
+			main.setTab(MainDialog.TAB_LOG);
 		}
 	}
 	
-	private void applyYahooAnalyzer () {
+	public void applyYahooAnalyzer () {
+		main.clearLog();
+		main.log("=== Applying Yahoo Analyzer Web service");
 		try {
 			new YahooAnalyzer().process(tableModel.getDocument());
 			tableModel.refreshDisplay();
+			main.log("Done");
+			main.setTab(MainDialog.TAB_XOM);
 		}
 		catch ( Throwable e ) {
 			main.log(e);
+			main.setTab(MainDialog.TAB_LOG);
 		}
 	}
 	
-	private void applyDBpedia () {
+	public void applyDBpediaSpotlight () {
+		main.clearLog();
+		main.log("=== Applying DBpedia Spotlight Web service");
 		try {
 			new DBpediaSpotlight("iu").process(tableModel.getDocument());
 			tableModel.refreshDisplay();
+			main.log("Done");
+			main.setTab(MainDialog.TAB_XOM);
 		}
 		catch ( Throwable e ) {
 			main.log(e);
+			main.setTab(MainDialog.TAB_LOG);
 		}
 	}
 	
-	private void doTAUSPostRequests () {
+	public void applyTAAS () {
+		main.clearLog();
+		main.log("=== Applying TAAS Web service");
+		try {
+			new TAAS().process(tableModel.getDocument());
+			tableModel.refreshDisplay();
+			main.log("Done");
+			main.setTab(MainDialog.TAB_XOM);
+		}
+		catch ( Throwable e ) {
+			main.log(e);
+			main.setTab(MainDialog.TAB_LOG);
+		}
+	}
+	
+	public void doTAUSPostRequests () {
+		main.clearLog();
+		main.log("=== Posting translation requests to TAUS server");
 		try {
 			IDocument doc = tableModel.getDocument();
 			if ( doc == null ) return;
@@ -236,13 +201,17 @@ public class DocumentsPanel extends JPanel {
 					}
 				}
 			}
+			main.log("Done");
 		}
 		catch ( Throwable e ) {
 			main.log(e);
+			main.setTab(MainDialog.TAB_LOG);
 		}
 	}
 	
-	private void doTAUSRetrieveAndClean () {
+	public void doTAUSRetrieveAndClean () {
+		main.clearLog();
+		main.log("=== Retrieving translation requests from TAUS server");
 		try {
 			IDocument doc = tableModel.getDocument();
 			if ( doc == null ) return;
@@ -269,9 +238,12 @@ public class DocumentsPanel extends JPanel {
 				}
 			}
 			tableModel.refreshDisplay();
+			main.log("Done");
+			main.setTab(MainDialog.TAB_XOM);
 		}
 		catch ( Throwable e ) {
 			main.log(e);
+			main.setTab(MainDialog.TAB_LOG);
 		}
 	}
 	

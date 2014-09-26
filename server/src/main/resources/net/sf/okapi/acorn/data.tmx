@@ -27,5 +27,69 @@
    <tuv xml:lang="en"><seg><bpt i="1">&lt;B></bpt>Contact:<ept i="1">&lt;/B></ept> Rotary Club of Iqaluit.</seg></tuv>
    <tuv xml:lang="iu"><seg><bpt i="1">&lt;B></bpt>ᖃᐅᔨᒋᐊᕐᕕᑦᓴᖅ:<ept i="1">&lt;/B></ept> ᓇᖕᒥᓂᖃᖅᑏᑦ ᑲᑐᔾᔨᖃᑎᒌᖓᑦ ᐃᖃᓗᓐᓂ.</seg></tuv>
   </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Use this form to perform another job search:</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᑖᓐᓇ ᐊᑐᕐᓗᒍ ᑎᑎᕋᕐᕕᒋᓗᒍ ᐊᓯᖏᓐᓂᒃ ᑕᑯᓇᓱᒍᑎᒋᓗᒍ:</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Keywords:</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐅᖃᐅᓯᒃᓴᐃᑦ:</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Category:</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᓛᒃᑰᖅᑐᑦ ᑭᓲᓂᖏᑦ:</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Need further assistance?</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᑲᔪᖅᑕᐅᒃᑲᓐᓂᕈᒪᕖᑦ?</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Go back to the welcome page</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐅᑎᕐᓗᑎᑦ ᓯᕗᓪᓕᖅᐹᖓᓄᑦ ᐱᒋᐊᕐᕕᐅᑉ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Career Opportunities</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᖅᑲᓇᐃᔮᒃᓴᐃᑦ ᒪᓂᒪᔪᑦ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Please click on the job title for more information, and apply from that page if you are interested.</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᓇᓕᐊᖕᓂᒃ ᑕᑯᒃᑲᓐᓂᕈᒪᒍᕕᑦ ᐱᔪᒥᒋᔭᐃᑦ ᓇᕿᓪᓗᒍ, ᑎᑎᕋᕆᐊᓕᖕᓂᒃ ᐊᑐᕐᓗᑎᑦ ᐱᓇᔪᒍᓐᓇᖅᐳᑎᑦ ᐱᔪᒥᒋᔭᖃᕈᕕᑦ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Here are our current job openings.</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐅᑯᐊ ᑕᕝᕙ ᒪᓂᒪᑎᑕᐅᔪᑦ ᐃᖅᑲᓇᐃᔮᒃᓴᐃᑦ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Login Name:</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᓯᕈᓐᓇᐅᑎᕕᑦ ᐊᑎᖓ:</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Returning Users:</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐅᑎᖅᑐᑦ ᐊᑐᖅᑏᑦ:</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>You can <bpt i="1">&lt;a href='jobs.html'></bpt>view all open job positions<ept i="1">&lt;/a></ept> or use the following search form to find jobs that suit your specific career interests. </seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᒪᐃᓕᐅᕈᓐᓇᖅᐳᑎᑦ <bpt i="1">&lt;a href='jobs.html'></bpt>ᑕᑯᓗᒋᑦ ᒪᒃᐱᖓᔪᑦ ᐃᖅᑲᓇᐃᔮᒃᓴᐃᑦ<ept i="1">&lt;/a></ept> ᐅᕝᕙᓘᓐᓃᑦ ᐊᑐᕐᓗᒋᑦ ᕿᓂᕈᑏᑦ ᑎᑎᕋᕆᐊᓖᑦ ᓇᓂᓯᓇᓱᒡᓗᑎᑦ ᓇᒻᒪᒋᔭᕐᓂᒃ ᐃᖅᑲᓇᐃᔮᒃᓴᒥᒃ.</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Our Work Culture</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᖅᑲᓇᐃᔮᑎᒍᑦ ᐃᓕᖅᑯᓯᕆᔭᕗᑦ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Comprehensive training will be provided including job specific and work-ready training.</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᓕᓐᓂᐊᕐᑎᑦᑎᓂᖅ ᐱᑕᖃᕐᑎᑕᐅᒻᒪᕆᖕᓂᐊᕐᐳᖅ ᐱᖃᓯᐅᑎᓗᒋᑦ ᐃᖅᑲᓇᐃᔭᑉ ᒥᒃᓴᓄᖓᔪᑦ ᐊᒻᒪᓗ ᐃᖅᑲᓇᐃᔭᓚᓕᕐᓗᓂ ᐱᕙᒋᔭᖅᓯᒪᓂᕐᒧ ᐃᓕᓐᓂᐊᕋᒃᓴᐃᑦ.</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>On-site introduction to the work site will be provided for all employees.</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐅᔭᕋᓐᓂᐊᕐᕕᐅᑉ ᐱᕕᖃᕐᕕᖓᓂ ᐃᓕᓐᓂᐊᕐᑎᑕᐅᔪᐃᓇᐅᖃᑦᑕᕋᔭᕐᒥᔪᑦ ᐃᖅᑲᓇᐃᔭᕐᑎᓕᒪᑦ.</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Appropriate cultural orientation for southern workers and technical training for all employees is planned.</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᓕᖅᑯᓯᑐᖃᕐᒧᖓᔪᒥᒃ ᖃᓪᓗᓈᑦ ᓄᓇᖓᓂᙵᕐᑐᓄᑦ ᐊᒻᒪᓗ ᐃᓕᓐᓂᐊᕐᓯᒪᔭᕆᐊᓕᖕᓂᒃ ᐃᓕᓐᓂᐊᕐᑎᑦᑎᓂᑦ ᐃᖅᑲᓇᐃᔭᕐᑎᓕᒫᓄᑦ ᐸᕐᓇᕆᔭᐅᓯᒪᖕᒥᔪᑦ.</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>"ᐊᑦᑕᕐᓇᖅᑕᐃᓕᒪᓂᖅ ᓯᕗᓪᓕᐅᑎᓪᓗᒍ, ᑕᐃᒪᙵᓕᒫᖅ"</seg></tuv>
+   <tuv xml:lang="iu"><seg>"Safety First, Always"</seg></tuv>
+  </tu>
  </body>
 </tmx>

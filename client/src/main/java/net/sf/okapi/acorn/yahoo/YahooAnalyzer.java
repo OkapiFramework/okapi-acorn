@@ -46,26 +46,32 @@ public class YahooAnalyzer extends BaseXLIFFProcessor {
 			JSONObject o3 = (JSONObject)o2.get("results");
 			if ( o3 == null ) return; // No result
 			JSONObject o4 = (JSONObject)o3.get("entities");
-			Object object = o4.get("entity");
-			if ( !(object instanceof JSONArray) ) {
-				return;
+			Object o5 = o4.get("entity");
+			if ( o5 instanceof JSONArray ) {
+				JSONArray array = (JSONArray)o5;
+				for ( Object obj : array ) {
+					annotate(fragment, (JSONObject)obj);
+				}
 			}
-			JSONArray array = (JSONArray)o4.get("entity");
-			// Markup the terms
-			for ( Object obj : array ) {
-				JSONObject o5 = (JSONObject)obj;
-				String term = ((JSONObject)o5.get("text")).get("content").toString();
-				// Find the term in the coded text
-				// Note: This works only on the first occurrence!
-				int start = fragment.getCodedText().indexOf(term);
-				if ( start == -1 ) continue;
-				// Annotate the coded text with the term
-				fragment.annotate(start, start+term.length(), "term", null, (String)o5.get("wiki_url"));
+			else if ( o5 instanceof JSONObject ) {
+				annotate(fragment, (JSONObject)o5);
 			}
 		}
 		catch ( Throwable e ) {
 			throw new RuntimeException("Error while querying service.", e);
 		}
+	}
+	
+	private void annotate (IContent fragment,
+		JSONObject obj)
+	{
+		String term = ((JSONObject)obj.get("text")).get("content").toString();
+		// Find the term in the coded text
+		// Note: This works only on the first occurrence!
+		int start = fragment.getCodedText().indexOf(term);
+		if ( start == -1 ) return;
+		// Annotate the coded text with the term
+		fragment.annotate(start, start+term.length(), "term", null, (String)obj.get("wiki_url"));
 	}
 
     private String post (String text)

@@ -78,7 +78,10 @@ public class Translation {
 					trgLang = (String)o2.get("targetLanguage");
 					if ( o2.containsKey("xlfSource") ) {
 						seg = Factory.XOM.createLoneSegment();
-						seg.setSource(jr.readContent(seg.getStore(), false, (JSONArray)o2.get("xlfSource")));
+						JSONArray src = (JSONArray)o2.get("xlfSource");
+						System.out.println("-- xlfSource for translation POST:");
+						System.out.println(src.toJSONString());
+						seg.setSource(jr.readContent(seg.getStore(), false, src));
 					}
 				}
 				catch ( ParseException e ) {

@@ -48,6 +48,7 @@ public class TMPanel extends JPanel {
 		c.weightx = 1.0;
 		//c.gridwidth = GridBagConstraints.REMAINDER;
 		add((edSearch = new JTextField()), c);
+		edSearch.setToolTipText("Leave empty to show all entries.");
 
 		final JButton btSearch = new JButton("Search");
 		btSearch.addActionListener(new ActionListener() {
@@ -61,13 +62,15 @@ public class TMPanel extends JPanel {
 		add(btSearch, c);
 
 		edResult = new JTextArea();
-		Font font = new Font("Gadugi", 0, 20); // Gadugi, Euphemia //new Font("Courier New", 0, 20);
+		Font font = new Font("Gadugi", 0, 20);
 		edResult.setFont(font);
 		edResult.setLineWrap(true);
 		edResult.setWrapStyleWord(true);
 		JScrollPane scrollPane = new JScrollPane(edResult); 
-		c = new GridBagConstraints(); c.anchor = GridBagConstraints.PAGE_END;
-		c.gridx = 0; c.gridy = 2; c.fill = GridBagConstraints.BOTH;
+		c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.PAGE_END;
+		c.gridx = 0; c.gridy = 2;
+		c.fill = GridBagConstraints.BOTH;
 		c.weighty = 1.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = GridBagConstraints.REMAINDER;
@@ -100,6 +103,9 @@ public class TMPanel extends JPanel {
 				log("src: " + Util.fmt(res.getSource()));
 				log("trg: " + Util.fmt(res.getTarget()));
 			}
+		}
+		if ( edResult.getText().isEmpty() ) {
+			log("No match found.");
 		}
 	}
 

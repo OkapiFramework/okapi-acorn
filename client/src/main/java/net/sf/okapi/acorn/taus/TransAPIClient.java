@@ -89,8 +89,6 @@ public class TransAPIClient {
 		// End of payload
 		tmp.append("}}");
 		
-		System.out.println("POST translation: "+tmp.toString());
-		
 		WebTarget target = clientMP.target(baseURL).path("translation");
 		MultiPart multiPartEntity = null;
 		try {
