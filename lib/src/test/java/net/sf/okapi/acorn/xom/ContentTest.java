@@ -54,7 +54,7 @@ public class ContentTest {
 		assertEquals("Text in\uE101\uE110bold\uE102\uE110 format.\uE103\uE110", ct);
 		//            01234567     8     90123     4     567890123
 		assertEquals(3, cont.getTags().size());
-		ITag tag = cont.getTags().get(Util.toKey(ct.charAt(7), ct.charAt(8)));
+		ITag tag = cont.getTags().get(XUtil.toKey(ct.charAt(7), ct.charAt(8)));
 		assertEquals("1", tag.getId());
 		ICTag code = (ICTag)tag;
 		assertEquals("<b>", code.getData());

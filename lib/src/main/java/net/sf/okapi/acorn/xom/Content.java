@@ -87,7 +87,7 @@ public class Content implements IContent {
 			case 1: // ITag, ICTag and IMTag
 				pos += 2;
 				findNext();
-				return (T)tags.get(Util.toKey(ctext.charAt(posNow), ctext.charAt(posNow+1)));
+				return (T)tags.get(XUtil.toKey(ctext.charAt(posNow), ctext.charAt(posNow+1)));
 //			case 2: // PCont
 //				pos += 2;
 //				findNext();
@@ -107,7 +107,7 @@ public class Content implements IContent {
 			start = pos;
 			for ( ; pos < ctext.length(); pos++ ) {
 				char ch = ctext.charAt(pos);
-				if ( Util.isChar1(ch) ) {
+				if ( XUtil.isChar1(ch) ) {
 					// Do we have text before?
 					// and if we in 'string' and 'object' modes
 					if (( start < pos ) && ( mode <= 1 )) {
@@ -191,11 +191,25 @@ public class Content implements IContent {
 		// Else check the tag references
 		// (the tags object is shared across the whole unit)
 		for ( int i=0; i<ctext.length(); i++ ) {
-			if ( Util.isChar1(ctext.charAt(i)) ) return true;
+			if ( XUtil.isChar1(ctext.charAt(i)) ) return true;
 		}
 		return false;
 	}
 
+	@Override
+	public boolean hasText (boolean seeWhitespaceAsText) {
+		for ( int i=0; i<ctext.length(); i++ ) {
+			char ch = ctext.charAt(i);
+			if ( !XUtil.isChar1(ch) ) {
+				if ( seeWhitespaceAsText || !Character.isWhitespace(ch) ) {
+					return true;
+				}
+			}
+			i++; // Skip second special character of the reference
+		}
+		return false;
+	}
+	
 	@Override
 	public String getPlainText () {
 		return Const.TAGREF_REGEX.matcher(new String(ctext)).replaceAll("");
@@ -221,8 +235,8 @@ public class Content implements IContent {
 		if ( tags.size() == 0 ) return Collections.emptyList();
 		ArrayList<ITag> list = new ArrayList<>();
 		for ( int i=0; i<ctext.length(); i++ ) {
-			if ( Util.isChar1(ctext.charAt(i)) ) {
-				list.add(tags.get(Util.toKey(ctext.charAt(i), ctext.charAt(++i))));
+			if ( XUtil.isChar1(ctext.charAt(i)) ) {
+				list.add(tags.get(XUtil.toKey(ctext.charAt(i), ctext.charAt(++i))));
 			}
 		}
 		return list;
@@ -233,8 +247,8 @@ public class Content implements IContent {
 		// Removes all the tags
 		for ( int i=0; i<ctext.length(); i++ ) {
 			char ch = ctext.charAt(i);
-			if ( Util.isChar1(ch) ) {
-				tags.remove(Util.toKey(ch, ctext.charAt(++i)));
+			if ( XUtil.isChar1(ch) ) {
+				tags.remove(XUtil.toKey(ch, ctext.charAt(++i)));
 			}
 		}
 		// Reset the text
@@ -251,8 +265,8 @@ public class Content implements IContent {
 		// Removes all the tags
 		for ( int i=start; i<end; i++ ) {
 			char ch = ctext.charAt(i);
-			if ( Util.isChar1(ch) ) {
-				tags.remove(Util.toKey(ch, ctext.charAt(++i)));
+			if ( XUtil.isChar1(ch) ) {
+				tags.remove(XUtil.toKey(ch, ctext.charAt(++i)));
 			}
 		}
 		ctext.delete(start, end);
@@ -277,7 +291,7 @@ public class Content implements IContent {
 	 */
 	@Override
 	public ICTag append (ICTag code) {
-		ctext.append(Util.toRef(tags.add(code)));
+		ctext.append(XUtil.toRef(tags.add(code)));
 		return code;
 	}
 	
@@ -286,7 +300,7 @@ public class Content implements IContent {
 		String data)
 	{
 		CTag ctag = new CTag(null, TagType.OPENING, id, data);
-		ctext.append(Util.toRef(tags.add(ctag)));
+		ctext.append(XUtil.toRef(tags.add(ctag)));
 		return ctag;
 	}
 
@@ -304,7 +318,7 @@ public class Content implements IContent {
 				String.format("The id '%s' does not correspond to a code.", id));
 		}
 		CTag ec = new CTag((CTag)opening, data);
-		ctext.append(Util.toRef(tags.add(ec)));
+		ctext.append(XUtil.toRef(tags.add(ec)));
 		return ec;
 	}
 
@@ -313,7 +327,7 @@ public class Content implements IContent {
 		String data)
 	{
 		CTag ctag = new CTag(null, TagType.STANDALONE, id, data);
-		ctext.append(Util.toRef(tags.add(ctag)));
+		ctext.append(XUtil.toRef(tags.add(ctag)));
 		return ctag;
 	}
 
@@ -322,7 +336,7 @@ public class Content implements IContent {
 		String type)
 	{
 		MTag mtag = new MTag(true, id, type);
-		ctext.append(Util.toRef(tags.add(mtag)));
+		ctext.append(XUtil.toRef(tags.add(mtag)));
 		return mtag;
 	}
 
@@ -338,13 +352,13 @@ public class Content implements IContent {
 				String.format("The id '%s' does not correspond to a marker.", id));
 		}
 		MTag em = new MTag((MTag)opening);
-		ctext.append(Util.toRef(tags.add(em)));
+		ctext.append(XUtil.toRef(tags.add(em)));
 		return em;
 	}
 
 	private void checkPosition (int pos) {
 		if ( pos > 0 ) {
-			if ( Util.isChar1(ctext.charAt(pos-1)) ) {
+			if ( XUtil.isChar1(ctext.charAt(pos-1)) ) {
 				throw new InvalidPositionException (
 					String.format("Position %d is inside a tag reference.", pos));
 			}
@@ -365,7 +379,7 @@ public class Content implements IContent {
 		ICTag code)
 	{
 		checkPosition(pos);
-		ctext.insert(pos, Util.toRef(tags.add(code)));
+		ctext.insert(pos, XUtil.toRef(tags.add(code)));
 		return code;
 	}
 
@@ -398,12 +412,12 @@ public class Content implements IContent {
 		checkPosition(end);
 		// Auto-generate the id
 		int key = tags.add(opening);
-		ctext.insert(start, Util.toRef(key));
+		ctext.insert(start, XUtil.toRef(key));
 		
 		// Create and insert the end tag
 		MTag closing = new MTag((MTag)opening);
 		key = tags.add(closing);
-		ctext.insert(end+2, Util.toRef(key));
+		ctext.insert(end+2, XUtil.toRef(key));
 		// Return the length difference
 		return ctext.length()-initial;
 	}
@@ -488,7 +502,7 @@ public class Content implements IContent {
 			// Check the corresponding closing tag (if any)
 			closing = tags.getClosingTag(opening.getId());
 			if ( closing != null ) {
-				int pos = ctext.indexOf(Util.toRef(tags.getKey(closing)));
+				int pos = ctext.indexOf(XUtil.toRef(tags.getKey(closing)));
 				if (( end == pos ) || ( end == pos+2 )) { // End is just before or before the closing tag
 					// We can reuse this annotation
 					if ( matchingType != null ) {
@@ -511,6 +525,5 @@ public class Content implements IContent {
 		
 		return opening;
 	}
-	
-	
+
 }

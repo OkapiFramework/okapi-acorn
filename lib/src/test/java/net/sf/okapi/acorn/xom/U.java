@@ -1,7 +1,7 @@
 package net.sf.okapi.acorn.xom;
 
 import net.sf.okapi.acorn.xom.Const;
-import net.sf.okapi.acorn.xom.Util;
+import net.sf.okapi.acorn.xom.XUtil;
 
 /**
  * Provides a set of utility functions for testing.
@@ -14,7 +14,7 @@ public class U {
 	 * @return the key.
 	 */
 	static public int kOC (int value) {
-		return Util.toKey(Const.CODE_OPENING, Const.TAGREF_BASE+value);
+		return XUtil.toKey(Const.CODE_OPENING, Const.TAGREF_BASE+value);
 	}
 	
 	/**
@@ -23,7 +23,7 @@ public class U {
 	 * @return the key.
 	 */
 	static public int kCC (int value) {
-		return Util.toKey(Const.CODE_CLOSING, Const.TAGREF_BASE+value);
+		return XUtil.toKey(Const.CODE_CLOSING, Const.TAGREF_BASE+value);
 	}
 	
 	/**
@@ -32,7 +32,7 @@ public class U {
 	 * @return the key.
 	 */
 	static public int kSC (int value) {
-		return Util.toKey(Const.CODE_STANDALONE, Const.TAGREF_BASE+value);
+		return XUtil.toKey(Const.CODE_STANDALONE, Const.TAGREF_BASE+value);
 	}
 
 	/**
@@ -41,7 +41,7 @@ public class U {
 	 * @return the key.
 	 */
 	static public int kOA (int value) {
-		return Util.toKey(Const.MARKER_OPENING, Const.TAGREF_BASE+value);
+		return XUtil.toKey(Const.MARKER_OPENING, Const.TAGREF_BASE+value);
 	}
 	
 	/**
@@ -50,7 +50,7 @@ public class U {
 	 * @return the key.
 	 */
 	static public int kCA (int value) {
-		return Util.toKey(Const.MARKER_CLOSING, Const.TAGREF_BASE+value);
+		return XUtil.toKey(Const.MARKER_CLOSING, Const.TAGREF_BASE+value);
 	}
 
 }

@@ -10,12 +10,17 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import net.sf.okapi.acorn.calais.OpenCalais;
+import net.sf.okapi.acorn.common.MarkerCleaner;
+import net.sf.okapi.acorn.common.Segmenter;
+import net.sf.okapi.acorn.common.Util;
 import net.sf.okapi.acorn.dbpedia.DBpediaSpotlight;
 import net.sf.okapi.acorn.taas.TAAS;
+import net.sf.okapi.acorn.taus.TAUSTransRequester;
+import net.sf.okapi.acorn.taus.TAUSTransRetriever;
 import net.sf.okapi.acorn.taus.TransAPIClient;
 import net.sf.okapi.acorn.yahoo.YahooAnalyzer;
 
-import org.oasisopen.xliff.om.v1.IContent;
+import org.oasisopen.xliff.om.v1.GetTarget;
 import org.oasisopen.xliff.om.v1.IDocument;
 import org.oasisopen.xliff.om.v1.IFile;
 import org.oasisopen.xliff.om.v1.IGroupOrUnit;
@@ -85,29 +90,51 @@ public class DocumentsPanel extends JPanel {
 	public IDocument getDocument () {
 		return tableModel.getDocument();
 	}
+	
+	public String getPath () {
+		return edPath.getText().trim();
+	}
 
-	public void applyTM () {
+	public void leveragefromTM () {
 		main.clearLog();
-		main.log("=== Applying TM");
+		main.log("=== Leverage from TM");
 		try {
-			IDocument doc = tableModel.getDocument();
-			if ( doc == null ) return;
-			// Try to find TM matches
-			for ( IFile file : doc ) {
-				for ( IGroupOrUnit gou : file ) {
-					if ( !gou.isUnit() ) continue;
-					IUnit unit = (IUnit)gou;
-					for ( ISegment seg : unit.getSegments() ) {
-						if ( seg.hasTarget() ) continue;
-						if ( seg.getSource().isEmpty() ) continue;
-						Entry res = tm.search(seg.getSource());
-						if ( res != null ) {
-							seg.copyTarget(res.getTarget());
-						}
-					}
-				}
-			}
-			tableModel.refreshDisplay();
+			SimpleTMLeveraging task = new SimpleTMLeveraging(tm);
+			task.setDocument(tableModel.getDocument());
+			main.runTask("Simple TM Leveraging", task);
+			if ( task.getError() != null ) throw task.getError();
+			tableModel.refreshDisplay(false);
+			main.log("Done");
+			main.setTab(MainDialog.TAB_XOM);
+		}
+		catch ( Throwable e ) {
+			main.log(e);
+			main.setTab(MainDialog.TAB_LOG);
+		}
+	}
+	
+	public void applySegmentation () {
+		main.clearLog();
+		main.log("=== Applying segmentation");
+		try {
+			Segmenter segmenter = new Segmenter();
+			segmenter.process(tableModel.getDocument());
+			tableModel.refreshDisplay(true);
+			main.log("Done");
+			main.setTab(MainDialog.TAB_XOM);
+		}
+		catch ( Throwable e ) {
+			main.log(e);
+			main.setTab(MainDialog.TAB_LOG);
+		}
+	}
+	
+	public void removeMarkers () {
+		main.clearLog();
+		main.log("=== Clearing markers");
+		try {
+			new MarkerCleaner().process(tableModel.getDocument());
+			tableModel.refreshDisplay(false);
 			main.log("Done");
 			main.setTab(MainDialog.TAB_XOM);
 		}
@@ -121,8 +148,11 @@ public class DocumentsPanel extends JPanel {
 		main.clearLog();
 		main.log("=== Applying Open-Calais Web services");
 		try {
-			new OpenCalais().process(tableModel.getDocument());
-			tableModel.refreshDisplay();
+			OpenCalais task = new OpenCalais();
+			task.setDocument(tableModel.getDocument());
+			main.runTask("Open-Calais Web Service", task);
+			if ( task.getError() != null ) throw task.getError();
+			tableModel.refreshDisplay(false);
 			main.log("Done");
 			main.setTab(MainDialog.TAB_XOM);
 		}
@@ -136,8 +166,11 @@ public class DocumentsPanel extends JPanel {
 		main.clearLog();
 		main.log("=== Applying Yahoo Analyzer Web service");
 		try {
-			new YahooAnalyzer().process(tableModel.getDocument());
-			tableModel.refreshDisplay();
+			YahooAnalyzer task = new YahooAnalyzer();
+			task.setDocument(tableModel.getDocument());
+			main.runTask("Yahoo Analyzer Web Service", task);
+			if ( task.getError() != null ) throw task.getError();
+			tableModel.refreshDisplay(false);
 			main.log("Done");
 			main.setTab(MainDialog.TAB_XOM);
 		}
@@ -151,8 +184,11 @@ public class DocumentsPanel extends JPanel {
 		main.clearLog();
 		main.log("=== Applying DBpedia Spotlight Web service");
 		try {
-			new DBpediaSpotlight("iu").process(tableModel.getDocument());
-			tableModel.refreshDisplay();
+			DBpediaSpotlight task = new DBpediaSpotlight("iu");
+			task.setDocument(tableModel.getDocument());
+			main.runTask("DBpedia Spotlight Web Service", task);
+			if ( task.getError() != null ) throw task.getError();
+			tableModel.refreshDisplay(false);
 			main.log("Done");
 			main.setTab(MainDialog.TAB_XOM);
 		}
@@ -166,8 +202,11 @@ public class DocumentsPanel extends JPanel {
 		main.clearLog();
 		main.log("=== Applying TAAS Web service");
 		try {
-			new TAAS().process(tableModel.getDocument());
-			tableModel.refreshDisplay();
+			TAAS task = new TAAS();
+			task.setDocument(tableModel.getDocument());
+			main.runTask("DBpedia Spotlight Web Service", task);
+			if ( task.getError() != null ) throw task.getError();
+			tableModel.refreshDisplay(false);
 			main.log("Done");
 			main.setTab(MainDialog.TAB_XOM);
 		}
@@ -181,26 +220,10 @@ public class DocumentsPanel extends JPanel {
 		main.clearLog();
 		main.log("=== Posting translation requests to TAUS server");
 		try {
-			IDocument doc = tableModel.getDocument();
-			if ( doc == null ) return;
-			// Post the translation requests for each segment
-			for ( IFile file : doc ) {
-				for ( IGroupOrUnit gou : file ) {
-					if ( !gou.isUnit() ) continue;
-					IUnit unit = (IUnit)gou;
-					for ( ISegment seg : unit.getSegments() ) {
-						if ( seg.hasTarget() ) continue;
-						if ( seg.getSource().isEmpty() ) continue;
-						if ( ttapi.translation_post(seg.getId(),
-							doc.getSourceLanguage(), doc.getTargetLanguage(),
-							seg.getSource()) >= 400 )
-						{
-							main.log("Error "+ttapi.getResponseString());
-							return;
-						}
-					}
-				}
-			}
+			TAUSTransRequester task = new TAUSTransRequester("iu", ttapi);
+			task.setDocument(tableModel.getDocument());
+			main.runTask("TAUS Translation API - Requester", task);
+			if ( task.getError() != null ) throw task.getError();
 			main.log("Done");
 		}
 		catch ( Throwable e ) {
@@ -213,31 +236,11 @@ public class DocumentsPanel extends JPanel {
 		main.clearLog();
 		main.log("=== Retrieving translation requests from TAUS server");
 		try {
-			IDocument doc = tableModel.getDocument();
-			if ( doc == null ) return;
-			// Get back the translations
-			for ( IFile file : doc ) {
-				for ( IGroupOrUnit gou : file ) {
-					if ( !gou.isUnit() ) continue;
-					IUnit unit = (IUnit)gou;
-					for ( ISegment seg : unit.getSegments() ) {
-						if ( seg.hasTarget() ) continue;
-						if ( seg.getSource().isEmpty() ) continue;
-						if ( ttapi.translation_id_get(seg.getId()) >= 400 ) {
-							main.log("Error "+ttapi.getResponseString());
-							return;
-						}
-						// Else: parse the result back to the target content
-						IContent target = ttapi.getTargetContent(ttapi.getResponseString());
-						if ( target != null ) {
-							seg.copyTarget(target);
-						}
-						// Remove the translation request from the server
-						ttapi.translation_id_delete(seg.getId());
-					}
-				}
-			}
-			tableModel.refreshDisplay();
+			TAUSTransRetriever task = new TAUSTransRetriever(ttapi);
+			task.setDocument(tableModel.getDocument());
+			main.runTask("TAUS Translation API - Retriever", task);
+			if ( task.getError() != null ) throw task.getError();
+			tableModel.refreshDisplay(false);
 			main.log("Done");
 			main.setTab(MainDialog.TAB_XOM);
 		}

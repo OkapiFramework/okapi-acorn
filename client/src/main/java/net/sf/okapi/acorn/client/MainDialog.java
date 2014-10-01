@@ -22,7 +22,6 @@ package net.sf.okapi.acorn.client;
 
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -44,7 +43,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.sf.okapi.acorn.common.FilterBasedReader;
 import net.sf.okapi.acorn.common.IDocumentReader;
-import net.sf.okapi.acorn.common.Segmenter;
 import net.sf.okapi.acorn.common.XLIFF2Reader;
 import net.sf.okapi.acorn.common.XLIFFWriter;
 import net.sf.okapi.acorn.taus.TransAPIClient;
@@ -68,16 +66,21 @@ public class MainDialog extends JFrame {
 	private JTabbedPane tabPane;
 	private TMPanel tmPanel;
 	private DocumentsPanel docPanel;
-	private JMenuItem miSaveAsXLF;
+	private JMenuItem miCleanMarkers;
+	private JMenuItem miSave;
+	private JMenuItem miSaveAs;
 	private JMenuItem miApplyTM;
+	private JMenuItem miSegment;
 	private JMenuItem miApplyDBpedia;
 	private JMenuItem miApplyYahoo;
 	private JMenuItem miApplyOpenCalais;
 	private JMenuItem miApplyTAAS;
 	private JMenuItem miPostTAUSRequests;
 	private JMenuItem miRetrieveTAUSRequests;
+	private ExecutionDialog execDialog;
 
 	public MainDialog () {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		tm = new SimpleTM();
 		ttapi = new TransAPIClient(null);
 		initComponents();
@@ -86,9 +89,7 @@ public class MainDialog extends JFrame {
 	}
 
 	private void initComponents () {
-		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Okapi Acorn - Client");
-
 		final String tabStart = "<html><body><table width='160'>";
 		final String tabEnd = "</table></body></html>";
 		
@@ -110,24 +111,53 @@ public class MainDialog extends JFrame {
 			}
 		});
 		
-		miSaveAsXLF = new JMenuItem("Save As XLIFF File...", KeyEvent.VK_S);
-		miSaveAsXLF.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-		menu.add(miSaveAsXLF);
-		miSaveAsXLF.addActionListener(new ActionListener() {
+		miSave = new JMenuItem("Save To XLIFF", KeyEvent.VK_S);
+		miSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		menu.add(miSave);
+		miSave.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed (ActionEvent event) {
-				saveAsXLIFF();
+				saveDocument();
+			}
+		});
+		
+		miSaveAs = new JMenuItem("Save As...", KeyEvent.VK_V);
+		menu.add(miSaveAs);
+		miSaveAs.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				saveDocumentAs();
 			}
 		});
 		
 		menu.addSeparator();
 		
-		miApplyTM = new JMenuItem("Apply Translation Memory", KeyEvent.VK_T);
+		miCleanMarkers = new JMenuItem("Remove Annotations", KeyEvent.VK_V);
+		menu.add(miCleanMarkers);
+		miCleanMarkers.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				docPanel.removeMarkers();
+			}
+		});
+		
+		miSegment = new JMenuItem("Apply Segmentation Rules", KeyEvent.VK_E);
+		menu.add(miSegment);
+		miSegment.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				docPanel.applySegmentation();
+			}
+		});
+		
+		menu.addSeparator();
+
+		miApplyTM = new JMenuItem("Leverage From Translation Memory", KeyEvent.VK_L);
 		menu.add(miApplyTM);
 		miApplyTM.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed (ActionEvent event) {
-				docPanel.applyTM();
+				docPanel.leveragefromTM();
 			}
 		});
 		
@@ -171,7 +201,7 @@ public class MainDialog extends JFrame {
 		
 		menu.addSeparator();
 		
-		miPostTAUSRequests = new JMenuItem("Send Translation Requests to TAUS Server", KeyEvent.VK_P);
+		miPostTAUSRequests = new JMenuItem("Send Translation Requests to TAUS Server", KeyEvent.VK_Q);
 		menu.add(miPostTAUSRequests);
 		miPostTAUSRequests.addActionListener(new ActionListener() {
 			@Override
@@ -180,7 +210,7 @@ public class MainDialog extends JFrame {
 			}
 		});
 		
-		miRetrieveTAUSRequests = new JMenuItem("Retrieve Translation Requests from TAUS Server", KeyEvent.VK_P);
+		miRetrieveTAUSRequests = new JMenuItem("Retrieve Translation Requests from TAUS Server", KeyEvent.VK_R);
 		menu.add(miRetrieveTAUSRequests);
 		miRetrieveTAUSRequests.addActionListener(new ActionListener() {
 			@Override
@@ -228,23 +258,38 @@ public class MainDialog extends JFrame {
 		tabPane.addTab(tabStart+"TAUS API Console"+tabEnd, atPanel);
 		
 		add(tabPane);
+		updateMenu();
 		
 		// Set minimum and preferred size for the dialog
 		setMinimumSize(new Dimension(550, 250));
 		setPreferredSize(new Dimension(950, 700));
 		pack();
-		updateMenu();
 
 		// Center the dialog
-		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		setLocation((dim.width - getSize().width) / 2,
-			(dim.height - getSize().height) / 2);
+		setLocationRelativeTo(null);
 	}
 
-	private void saveAsXLIFF () {
+	private void saveDocument () {
 		IDocument doc = docPanel.getDocument();
 		if ( doc == null ) return;
     	try {
+           	clearLog();
+			log("===== Save Document");
+    		XLIFFWriter.saveAs(doc, new File(docPanel.getPath()+".xlf"));
+    		log("Done");
+    	}
+    	catch ( Throwable e ) {
+    		log(e);
+			setTab(TAB_LOG);
+    	}
+	}
+
+	private void saveDocumentAs () {
+		IDocument doc = docPanel.getDocument();
+		if ( doc == null ) return;
+    	try {
+    		clearLog();
+			log("===== Save Document");
     		File outputFile;
     		JFileChooser fc = new JFileChooser();
     		FileNameExtensionFilter ff;
@@ -255,6 +300,7 @@ public class MainDialog extends JFrame {
     		// In both case:
     		fc.addChoosableFileFilter(ff);
     		fc.setFileFilter(ff);
+    		fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
     		int option = fc.showSaveDialog(this);
     		if ( option == JFileChooser.APPROVE_OPTION ) {
    				outputFile = fc.getSelectedFile();
@@ -269,6 +315,7 @@ public class MainDialog extends JFrame {
     	}
     	catch ( Throwable e ) {
     		log(e);
+			setTab(TAB_LOG);
     	}
 	}
 	
@@ -293,6 +340,7 @@ public class MainDialog extends JFrame {
     		fc.addChoosableFileFilter(new FileNameExtensionFilter("TMX Files", "tmx"));
     		fc.addChoosableFileFilter(ff);
     		fc.setFileFilter(ff);
+    		fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
     		int option = fc.showOpenDialog(this);
     		if ( option == JFileChooser.APPROVE_OPTION ) {
    				inputFile = fc.getSelectedFile();
@@ -334,6 +382,7 @@ public class MainDialog extends JFrame {
 	    	case "tmx":
 	    		reader = new FilterBasedReader("okf_tmx");
 	    		break;
+	    	case "htm":
 	    	case "html":
 	    		reader = new FilterBasedReader("okf_html");
 	    		break;
@@ -344,7 +393,6 @@ public class MainDialog extends JFrame {
 	    	}
     	
     		IDocument doc = reader.load(inputFile);
-    		new Segmenter().process(doc);
     		docPanel.setDocument(doc, path);
     		log("Done");
 			setTab(TAB_XOM);
@@ -352,7 +400,7 @@ public class MainDialog extends JFrame {
     	catch ( Throwable e ) {
     		log(e);
 			setTab(TAB_LOG);
-   	}
+    	}
     	finally {
     		updateMenu();
     	}
@@ -392,12 +440,14 @@ public class MainDialog extends JFrame {
 			nf.format(rt.freeMemory()/1024),
 			nf.format(rt.totalMemory()/1024)));
 		log("-------------------------------------------------------------------------------");
-	
 	}
 	
 	private void updateMenu () {
 		boolean enabled = (docPanel.getDocument() != null);
-		miSaveAsXLF.setEnabled(enabled);
+		miSave.setEnabled(enabled);
+		miSaveAs.setEnabled(enabled);
+		miSegment.setEnabled(enabled);
+		miCleanMarkers.setEnabled(enabled);
 		miApplyDBpedia.setEnabled(enabled);
 		miApplyTM.setEnabled(enabled);
 		miApplyYahoo.setEnabled(enabled);
@@ -420,4 +470,13 @@ public class MainDialog extends JFrame {
 		});
 	}
 
+	public void runTask (String title,
+		XLIFFDocumentTask task)
+	{
+		if ( execDialog == null ) {
+			execDialog = new ExecutionDialog(this, true);
+		}
+		execDialog.setTask(task, title);
+		execDialog.setVisible(true);
+	}
 }

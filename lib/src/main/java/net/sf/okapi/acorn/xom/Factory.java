@@ -75,10 +75,10 @@ public enum Factory implements IXLIFFFactory {
 		int key;
 		for ( int i=0; i<tmp.length(); i++ ) {
 			char ch = tmp.charAt(i);
-			if ( Util.isChar1(ch) ) {
+			if ( XUtil.isChar1(ch) ) {
 				ITag tag = oriTags.get(tmp, i);
 				key = destTags.add(copyTag(tag, destTags));
-				tmp.replace(i, i+2, Util.toRef(key)); i++;
+				tmp.replace(i, i+2, XUtil.toRef(key)); i++;
 			}
 		}
 		dest.setCodedText(tmp.toString());

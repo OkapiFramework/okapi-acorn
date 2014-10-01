@@ -30,8 +30,13 @@ public class DocumentTableModel extends AbstractTableModel {
 		return doc;
 	}
 	
-	public void refreshDisplay () {
-		fireTableDataChanged();
+	public void refreshDisplay (boolean updateData) {
+		if ( updateData ) {
+			updateData();
+		}
+		else {
+			fireTableDataChanged();
+		}
 	}
 	
 	private void updateData () {

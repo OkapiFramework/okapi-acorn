@@ -61,7 +61,7 @@ public class Tags implements ITags {
 	public ITag get (CharSequence ctext,
 		int pos)
 	{
-		return get(Util.toKey(ctext.charAt(pos), ctext.charAt(pos+1)));
+		return get(XUtil.toKey(ctext.charAt(pos), ctext.charAt(pos+1)));
 	}
 
 	@Override
@@ -150,7 +150,7 @@ public class Tags implements ITags {
 		if ( tags == null ) tags = new LinkedHashMap<>(3);
 		int value = lastValues.get(mtype);
 		lastValues.put(mtype, ++value);
-		int key = Util.toKey(mtype, Const.TAGREF_BASE+value);
+		int key = XUtil.toKey(mtype, Const.TAGREF_BASE+value);
 		if ( tags.containsKey(key) ) {
 			throw new InvalidParameterException("The key auto-selected to add this marker exists already.");
 		}

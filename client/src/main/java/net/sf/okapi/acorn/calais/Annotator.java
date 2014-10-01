@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import net.sf.okapi.acorn.xom.XUtil;
+
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IMTag;
 
@@ -17,7 +19,12 @@ public class Annotator {
 
 	private static Comparator<IInfoSpan> positionComparator = new Comparator<IInfoSpan>() {
 		public int compare(IInfoSpan span1, IInfoSpan span2) {
-			return Integer.compare(span2.getStart(), span1.getStart());
+			int s = Integer.compare(span2.getStart(), span1.getStart());
+			if ( s == 0 ) {
+				s = Integer.compare((span2.getEnd()-span2.getStart()), (span1.getEnd()-span1.getStart()));
+			}
+			return s;
+			//Integer.compare(span2.getStart(), span1.getStart());
 		}
 	};
 
@@ -43,23 +50,24 @@ public class Annotator {
 		int countStart = 0;
 		int countEnd = 0;
 		
+		String ct = content.getCodedText();
 		for ( IInfoSpan span : spans ) {
-			start = span.getStart();
-			end = span.getEnd();
+			start = span.getStart(); //Util.getCodedTextPosition(ct, span.getStart(), false);
+			end = span.getEnd(); //Util.getCodedTextPosition(ct, span.getEnd(), false);
 			type = span.getInfo().getType();
 			value = span.getInfo().getValue();
-System.out.println("s="+start+" e="+end+" t="+type+" v="+value);
+System.out.println("s="+start+" e="+end+" len="+(end-start)+" t="+type+" v="+value);
 			
 			int addStart = 0;
 			int addEnd = 0;
-			if ( prevStart == start ) {
+			if ( start == prevStart ) {
 				addStart = (++countStart)*2;
 				addEnd = (++countEnd)*2;
 				if ( end > prevEnd ) {
 					addEnd = (++countEnd)*2;
 				}
 			}
-			else { // start > prevStart
+			else { // start < prevStart (because of sorting)
 				if ( end > prevStart ) {
 					addEnd = (++countEnd)*2;
 					if ( end >= prevEnd ) {

@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import net.sf.okapi.acorn.common.BaseXLIFFProcessor;
+import net.sf.okapi.acorn.client.XLIFFDocumentTask;
 import net.sf.okapi.acorn.xom.Factory;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -17,16 +17,15 @@ import org.json.simple.parser.ParseException;
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IMTag;
 import org.oasisopen.xliff.om.v1.ISegment;
-import org.oasisopen.xliff.om.v1.IUnit;
 
-public class OpenCalais extends BaseXLIFFProcessor {
+public class OpenCalais extends XLIFFDocumentTask {
 
 	private class Occurrence implements Annotator.IInfoSpan, Comparable<Occurrence> {
 		
-		int start;
-		int end;
-		IMTag info;
-		String name;
+		private int start;
+		private int end;
+		private IMTag info;
+		private String name;
 
 		public Occurrence (int offset,
 			int length,
@@ -75,15 +74,12 @@ public class OpenCalais extends BaseXLIFFProcessor {
 	}
 	
 	@Override
-	public void process (IUnit unit) {
-		for ( ISegment segment : unit.getSegments() ) {
-			process(segment);
-		}
-	}
-	
-	private void process (ISegment segment) {
+	protected void process (ISegment segment) {
+    	super.process(segment);
 		IContent content = segment.getSource();
 		if ( content.isEmpty() ) return;
+		String body = content.getPlainText();
+		if ( body.isEmpty() ) return;
 		
 		PostMethod method = new PostMethod(BASEURL);
 		method.setRequestHeader("x-calais-licenseID", "qp4vk8cbb4xjmjde6hzpuxdq");
@@ -92,7 +88,6 @@ public class OpenCalais extends BaseXLIFFProcessor {
         method.setRequestHeader("enableMetadataType", "SocialTags,GenericRelations");
         
         // Do the call
-        String body = content.getPlainText();
         try {
 			method.setRequestEntity(new StringRequestEntity(body, "text/raw", "UTF-8"));
 		}
@@ -103,7 +98,6 @@ public class OpenCalais extends BaseXLIFFProcessor {
         String res = doRequest(method);
         
         // Process the results
-        System.out.println(res);
         annotate(content, res);
 	}
 
@@ -163,6 +157,16 @@ public class OpenCalais extends BaseXLIFFProcessor {
 		catch (ParseException e) {
 			e.printStackTrace();
 		}
+	}
+
+    @Override
+	public String getInfo () {
+		return "<html><header><style>"
+			+ "body{font-size: large;} code{font-size: large;}"
+			+ "</style></header><body>"
+			+ "<p>The <b>Open-Calais Web Service</b> from Thomson Reuters is used to find entities and mark them "
+			+ "using the ITS Text Analysis annotation.</p>"
+			+ "</body></html>";
 	}
 
 }

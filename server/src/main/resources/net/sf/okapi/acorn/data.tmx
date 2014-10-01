@@ -3,6 +3,53 @@
  <header creationtool="Acorn" creationtoolversion="1.0" datatype="xml" segtype="sentence" adminlang="en" srclang="en" o-tmf="Acorn">
  </header>
  <body>
+
+ <!-- http://www.kativik.qc.ca/
+  <tu>
+   <tuv xml:lang="en"><seg></seg></tuv>
+   <tuv xml:lang="iu"><seg></seg></tuv>
+  </tu>
+  -->
+  <tu>
+   <tuv xml:lang="en"><seg>About Nunavut</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᓄᓇᕗᑦᒨᓕᖓᔪᑦ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>About Canada</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᑲᓇᑕᒨᓕᖓᔪᑦ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>About Iqaluit</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᖃᓗᐃᑦᒨᓕᖓᔪᑦ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Sign in</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᑎᕐᓗᑎᑦ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Our Organization</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᑎᒥᕐᑯᑎᕗᑦ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Employment</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐱᓇᓱᒉᑦ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Visit pages in this section for information on current jobs available as well as for information regarding the various jobs available throughout Nunavik and in Montreal.</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᑕᒡᒐᓂ ᐳᓛᕈᓐᓇᑐᑎᑦ ᕿᓂᕐᕕᒋᓗᒍ ᖃᐅᔨᒪᔭᑦᓴᓂᒃ ᑲᒪᔪᓂᒃ ᐅᓪᓗᒥ ᐱᓇᓱᒐᕐᓂᒃ ᐱᔭᑦᓴᐅᔪᓂᒃ ᐊᒻᒪᓗ ᕿᓂᕐᕕᒋᓗᒍ ᖃᐅᔨᒪᔭᑦᓴᓂᒃ ᑲᒪᔪᓂᒃ ᐊᑦᔨᒌᖕᖏᑐᒋᐊᓪᓚᓂᒃ ᐱᓇᓱᒐᕐᓂᒃ ᐱᔭᑦᓴᐅᔪᓂᒃ ᓄᓇᕕᐅᑉ ᐃᓗᓕᒫᖓᓂ ᐊᒻᒪᓗ ᒪᓐᑐᔨᐊᒥ.</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>AiPai Web</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐁᐯ ᐅᑐᑦᓯᒪᕕᖓ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>AiPai Web can help you learn to type Inuktitut using syllabics.</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐁᐯ-ᒥᓐᓇ ᖃᕆᑕᐅᔭᒃᑯᑦ ᐊᑐᐃᓐᓇᖃᕐᕕᖓ ᐊᑐᐃᓐᓇᖅ ᐃᓕᓐᓂᐊᑎᑦᓯᒍᑎᐅᑎᓪᓗᒍ ᐃᓄᒃᑎᑐᑦ ᓇᕿᑦᑕᓂᕐᒥᒃ.</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>AiPai Web teaches all characters used in Nunavik Inuktitut in a sequence of 34 lessons, random practice texts and races against opponents.</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐁᐯ ᖃᕆᑕᐅᔭᒃᑯᑦ ᐊᑐᐃᓐᓇᖃᕐᕕᒃ ᐃᓕᓐᓂᐊᑎᑦᓯᓲᖅ ᐊᑐᕐᑕᐅᓲᓕᒪᓃᒃ ᓄᓇᕕᒻᒥᐅᑎᑐᑦ ᐃᓄᒃᑎᑐᑦ 34-ᓂᒃ ᐃᓕᓐᓂᐊᑎᑦᓯᒍᑎᖃᕐᓱᓂ ᑐᖓᓕᕇᓂᒃ, ᐅᖃᐅᓯᕐᓂᒃ ᐱᒋᐅᕐᓴᐅᑎᐅᑦᓱᓂ ᓂᕈᐊᕐᑕᐅᔪᓂᒃ ᑕᒫᖕᖓᑐᐃᓐᓇᖅ ᓱᑲᓕᐅᑎᓂᕐᒥᓗ ᖃᑦᓯᕌᕐᓯᒪᐅᑏᑦ ᐊᓯᖏᑦ ᖄᖏᒐᓱᐊᕐᓱᒋᑦ.</seg></tuv>
+  </tu>
   <tu>
    <tuv xml:lang="en"><seg>We can pave the way for the future.</seg></tuv>
    <tuv xml:lang="iu"><seg>ᓯᕗᓂᑦᓴᑎᓐᓄᑦ ᐊᖁᑎᒃᓴᓕᐅᕆᐊᖃᕋᑦᑕ.</seg></tuv>

@@ -27,10 +27,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
-import org.oasisopen.xliff.om.v1.ICTag;
-import org.oasisopen.xliff.om.v1.IContent;
-import org.oasisopen.xliff.om.v1.TagType;
-
 public class Main {
 
 	public static void main (String[] originalArgs) {
@@ -53,27 +49,6 @@ public class Main {
 		}
 
 		MainDialog.start();
-		
-//		TAAS taas = new TAAS();
-//		taas.handleUnit(null);
-		
-//		OpenCalais proc = new OpenCalais();
-//		Unit unit = new Unit("id");
-//		Segment seg = unit.appendSegment();
-//		Fragment frag = seg.getSource();
-//		frag.append("The Rotary Club in Iqaluit meets every first Monday of each month.");
-
-		//		frag.append("It became a vital link in a trade route between the Orient, Eastern Canada and London. ");
-
-//		frag.append("This is a test from Boulder, ");
-//		frag.append(TagType.OPENING, "1", "<b>", false);
-//		frag.append("Colorado");
-//		frag.append(TagType.CLOSING, "1", "</b>", false);
-//		frag.append(", to see if this Java program works fine.");
-//		frag.appendStandalone("2", "<br>");
-		
-//		proc.handleUnit(new Event(EventType.TEXT_UNIT, null, unit));
-
 	}
 
 }

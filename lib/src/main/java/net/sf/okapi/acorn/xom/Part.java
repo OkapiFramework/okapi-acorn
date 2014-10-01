@@ -94,7 +94,7 @@ public class Part implements IPart {
 		if ( target == null ) {
 			switch ( option ) {
 			case CLONE_SOURCE:
-				throw new RuntimeException("CLONE_SOURCE case not implemented yet");
+				target = Factory.XOM.copyContent(store, true, source);
 			case CREATE_EMPTY:
 				target = new Content(store, true);
 				break;

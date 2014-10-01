@@ -4,6 +4,7 @@ import org.oasisopen.xliff.om.v1.IDocument;
 import org.oasisopen.xliff.om.v1.IFile;
 import org.oasisopen.xliff.om.v1.IGroup;
 import org.oasisopen.xliff.om.v1.IGroupOrUnit;
+import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.IUnit;
 
 public abstract class BaseXLIFFProcessor implements IXLIFFProcessor {
@@ -26,6 +27,14 @@ public abstract class BaseXLIFFProcessor implements IXLIFFProcessor {
 		}
 	}
 
-	abstract public void process (IUnit unit);
-
+	protected void process (IUnit unit) {
+		for ( ISegment seg : unit.getSegments() ) {
+			process(seg);
+		}
+	}
+	
+	protected void process (ISegment segment) {
+		// Do nothing by default
+	}
+	
 }

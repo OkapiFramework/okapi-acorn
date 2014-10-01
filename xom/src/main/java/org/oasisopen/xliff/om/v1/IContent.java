@@ -28,6 +28,14 @@ public interface IContent extends Iterable<Object> {
 	public boolean hasTag ();
 	
 	/**
+	 * Indicates if this content has some text (content that is not tags).
+	 * @param seeWhitespaceAsText true to see whitespace as part of the text,
+	 * false to not consider whitespace as text. 
+	 * @return true if there is text, false otherwise.
+	 */
+	public boolean hasText (boolean seeWhitespaceAsText);
+	
+	/**
 	 * Gets a plain text version (all tag references stripped out) of the content of this fragment.
 	 * @return the plain text version of this fragment.
 	 */

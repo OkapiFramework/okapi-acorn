@@ -26,7 +26,7 @@ import org.oasisopen.xliff.om.v1.IXLIFFFactory;
 
 public class SimpleTM implements IWithStore, Iterable<Entry> {
 
-	private static final IXLIFFFactory XFIMPL2 = Factory.XOM;
+	private static final IXLIFFFactory OKAPI_XLIFFIMPL = Factory.XOM;
 	
 	private final String tmId;
 	private final IStore store;
@@ -58,8 +58,8 @@ public class SimpleTM implements IWithStore, Iterable<Entry> {
 			if ( trgContent.isEmpty() ) continue; // Skip segments with empty target
 			// Else: add the segment
 			Entry entry = new Entry(
-				XFIMPL2.copyContent(store, false, srcContent),
-				XFIMPL2.copyContent(store, true, trgContent));
+				OKAPI_XLIFFIMPL.copyContent(store, false, srcContent),
+				OKAPI_XLIFFIMPL.copyContent(store, true, trgContent));
 			if ( entries.add(entry) ) count++;
 		}
 		return count;
@@ -68,9 +68,9 @@ public class SimpleTM implements IWithStore, Iterable<Entry> {
 	public void addSegment (String srcPlainText,
 		String trgPlainText)
 	{
-		IContent src = XFIMPL2.createContent(store, false);
+		IContent src = OKAPI_XLIFFIMPL.createContent(store, false);
 		src.setCodedText(srcPlainText);
-		IContent trg = XFIMPL2.createContent(store, true);
+		IContent trg = OKAPI_XLIFFIMPL.createContent(store, true);
 		trg.setCodedText(trgPlainText);
 		entries.add(new Entry(src, trg));
 	}

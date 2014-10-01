@@ -61,8 +61,15 @@ public class ExtObjects extends BaseData1 implements IExtObjects {
 	public IExtObject getOrCreate (String nsUri,
 		String name)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if ( list == null ) list = new ArrayList<>();
+		for ( IExtObject obj : list ) {
+			if ( obj.getNSUri().equals(nsUri)
+				&& obj.getName().equals(name) ) {
+				return obj; // Found
+			}
+		}
+		// None found, create one
+		return add(nsUri, name);
 	}
 
 	@Override

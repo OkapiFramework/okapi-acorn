@@ -27,7 +27,8 @@ public interface IExtObjects extends IWithExtFields, Iterable<IExtObject> {
 		String name);
 
 	/**
-	 * Get and if needed, create before, a given extension object from this collection.
+	 * Get, and if needed, create before, a given extension object from this collection.
+	 * If the object is created it is added automatically to the collection.
 	 * @param nsUri the namespace of the extension object.
 	 * @param name the name of the extension object.
 	 * @return the extension object searched for: the first existing one, or one just created.

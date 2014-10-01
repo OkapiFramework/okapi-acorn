@@ -1,5 +1,6 @@
 package net.sf.okapi.acorn.common;
 
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +39,12 @@ public class Segmenter extends BaseXLIFFProcessor {
 				unit.split(partIndex, srcEnd, srcEnd, trgEnd, trgEnd, true);
 			}
 			// Go to next segment, it will be the new segment if one was created
+		}
+		// Set the segment IDs for TAUS
+		for ( ISegment segment : unit.getSegments() ) {
+			if ( segment.getId().length() < 5 ) {
+				segment.setId(UUID.randomUUID().toString());
+			}
 		}
 	}
 

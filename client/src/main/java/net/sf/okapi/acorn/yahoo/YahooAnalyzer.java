@@ -8,16 +8,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import net.sf.okapi.acorn.common.BaseXLIFFProcessor;
+import net.sf.okapi.acorn.client.XLIFFDocumentTask;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.ISegment;
-import org.oasisopen.xliff.om.v1.IUnit;
 
-public class YahooAnalyzer extends BaseXLIFFProcessor {
+public class YahooAnalyzer extends XLIFFDocumentTask {
 
 	private JSONParser parser;
 
@@ -26,19 +25,17 @@ public class YahooAnalyzer extends BaseXLIFFProcessor {
     }
     
     @Override
-    public void process (IUnit unit) {
-    	// Add terms in each source segment
-    	for ( ISegment segment : unit.getSegments() ) {
-    		getTerms(segment);
-    	}
+    protected void process (ISegment segment) {
+    	super.process(segment);
+    	getTerms(segment);
     }
 
 	private void getTerms (ISegment segment) {
 		try {
 			// Get the source content
-			IContent fragment = segment.getSource();
+			IContent content = segment.getSource();
 			// Get the coded text for the content
-			String text = fragment.getCodedText();
+			String text = content.getCodedText();
 			if ( text.isEmpty() ) return;
 			// Query Yahoo with the coded text: this gives an array of terms
 			JSONObject o1 = (JSONObject)parser.parse(post(text));
@@ -46,15 +43,16 @@ public class YahooAnalyzer extends BaseXLIFFProcessor {
 			JSONObject o3 = (JSONObject)o2.get("results");
 			if ( o3 == null ) return; // No result
 			JSONObject o4 = (JSONObject)o3.get("entities");
+			if ( o4 == null ) return; // No entities
 			Object o5 = o4.get("entity");
 			if ( o5 instanceof JSONArray ) {
 				JSONArray array = (JSONArray)o5;
 				for ( Object obj : array ) {
-					annotate(fragment, (JSONObject)obj);
+					annotate(content, (JSONObject)obj);
 				}
 			}
 			else if ( o5 instanceof JSONObject ) {
-				annotate(fragment, (JSONObject)o5);
+				annotate(content, (JSONObject)o5);
 			}
 		}
 		catch ( Throwable e ) {
@@ -116,5 +114,16 @@ public class YahooAnalyzer extends BaseXLIFFProcessor {
 		// Else: error
 		throw new RuntimeException("Error processing the response, code="+handle.getResponseCode());
     }
+
+    @Override
+	public String getInfo () {
+		return "<html><header><style>"
+			+ "body{font-size: large;} h3{font-size: large;} code{font-size: large;}"
+			+ "</style></header><body>"
+			+ "<p>The <b>Yahoo Content Analysis Web Service</b> is used to find entities and mark them as 'terms' "
+			+ "using term markers. When available, the <code>ref</code> attribute points to the "
+			+ "Wikipedia page corresponding to the entity.</p>"
+			+ "</body></html>";
+	}
 
 }

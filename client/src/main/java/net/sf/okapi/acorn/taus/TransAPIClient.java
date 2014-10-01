@@ -196,7 +196,8 @@ public class TransAPIClient {
 				seg.setTarget(JR.readContent(seg.getStore(), true, (JSONArray)o2.get("xlfTarget")));
 			}
 			else {
-				seg.setTarget((String)o2.get("target"));
+				String t = (String)o2.get("target");
+				if (( t != null ) && !t.isEmpty() ) seg.setTarget(t);
 			}
 		}
 		catch ( ParseException e ) {

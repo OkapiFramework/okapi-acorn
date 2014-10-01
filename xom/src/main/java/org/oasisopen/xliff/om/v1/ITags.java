@@ -81,7 +81,7 @@ public interface ITags extends Iterable<ITag> {
 	/**
 	 * Added a given tag to this collection.
 	 * @param tag the new tag to add.
-	 * @return the added tag (same as the parameter).
+	 * @return the key of the added tag.
 	 */
 	public int add (ITag tag);
 

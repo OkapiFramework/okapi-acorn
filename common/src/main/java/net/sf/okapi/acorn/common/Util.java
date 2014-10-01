@@ -20,10 +20,20 @@
 
 package net.sf.okapi.acorn.common;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sf.okapi.acorn.xom.Factory;
+import net.sf.okapi.acorn.xom.XUtil;
+
 import org.oasisopen.xliff.om.v1.ICTag;
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IMTag;
+import org.oasisopen.xliff.om.v1.ISegment;
+import org.oasisopen.xliff.om.v1.ITag;
+import org.oasisopen.xliff.om.v1.ITags;
 import org.oasisopen.xliff.om.v1.TagType;
+import org.oasisopen.xliff.om.v1.TargetState;
 
 public class Util {
 	
@@ -119,6 +129,124 @@ public class Util {
 
 	public static boolean isNoE (String text) {
 		return (( text == null ) || text.isEmpty() );
+	}
+
+	private static String toStr (ITag tag) {
+		String type = tag.getType();
+		switch ( tag.getTagType() ) {
+		case OPENING:
+			return "o"+type;
+		case CLOSING:
+			return "c"+type;
+		case STANDALONE:
+			return "s"+type;
+		}
+		return null; // Should never occur
+	}
+	
+	/**
+	 * Leverages a given content into the target of a given segment.
+	 * The text of the content is set in the target of the segment, then this method
+	 * tries to copy the tags in the source of the segment to replace their corresponding
+	 * tags into the target content. Any source tag without a match is then copied at the end
+	 * of the target, and any target tag not replaced by a source one is removed.
+	 * @param dest the segment where to apply the leveraging.
+	 * @param translation the content to leverage into the segment.
+	 */
+	public static void leverage (ISegment dest,
+		IContent translation)
+	{
+		// Get the list of the tags in the source
+		List<ITag> srcTags = dest.getSource().getOwnTags();
+		// Detect if there is a tag as the start of the segment
+		ITag first = null;
+		if ( XUtil.isChar1(dest.getSource().getCodedText().charAt(0)) ) {
+			first = srcTags.get(0);
+		}
+		// Duplicate the translation into the target of the destination segment
+		IContent cont = Factory.XOM.copyContent(dest.getStore(), true, translation);
+		List<ITag> trgTags = cont.getOwnTags();
+		
+		if ( !srcTags.isEmpty() || !trgTags.isEmpty() ) {
+
+			List<String> sigs = new ArrayList<>();
+			for ( ITag tag : srcTags ) {
+				sigs.add(toStr(tag));
+			}
+			ITags tags = cont.getTags();
+			StringBuilder ct = new StringBuilder(cont.getCodedText());
+			
+			if ( !trgTags.isEmpty() ) {
+				int ti = -1;
+				for ( int i=0; i<ct.length(); i++ ) {
+					char ch = ct.charAt(i);
+					if ( XUtil.isChar1(ch) ) {
+						// Get the key of the tag and its signature
+						int key = XUtil.toKey(ch, ct.charAt(i+1));
+						ITag tag = tags.get(key);
+						String tsig = toStr(tag);
+						ti++; // Increment the tag index
+						for ( int j=0; j<sigs.size(); j++ ) {
+							// search for non-null target signatures that match the source tag
+							if ( tsig.equals(sigs.get(j)) ) {
+								// Make a copy of the source tag
+								ITag stag = Factory.XOM.copyTag(srcTags.get(j), tags);
+								// And replace the target one
+								ct.replace(i, i+2, XUtil.toRef(tags.add(stag)));
+								// Remove the replaced tag from the list of target tags
+								tags.remove(key);
+								// Sets its signature to null (so it won't be used twice
+								sigs.set(j, null);
+								trgTags.set(ti, null);
+								break;
+							}
+						}
+						i++;
+					}
+				}
+			}
+			
+			// Now, the non-nulls in sigs are the source tags not in the target
+			// We need to add those to the new target content
+			for ( int i=0; i<sigs.size(); i++ ) {
+				if ( sigs.get(i) == null ) continue;
+				// Try to add the code that starts or ends the segment at those positions
+				if ( srcTags.get(i) == first ) {
+					ct.insert(0, XUtil.toRef(tags.add(Factory.XOM.copyTag(srcTags.get(i), tags))));
+				}
+				else { // last or any
+					ct.append(XUtil.toRef(tags.add(Factory.XOM.copyTag(srcTags.get(i), tags))));
+				}
+			}
+			
+			// And the non-nulls in trgTags are the extra tags in the target
+			// We need to remove those from the new target content
+			// (although some may be required
+			for ( int i=0; i<trgTags.size(); i++ ) {
+				if ( trgTags.get(i) == null ) continue;
+				// Remove the tag from new target
+				int key = cont.getTags().getKey(trgTags.get(i));
+				String ref = XUtil.toRef(key);
+				int p = ct.indexOf(ref);
+				if ( p == -1 ) {
+					//TODO: handle the issue, we should have a value
+					continue;
+				}
+				// Delete the reference and the actual tag
+				ct.delete(p, p+2);
+				tags.remove(key);
+			}
+
+			// Set the new coded text
+			cont.setCodedText(ct.toString());
+		
+		} // End of fixing up tags
+		
+		// Set that new content in the segment's target
+		dest.setTarget(cont);
+		// Update the target state
+		dest.setState(TargetState.TRANSLATED);
+		dest.setSubState(null); // Make sure any sub-state is reset
 	}
 
 }

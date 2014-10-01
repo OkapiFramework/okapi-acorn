@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import net.sf.okapi.acorn.common.BaseXLIFFProcessor;
+import net.sf.okapi.acorn.client.XLIFFDocumentTask;
 import net.sf.okapi.acorn.common.NSContext;
 import net.sf.okapi.acorn.common.Util;
 import net.sf.okapi.acorn.xom.Factory;
@@ -37,7 +36,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class TAAS extends BaseXLIFFProcessor {
+public class TAAS extends XLIFFDocumentTask {
 
 	private static final String BASEURL = "https://api.taas-project.eu";
 	private static final String GLS_URI = Util.NS_XLIFF20_GLOSSARY;
@@ -78,7 +77,7 @@ public class TAAS extends BaseXLIFFProcessor {
 		terms = new ArrayList<>();
 		try {
 			for ( ISegment seg : unit.getSegments() ) {
-				process(seg.getSource().getCodedText());
+				process(seg);
 			}
 			addGlossaryEntries(unit);
 		}
@@ -87,48 +86,54 @@ public class TAAS extends BaseXLIFFProcessor {
 		}
 	}
 
-	private void process (String codedText)
-		throws MalformedURLException, IOException, XPathExpressionException,
-		ParserConfigurationException, SAXException
-	{
-        StringBuilder r = new StringBuilder();
-        r.append(BASEURL).append("/extraction/");
-        r.append("?sourceLang=").append(srcLang);
-        r.append("&targetLang=").append(trgLang); // Hard-coded for the demo
-        r.append("&method=").append("4"); //4
-        HttpURLConnection conn;
-        conn = (HttpURLConnection) new URL(r.toString()).openConnection();
-        conn.setRequestProperty("Authorization", credentials.getBasic());
-        String tuk = credentials.getUserKey();
-        if ( tuk != null ) {
-            conn.setRequestProperty("TaaS-User-Key", tuk);
-        }
-        conn.setRequestProperty("Accept", "text/xml");
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "text/plain");
-        conn.setDoOutput(true);
-        OutputStream out = conn.getOutputStream();
-        try {
-            out.write(codedText.getBytes(StandardCharsets.UTF_8));
-        }
-        finally {
-            out.close();
-        }
-
-        String res = null;
-        InputStream in = conn.getInputStream();
-        try {
-            ByteArrayOutputStream o = new ByteArrayOutputStream();
-            byte[] b = new byte[1024];
-            int readBytes;
-            while ((readBytes = in.read(b)) > 0) o.write(b, 0, readBytes);
-            res = new String(o.toByteArray(), StandardCharsets.UTF_8);
-        }
-        finally {
-            in.close();
-        }	        
-//        System.out.println(res);
-        parseTerms(res);
+	@Override
+	protected void process (ISegment segment) {
+    	super.process(segment);
+		try {
+			String codedText = segment.getSource().getCodedText();
+			if ( codedText.isEmpty() ) return;
+	        StringBuilder r = new StringBuilder();
+	        r.append(BASEURL).append("/extraction/");
+	        r.append("?sourceLang=").append(srcLang);
+	        r.append("&targetLang=").append(trgLang); // Hard-coded for the demo
+	        r.append("&method=").append("4"); //4
+	        HttpURLConnection conn;
+	        conn = (HttpURLConnection) new URL(r.toString()).openConnection();
+	        conn.setRequestProperty("Authorization", credentials.getBasic());
+	        String tuk = credentials.getUserKey();
+	        if ( tuk != null ) {
+	            conn.setRequestProperty("TaaS-User-Key", tuk);
+	        }
+	        conn.setRequestProperty("Accept", "text/xml");
+	        conn.setRequestMethod("POST");
+	        conn.setRequestProperty("Content-Type", "text/plain");
+	        conn.setDoOutput(true);
+	        OutputStream out = conn.getOutputStream();
+	        try {
+	            out.write(codedText.getBytes(StandardCharsets.UTF_8));
+	        }
+	        finally {
+	            out.close();
+	        }
+	
+	        String res = null;
+	        InputStream in = conn.getInputStream();
+	        try {
+	            ByteArrayOutputStream o = new ByteArrayOutputStream();
+	            byte[] b = new byte[1024];
+	            int readBytes;
+	            while ((readBytes = in.read(b)) > 0) o.write(b, 0, readBytes);
+	            res = new String(o.toByteArray(), StandardCharsets.UTF_8);
+	        }
+	        finally {
+	            in.close();
+	        }	        
+	//        System.out.println(res);
+	        parseTerms(res);
+		}
+		catch ( Throwable e ) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void parseTerms (String res)
@@ -190,7 +195,7 @@ public class TAAS extends BaseXLIFFProcessor {
 
 		// Get or create the glossary element
 		IExtObjects eos = unit.getExtObjects();
-		IExtObject eo = eos.add(GLS_URI, "glossary");
+		IExtObject eo = eos.getOrCreate(GLS_URI, "glossary");
 		// Add entries to the glossary
 		for ( Entry ent : terms ) {
 			// Add the glossEntry element
@@ -204,8 +209,21 @@ public class TAAS extends BaseXLIFFProcessor {
 				IExtObject trans = Factory.XOM.createExtObject(GLS_URI, "translation");
 				entry.getItems().add(trans);
 				trans.add(tra, false);
+				trans.getExtFields().set("source", "TaaS Glossary");
 			}
 		}
 	}
 	
+    @Override
+	public String getInfo () {
+		return "<html><header><style>"
+			+ "body{font-size: large;} code{font-size: large;}"
+			+ "</style></header><body>"
+			+ "<p>The <b>TAAS Web Service</b> (Terminology as a Service) powered by Tilde, provides a way "
+			+ "to discover in the source text the terms stored in common or private collections.</p>"
+			+ "<p>The list of the found terms and their translation is added to each unit of the document "
+			+ "using the Glossary module.</p>"
+			+ "</body></html>";
+	}
+
 }

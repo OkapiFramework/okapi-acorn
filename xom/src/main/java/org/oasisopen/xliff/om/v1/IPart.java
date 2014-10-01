@@ -36,7 +36,7 @@ public interface IPart {
 	public boolean hasTarget ();
 	
 	/**
-	 * Creates a new target content for this part.
+	 * Creates a new empty target content for this part.
 	 * @return the new target content.
 	 * @see #getTarget(GetTarget)
 	 */

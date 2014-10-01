@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import net.sf.okapi.acorn.common.BaseXLIFFProcessor;
+import net.sf.okapi.acorn.client.XLIFFDocumentTask;
 import net.sf.okapi.acorn.common.Util;
 import net.sf.okapi.acorn.xom.Factory;
 
@@ -37,7 +37,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
-public class DBpediaSpotlight extends BaseXLIFFProcessor {
+public class DBpediaSpotlight extends XLIFFDocumentTask {
 
 	private static final String ITS20_URI = "http://www.w3.org/2005/11/its";
 	private static final String DBP_URI = "myDBpediaNS";
@@ -50,6 +50,7 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 	private String defaultTargetLang;
 	private String trgLang;
 	private HashMap<String, Resource> unitEntries;
+	private int unitTransCount;
 
 	private class TransRes {
 		String trans;
@@ -117,23 +118,23 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 	@Override
 	public void process (IUnit unit) {
 		unitEntries = new HashMap<>();
-		int transCount = 0;
+		unitTransCount = 0;
 		for ( ISegment segment : unit.getSegments() ) {
-			transCount += annotate(unit, segment);
+			process(segment);
 		}
 		// Add the glossary entry if needed
-		if ( transCount > 0 ) {
+		if ( unitTransCount > 0 ) {
 			addGlossaryEntries(unit);
 		}
 	}
 	
-	private int annotate (IUnit unit,
-		ISegment segment)
-	{
-		int transCount = 0;
+	@Override
+	protected void process (ISegment segment) {
+    	super.process(segment);
 		try {
 			IContent content = segment.getSource();
 			String text = content.getCodedText();
+			if ( content.isEmpty() ) return;
 			List<Occurrence> list = new ArrayList<>();
 			HashMap<String, Resource> newEntries = new HashMap<>();
 			// Get the candidates parse back the result
@@ -162,9 +163,9 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 					res.qvalue = qvalue;
 					// Try to get a translation from Wikidata (from the q-value)
 					count = getTranslationFromWikiData(res);
-					transCount += count;
+					unitTransCount += count;
 				}
-				transCount += count;
+				unitTransCount += count;
 			}
 
 			// Add the new entries to the unit-level entries
@@ -192,8 +193,6 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 		catch ( Throwable e ) {
 			throw new RuntimeException("Error while querying service.", e);
 		}
-		
-		return transCount;
 	}
 
 	private void processSurfaceForm (Object surfaceFormItem,
@@ -241,7 +240,7 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
 		
 		// Get or create the glossary element
 		IExtObjects eos = unit.getExtObjects();
-		IExtObject eo = eos.add(GLS_URI, "glossary");
+		IExtObject eo = eos.getOrCreate(GLS_URI, "glossary");
 		// Add entries to the glossary
 		for ( String uri : unitEntries.keySet() ) {
 			Resource res = unitEntries.get(uri);
@@ -369,6 +368,20 @@ public class DBpediaSpotlight extends BaseXLIFFProcessor {
         	return res.substring(pos+1);
         }
         return null;
+	}
+
+    @Override
+	public String getInfo () {
+		return "<html><header><style>"
+			+ "body{font-size: large;} code{font-size: large;}"
+			+ "</style></header><body>"
+			+ "<p>This function uses several Web service to find entities in the source text and try to get "
+			+ "the corresponding translations. The process is the following:</p>"
+			+ "<ul><li>The <b>DBpedia Splotlight Web service</b> is used to extract entities. Each entity comes with a URI.</li>"
+			+ "<li>For each entity, we use a <b>SPARQL query</b> to cross-reference on <b>DBpedia</b> the URI with <b>Wikidata</b> information. This may give us a Q-Value (a unique identifier for Wikidata).</li>"
+			+ "<li>If there is a Q-Value, we query it on Wikidata to try to get translations in the target language.</li></ul>"
+			+ "<p>Found entities are annotated with their types, and any translation found is added in the unit using the Glossary module.</p>"
+			+ "</body></html>";
 	}
 
 }

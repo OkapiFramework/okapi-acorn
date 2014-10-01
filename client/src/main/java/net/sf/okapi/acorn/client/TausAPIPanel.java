@@ -119,7 +119,7 @@ public class TausAPIPanel extends JPanel {
 		c = new GridBagConstraints();
 		c.insets = new Insets(0, -4, 0, 0);
 		c.gridx = 1; c.gridy = 3; c.fill = GridBagConstraints.HORIZONTAL;
-		 c.gridwidth = GridBagConstraints.REMAINDER;
+		c.gridwidth = GridBagConstraints.REMAINDER;
 		add((edCallbackUrl = new JTextField()), c);
 		
 		c = new GridBagConstraints();
@@ -168,7 +168,7 @@ public class TausAPIPanel extends JPanel {
 		c = new GridBagConstraints(); c.anchor = GridBagConstraints.PAGE_END;
 		c.gridx = 0; c.gridy = 8; c.fill = GridBagConstraints.BOTH;
 		c.weighty = 1.0;
-		 c.gridwidth = GridBagConstraints.REMAINDER;
+		c.gridwidth = GridBagConstraints.REMAINDER;
 		add(scrollPane, c);
 		
 		updateCommand();

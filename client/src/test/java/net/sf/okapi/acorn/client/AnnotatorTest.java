@@ -1,29 +1,32 @@
 package net.sf.okapi.acorn.client;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 
-import net.sf.okapi.acorn.calais.olib_Annotator;
-import net.sf.okapi.lib.xliff2.core.Fragment;
-import net.sf.okapi.lib.xliff2.core.MTag;
-import net.sf.okapi.lib.xliff2.core.Unit;
+import net.sf.okapi.acorn.calais.Annotator;
+import net.sf.okapi.acorn.common.Util;
+import net.sf.okapi.acorn.xom.Factory;
+import net.sf.okapi.acorn.xom.Unit;
 
 import org.junit.Test;
+import org.oasisopen.xliff.om.v1.IContent;
+import org.oasisopen.xliff.om.v1.IMTag;
 
 public class AnnotatorTest {
 
-	private olib_Annotator annotaror = new olib_Annotator();
+	private Annotator annotaror = new Annotator();
 	
-	private class Info implements olib_Annotator.IInfoSpan {
+	private class Info implements Annotator.IInfoSpan {
 
 		private int start;
 		private int end;
-		private MTag info;
+		private IMTag info;
 		
 		public Info (int start, int end, String type) {
 			this.start = start;
 			this.end = end;
-			this.info = new MTag("unused", type);
+			this.info = Factory.XOM.createOpeningMTag("unused", type);
 		}
 		
 		@Override
@@ -37,7 +40,7 @@ public class AnnotatorTest {
 		}
 
 		@Override
-		public MTag getInfo () {
+		public IMTag getInfo () {
 			return info;
 		}
 		
@@ -45,52 +48,66 @@ public class AnnotatorTest {
 	
 	@Test
 	public void testAnnotationsOnPlainNested () {
-		Fragment frag = new Unit("id").appendSegment().getSource();
+		IContent frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
-		ArrayList<olib_Annotator.IInfoSpan> spans = new ArrayList<>();
+		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
 		spans.add(new Info(6, 11, "t:1"));
 		spans.add(new Info(6, 11, "t:2"));
 		spans.add(new Info(6, 11, "t:3"));
 		annotaror.annotates(frag, spans);
-		assertEquals("word1 <mrk id=\"1\" type=\"t:1\"><mrk id=\"2\" type=\"t:2\"><mrk id=\"3\" type=\"t:3\">word2</mrk></mrk></mrk>", frag.toXLIFF());
+		assertEquals("word1 <mrk id=\"1\" type=\"t:1\"><mrk id=\"2\" type=\"t:2\"><mrk id=\"3\" type=\"t:3\">word2</mrk></mrk></mrk>", Util.fmt(frag));
+	}
+
+	@Test
+	public void testAnnotationsOnCodedText () {
+		IContent frag = new Unit("id").appendSegment().getSource();
+		frag.appendCode("1", "[br/]");
+		frag.append("word1 word2");
+		//         ##word1 word2
+		//         0123456789012
+		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
+		spans.add(new Info(2, 11, "t:1"));
+		spans.add(new Info(2, 5, "t:2"));
+		annotaror.annotates(frag, spans);
+		assertEquals("<C:1/><M:1><M:2>word1</M:2> word2</M:1>", Util.fmt(frag));
 	}
 
 	@Test
 	public void testAnnotationsOnPlainNestedAtStart () {
-		Fragment frag = new Unit("id").appendSegment().getSource();
+		IContent frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
-		ArrayList<olib_Annotator.IInfoSpan> spans = new ArrayList<>();
+		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
 		spans.add(new Info(0, 11, "t:1"));
 		spans.add(new Info(0, 5, "t:2"));
 		annotaror.annotates(frag, spans);
-		assertEquals("<mrk id=\"1\" type=\"t:1\"><mrk id=\"2\" type=\"t:2\">word1</mrk> word2</mrk>", frag.toXLIFF());
+		assertEquals("<M:1><M:2>word1</M:2> word2</M:1>", Util.fmt(frag));
 	}
 
 	@Test
 	public void testAnnotationsOnPlainNestedAtEnd () {
-		Fragment frag = new Unit("id").appendSegment().getSource();
+		IContent frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
-		ArrayList<olib_Annotator.IInfoSpan> spans = new ArrayList<>();
+		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
 		spans.add(new Info(0, 11, "t:1"));
 		spans.add(new Info(6, 11, "t:2"));
 		annotaror.annotates(frag, spans);
-		assertEquals("<mrk id=\"2\" type=\"t:1\">word1 <mrk id=\"1\" type=\"t:2\">word2</mrk></mrk>", frag.toXLIFF());
+		assertEquals("<M:2>word1 <M:1>word2</M:1></M:2>", Util.fmt(frag));
 	}
 
 	@Test
 	public void testAnnotationsOnPlainNestedAtStartAndEnd () {
-		Fragment frag = new Unit("id").appendSegment().getSource();
+		IContent frag = new Unit("id").appendSegment().getSource();
 		frag.append("word1 word2");
 		//           01234567890
-		ArrayList<olib_Annotator.IInfoSpan> spans = new ArrayList<>();
+		ArrayList<Annotator.IInfoSpan> spans = new ArrayList<>();
 		spans.add(new Info(0, 11, "t:1"));
 		spans.add(new Info(6, 11, "t:2"));
 		spans.add(new Info(0, 5, "t:3"));
 		annotaror.annotates(frag, spans);
-		assertEquals("<mrk id=\"2\" type=\"t:1\"><mrk id=\"3\" type=\"t:3\">word1</mrk> <mrk id=\"1\" type=\"t:2\">word2</mrk></mrk>", frag.toXLIFF());
+		assertEquals("<M:2><M:3>word1</M:3> <M:1>word2</M:1></M:2>", Util.fmt(frag));
 	}
 
 }
