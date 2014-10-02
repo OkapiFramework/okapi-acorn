@@ -210,11 +210,13 @@ public class Util {
 			// We need to add those to the new target content
 			for ( int i=0; i<sigs.size(); i++ ) {
 				if ( sigs.get(i) == null ) continue;
+				// Ignore marker tags
+				if ( !srcTags.get(i).isCode() ) continue;
 				// Try to add the code that starts or ends the segment at those positions
 				if ( srcTags.get(i) == first ) {
 					ct.insert(0, XUtil.toRef(tags.add(Factory.XOM.copyTag(srcTags.get(i), tags))));
 				}
-				else { // last or any
+				else { // last or any other position
 					ct.append(XUtil.toRef(tags.add(Factory.XOM.copyTag(srcTags.get(i), tags))));
 				}
 			}

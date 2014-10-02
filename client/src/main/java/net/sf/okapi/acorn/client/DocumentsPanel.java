@@ -204,7 +204,7 @@ public class DocumentsPanel extends JPanel {
 		try {
 			TAAS task = new TAAS();
 			task.setDocument(tableModel.getDocument());
-			main.runTask("DBpedia Spotlight Web Service", task);
+			main.runTask("TAAS Web Service", task);
 			if ( task.getError() != null ) throw task.getError();
 			tableModel.refreshDisplay(false);
 			main.log("Done");

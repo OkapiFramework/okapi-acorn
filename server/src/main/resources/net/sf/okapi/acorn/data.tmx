@@ -10,6 +10,23 @@
    <tuv xml:lang="iu"><seg></seg></tuv>
   </tu>
   -->
+  
+  <tu>
+   <tuv xml:lang="en"><seg>Explore Nunavut</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᓄᓇᕗᑦᐊᐅᓪᓚᕐᓂᖅ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Explore Iqaluit</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᖃᓗᐃᑦᐊᐅᓪᓚᕐᓂᖅ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>Explore Canada</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᑲᓇᑕᐊᐅᓪᓚᕐᓂᖅ</seg></tuv>
+  </tu>
+  <tu>
+   <tuv xml:lang="en"><seg>The Inuksuk Project</seg></tuv>
+   <tuv xml:lang="iu"><seg>ᐃᓄᒃᓱᒃᓴᓈᖅ</seg></tuv>
+  </tu>
   <tu>
    <tuv xml:lang="en"><seg>About Nunavut</seg></tuv>
    <tuv xml:lang="iu"><seg>ᓄᓇᕗᑦᒨᓕᖓᔪᑦ</seg></tuv>
@@ -135,8 +152,8 @@
    <tuv xml:lang="iu"><seg>ᐃᓕᖅᑯᓯᑐᖃᕐᒧᖓᔪᒥᒃ ᖃᓪᓗᓈᑦ ᓄᓇᖓᓂᙵᕐᑐᓄᑦ ᐊᒻᒪᓗ ᐃᓕᓐᓂᐊᕐᓯᒪᔭᕆᐊᓕᖕᓂᒃ ᐃᓕᓐᓂᐊᕐᑎᑦᑎᓂᑦ ᐃᖅᑲᓇᐃᔭᕐᑎᓕᒫᓄᑦ ᐸᕐᓇᕆᔭᐅᓯᒪᖕᒥᔪᑦ.</seg></tuv>
   </tu>
   <tu>
-   <tuv xml:lang="en"><seg>"ᐊᑦᑕᕐᓇᖅᑕᐃᓕᒪᓂᖅ ᓯᕗᓪᓕᐅᑎᓪᓗᒍ, ᑕᐃᒪᙵᓕᒫᖅ"</seg></tuv>
-   <tuv xml:lang="iu"><seg>"Safety First, Always"</seg></tuv>
+   <tuv xml:lang="en"><seg>"Safety First, Always"</seg></tuv>
+   <tuv xml:lang="iu"><seg>"ᐊᑦᑕᕐᓇᖅᑕᐃᓕᒪᓂᖅ ᓯᕗᓪᓕᐅᑎᓪᓗᒍ, ᑕᐃᒪᙵᓕᒫᖅ"</seg></tuv>
   </tu>
  </body>
 </tmx>
