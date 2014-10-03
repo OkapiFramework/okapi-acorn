@@ -108,11 +108,17 @@ public interface IContent extends Iterable<Object> {
 	public IContent append (char ch);
 
 	/**
-	 * Appends an inline code at the end of this content.
-	 * @param code the code to add.
-	 * @return the code that was added (same as the parameter).
+	 * Appends an {@link ICTag} object at the end of this content.
+	 * @param code the code to append.
+	 * @return the appended code (same code as the parameter).
 	 */
 	public ICTag append (ICTag code);
+	
+	/**
+	 * Appends a content to this content.
+	 * @param content the content to append (cannot be itself or null).
+	 */
+	public void append (IContent content);
 	
 	/**
 	 * Appends to this content the opening tag for a new code.

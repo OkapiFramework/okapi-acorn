@@ -11,7 +11,7 @@ public class Segmenter extends BaseXLIFFProcessor {
 
 	@Override
 	public void process (IUnit unit) {
-		Pattern pattern = Pattern.compile("\\.[ \\t\\n]");
+		Pattern pattern = Pattern.compile("[\\.!][ \\t\\n]");
 		for ( int partIndex=0; partIndex<unit.getPartCount(); partIndex++ ) {
 			if ( !unit.getPart(partIndex).isSegment() ) continue;
 			ISegment seg = (ISegment)unit.getPart(partIndex);

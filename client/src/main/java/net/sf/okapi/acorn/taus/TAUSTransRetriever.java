@@ -5,7 +5,6 @@ import net.sf.okapi.acorn.common.Util;
 
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.ISegment;
-import org.oasisopen.xliff.om.v1.TargetState;
 
 public class TAUSTransRetriever extends XLIFFDocumentTask {
 

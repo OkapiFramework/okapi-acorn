@@ -479,4 +479,205 @@ public class Unit extends BaseData3 implements IUnit {
 		}
 	}
 
+	@Override
+	public void join (int startPartIndex,
+		int endPartIndex,
+		boolean restrictedJoin,
+		boolean sourceIfNoTargetSegment,
+		boolean sourceIfNoTargetIgnorable)
+	{
+		// check start index
+		if (( startPartIndex < 0 ) || ( startPartIndex >= getPartCount() )) {
+			throw new InvalidParameterException("Invalid startPartIndex value.");
+		}
+		// Auto-correct -1 for the end index if needed (same as last part)
+		if ( endPartIndex == -1 ) endPartIndex = getPartCount()-1;
+		// Same index?
+		if ( endPartIndex == startPartIndex ) return;
+		// Check the end index
+		if (( endPartIndex <= startPartIndex ) || ( endPartIndex >= getPartCount() )) {
+			throw new InvalidParameterException("Invalid endPartIndex value.");
+		}
+		
+		// Get the target order
+		List<IPart> list = getTargetOrderedParts();
+		
+		// Get the objects where to append (first part)
+		IPart startPart = list.get(startPartIndex);
+		int i;
+		
+		// Check for segments that cannot be re-segmented
+		if ( restrictedJoin  ) {
+			if ( startPart.isSegment() && !((Segment)startPart).getCanResegment() ) {
+				throw new InvalidParameterException("The first segment cannot be re-segmented.");
+			}
+			i = startPartIndex+1;
+			do {
+				IPart part = list.get(i);
+				if ( part.isSegment() && !((Segment)part).getCanResegment() ) {
+					throw new InvalidParameterException("One of more of the segments cannot be re-segmented.");
+				}
+				i++;
+			}
+			while ( i <= endPartIndex ); 
+		}
+		
+		IContent startSource = startPart.getSource();
+
+		IContent startTarget = null;
+		if ( startPart.hasTarget() && !startPart.getTarget().isEmpty() ) {
+			startTarget = startPart.getTarget();
+		}
+		else {
+			if ( startPart.isSegment() ) {
+				if ( sourceIfNoTargetSegment )
+					startTarget = Factory.XOM.copyContent(store, true, startSource);
+			}
+			else {
+				if ( sourceIfNoTargetIgnorable )
+					startTarget = Factory.XOM.copyContent(store, true, startSource);
+			}
+		}
+		// Now set the target (if there is one)
+		if ( startTarget != null ) {
+			startPart.setTarget(startTarget);
+		}
+
+		// Append the parts to the first part
+		i = startPartIndex+1;
+		do {
+			IPart part = list.get(i);
+			IContent srcFrag = part.getSource();
+			startSource.append(srcFrag);
+			
+			IContent trgFrag = null;
+			if ( part.hasTarget() && !part.getTarget().isEmpty() ) {
+				trgFrag = part.getTarget();
+			}
+			else {
+				if ( part.isSegment() ) {
+					if ( sourceIfNoTargetSegment )
+						trgFrag = Factory.XOM.copyContent(store, true, srcFrag);
+				}
+				else {
+					if ( sourceIfNoTargetIgnorable )
+						trgFrag = Factory.XOM.copyContent(store, true, srcFrag);
+				}
+			}
+			// Now set the target (if there is one)
+			if ( trgFrag != null ) {
+				if ( startTarget != null ) {
+					startTarget.append(trgFrag);
+				}
+				else {
+					startPart.setTarget(trgFrag);
+					startTarget = startPart.getTarget();
+				}
+			}
+			
+			// Make sure the joined part is xml:space='preserve'
+			if ( startPart.getPreserveWS() != part.getPreserveWS() ) {
+				startPart.setPreserveWS(true);
+			}
+			
+			// Use the "earliest" state and subState
+			if ( startPart.isSegment() && part.isSegment() ) {
+				ISegment startSeg = (ISegment)startPart;
+				ISegment seg = (ISegment)part;
+				if ( startSeg.getState().compareTo(seg.getState()) > 0 ) {
+					startSeg.setState(seg.getState());
+					startSeg.setSubState(seg.getSubState());
+				}
+			}
+
+			i++; // Next part to join
+		}
+		while ( i <= endPartIndex );
+		
+		// Remove the collapsed parts
+		i = startPartIndex+1;
+		do {
+			// Keep removing the part just after the start
+			IPart part = list.get(startPartIndex+1);
+			list.remove(startPartIndex+1);
+			parts.remove(part);
+			i++;
+		}
+		while ( i <= endPartIndex );
+		
+		// Correct the target order values if needed
+		if ( hasTargetOrder() ) {
+			int removedCount = endPartIndex-startPartIndex;
+			int srcOrder = 1;
+			for ( IPart part : parts ) {
+				int order = part.getTargetOrder();
+//			if ( order > 0 ) {
+//				part.setTargetOrder((order-removedCount == srcOrder)
+//					? 0 : order-removedCount);
+//			}
+				if ( order == 0 ) order = srcOrder;
+				if ( order > startPartIndex+1 ) {
+					part.setTargetOrder((order-removedCount == srcOrder)
+						? 0 : order-removedCount);
+				}
+				srcOrder++;
+			}
+		}
+		
+		//TODO make sure we have at least one segment left in unit
+	}
+	
+	@Override
+	public void joinAll (boolean sourceIfNoTargetSegment,
+		boolean sourceIfNoTargetIgnorable) {
+		int start = 0;
+		List<IPart> list = getTargetOrderedParts();
+		// Go through the list of ordered parts
+		while ( true ) {
+			// Get the next start
+			while ( start < list.size() ) {
+				IPart part = list.get(start);
+				if ( part.isSegment() ) {
+					if ( ((Segment)part).getCanResegment() ) {
+						// Found the first segment
+						break;
+					}
+				}
+				// Skip over ignorable elements and non-reorderable segments.
+				start++;
+			}
+			// Get out now if the start is the last part
+			if ( start >= list.size() ) return;
+			
+			// Else, get the end 
+			int end;
+			for ( end=start+1; end<list.size(); end++ ) {
+				IPart part = list.get(end);
+				if ( part.isSegment() ) {
+					if ( !((Segment)part).getCanResegment() ) {
+						// End before segment that cannot be re-segmented
+						break;
+					}
+				}
+			}
+			// Case of start==end is handled by the join() method.
+			join(start, end-1, false, sourceIfNoTargetSegment, sourceIfNoTargetIgnorable);
+			// Get the new list
+			list = getTargetOrderedParts();
+			start++;
+		}
+	}
+
+	/**
+	 * Internal method to append parts
+	 * @param part the part to append.
+	 * @return the part appended (same as the parameter).
+	 */
+	IPart appendPart (IPart part) {
+		if ( part.getStore() != this.store ) {
+			throw new InvalidParameterException("The part must use the same store as this unit.");
+		}
+		parts.add(part);
+		return part;
+	}
 }

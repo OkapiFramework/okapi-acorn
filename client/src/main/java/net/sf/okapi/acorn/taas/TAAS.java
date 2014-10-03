@@ -26,7 +26,10 @@ import net.sf.okapi.acorn.common.Util;
 import net.sf.okapi.acorn.xom.Factory;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.oasisopen.xliff.om.v1.ExtObjectItemType;
 import org.oasisopen.xliff.om.v1.IExtObject;
+import org.oasisopen.xliff.om.v1.IExtObjectData;
+import org.oasisopen.xliff.om.v1.IExtObjectItem;
 import org.oasisopen.xliff.om.v1.IExtObjects;
 import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.IUnit;
@@ -198,13 +201,30 @@ public class TAAS extends XLIFFDocumentTask {
 		IExtObject eo = eos.getOrCreate(GLS_URI, "glossary");
 		// Add entries to the glossary
 		for ( Entry ent : terms ) {
-			// Add the glossEntry element
-			IExtObject entry = Factory.XOM.createExtObject(GLS_URI, "glossEntry");
-			eo.getItems().add(entry);
-			IExtObject term = Factory.XOM.createExtObject(GLS_URI, "term");
-			entry.getItems().add(term);
-			term.add(ent.source, false);
-			// Add the translation elements
+			// Try to find if there is an entry already for this source term
+			IExtObject entry = null;
+			for ( IExtObjectItem item : eo.getItems() ) {
+				if ( item.getType() == ExtObjectItemType.OBJECT ) {
+					IExtObject obj = (IExtObject)item;
+					if ( obj.getNSUri().equals(GLS_URI) ) {
+						IExtObject t = (IExtObject)obj.getItems().get(0);
+						IExtObjectData data = (IExtObjectData)t.getItems().get(0);
+						if (( data != null ) && data.getContent().equals(ent.source) ) {
+							entry = obj;
+							break;
+						}
+					}
+				}
+			}
+			// Create the glossEntry element if none was found
+			if ( entry == null ) {
+				entry = Factory.XOM.createExtObject(GLS_URI, "glossEntry");
+				eo.getItems().add(entry);
+				IExtObject term = Factory.XOM.createExtObject(GLS_URI, "term");
+				entry.getItems().add(term);
+				term.add(ent.source, false);
+			}
+			// Then, in all cases: add the translation elements
 			for ( String tra : ent.targets ) {
 				IExtObject trans = Factory.XOM.createExtObject(GLS_URI, "translation");
 				entry.getItems().add(trans);

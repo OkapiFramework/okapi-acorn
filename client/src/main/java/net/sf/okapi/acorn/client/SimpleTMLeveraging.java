@@ -2,7 +2,6 @@ package net.sf.okapi.acorn.client;
 
 import net.sf.okapi.acorn.common.Util;
 
-import org.oasisopen.xliff.om.v1.GetTarget;
 import org.oasisopen.xliff.om.v1.ISegment;
 import org.oasisopen.xliff.om.v1.TargetState;
 

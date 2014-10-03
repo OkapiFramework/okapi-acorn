@@ -244,6 +244,14 @@ public class Util {
 		
 		} // End of fixing up tags
 		
+		// Fix up white spaces if needed
+		String st = dest.getSource().getCodedText();
+		int p = lastNonWS(st);
+		if (( p > -1 ) && ( p < st.length()-1 )) {
+			st = cont.getCodedText() + st.substring(p+1);
+			cont.setCodedText(st);
+		}
+		
 		// Set that new content in the segment's target
 		dest.setTarget(cont);
 		// Update the target state
@@ -251,4 +259,12 @@ public class Util {
 		dest.setSubState(null); // Make sure any sub-state is reset
 	}
 
+	private static int lastNonWS (String text) {
+		for ( int i=text.length()-1; i>=0; i-- ) {
+			if ( !Character.isWhitespace(text.charAt(i)) ) {
+				return i;
+			}
+		}
+		return -1; // Empty or all WS
+	}
 }

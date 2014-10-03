@@ -42,7 +42,9 @@ import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.sf.okapi.acorn.common.FilterBasedReader;
+import net.sf.okapi.acorn.common.FilterBasedWriter;
 import net.sf.okapi.acorn.common.IDocumentReader;
+import net.sf.okapi.acorn.common.IDocumentWriter;
 import net.sf.okapi.acorn.common.XLIFF2Reader;
 import net.sf.okapi.acorn.common.XLIFFWriter;
 import net.sf.okapi.acorn.taus.TransAPIClient;
@@ -69,6 +71,7 @@ public class MainDialog extends JFrame {
 	private JMenuItem miCleanMarkers;
 	private JMenuItem miSave;
 	private JMenuItem miSaveAs;
+	private JMenuItem miCreateTarget;
 	private JMenuItem miApplyTM;
 	private JMenuItem miSegment;
 	private JMenuItem miApplyDBpedia;
@@ -111,6 +114,17 @@ public class MainDialog extends JFrame {
 			}
 		});
 		
+		miCreateTarget = new JMenuItem("Create Translated File", KeyEvent.VK_C);
+		menu.add(miCreateTarget);
+		miCreateTarget.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				exportFile();
+			}
+		});
+		
+		menu.addSeparator();
+
 		miSave = new JMenuItem("Save To XLIFF", KeyEvent.VK_S);
 		miSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
 		menu.add(miSave);
@@ -376,11 +390,11 @@ public class MainDialog extends JFrame {
 	    	case "xlf":
 	    		reader = new XLIFF2Reader();
 	    		break;
-	    	case "docx":
-	    		reader = new FilterBasedReader("okf_openxml");
-	    		break;
 	    	case "tmx":
 	    		reader = new FilterBasedReader("okf_tmx");
+	    		break;
+	    	case "docx":
+	    		reader = new FilterBasedReader("okf_openxml");
 	    		break;
 	    	case "htm":
 	    	case "html":
@@ -403,6 +417,45 @@ public class MainDialog extends JFrame {
     	}
     	finally {
     		updateMenu();
+    	}
+	}
+	
+	private void exportFile () {
+		clearLog();
+		log("===== Create translated file");
+    	try {
+    		IDocument doc = docPanel.getDocument();
+    		if ( doc == null ) return;
+    		String path = docPanel.getPath();
+    		int p = path.lastIndexOf('.');
+    		String ext = "";
+    		if ( p > -1 ) ext = path.substring(p+1).toLowerCase();
+    		IDocumentWriter writer = null;
+	    	switch ( ext ) {
+	    	case "docx":
+	    		writer = new FilterBasedWriter("okf_openxml");
+	    		break;
+	    	case "htm":
+	    	case "html":
+	    		writer = new FilterBasedWriter("okf_html");
+	    		break;
+	    	case "xlf":
+	    	case "tmx":
+				log("Unsupported or unknown file format.");
+				setTab(TAB_LOG);
+	    		return;
+	    	default:
+				log("Unsupported or unknown file format.");
+				setTab(TAB_LOG);
+	    		return;
+	    	}
+	    	writer.merge(doc, new File(path));
+    		log("Done");
+			setTab(TAB_XOM);
+    	}
+    	catch ( Throwable e ) {
+    		log(e);
+			setTab(TAB_LOG);
     	}
 	}
 	
@@ -444,6 +497,7 @@ public class MainDialog extends JFrame {
 	
 	private void updateMenu () {
 		boolean enabled = (docPanel.getDocument() != null);
+		miCreateTarget.setEnabled(enabled);
 		miSave.setEnabled(enabled);
 		miSaveAs.setEnabled(enabled);
 		miSegment.setEnabled(enabled);

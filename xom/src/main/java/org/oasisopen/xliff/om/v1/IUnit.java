@@ -168,4 +168,24 @@ public interface IUnit extends IGroupOrUnit, IWithStore, Iterable<IPart> {
 		int trgEnd,
 		boolean changeState);
 
+	/**
+	 * Joins two or more parts together into the first one.
+	 * @param startPartIndex the index of the first part to join (in the target order)
+	 * @param endPartIndex the index of the last part to join (in the target order)
+	 * @param restrictedJoin true to throw an exception if one of the segment cannot be merged,
+	 * false to allow to merge regardless of the canResegment values (e.g for merger mode)
+	 * @param adjustTargetIgnorable TODO
+	 */
+	public void join (int startPartIndex,
+		int endPartIndex,
+		boolean restrictedJoin,
+		boolean sourceIfNoTargetSegment,
+		boolean sourceIfNoTargetIgnorable);
+
+	/**
+	 * Joins all the parts of this unit into a single segment.
+	 */
+	public void joinAll (boolean sourceIfNoTargetSegment,
+		boolean sourceIfNoTargetIgnorable);
+	
 }

@@ -12,7 +12,6 @@ import javax.swing.JTextField;
 import net.sf.okapi.acorn.calais.OpenCalais;
 import net.sf.okapi.acorn.common.MarkerCleaner;
 import net.sf.okapi.acorn.common.Segmenter;
-import net.sf.okapi.acorn.common.Util;
 import net.sf.okapi.acorn.dbpedia.DBpediaSpotlight;
 import net.sf.okapi.acorn.taas.TAAS;
 import net.sf.okapi.acorn.taus.TAUSTransRequester;
@@ -20,14 +19,8 @@ import net.sf.okapi.acorn.taus.TAUSTransRetriever;
 import net.sf.okapi.acorn.taus.TransAPIClient;
 import net.sf.okapi.acorn.yahoo.YahooAnalyzer;
 
-import org.oasisopen.xliff.om.v1.GetTarget;
 import org.oasisopen.xliff.om.v1.IDocument;
-import org.oasisopen.xliff.om.v1.IFile;
-import org.oasisopen.xliff.om.v1.IGroupOrUnit;
-import org.oasisopen.xliff.om.v1.ISegment;
-import org.oasisopen.xliff.om.v1.IUnit;
 
-import com.mycorp.tmlib.Entry;
 import com.mycorp.tmlib.SimpleTM;
 
 public class DocumentsPanel extends JPanel {

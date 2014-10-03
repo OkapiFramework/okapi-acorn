@@ -62,6 +62,22 @@ public enum Factory implements IXLIFFFactory {
 	{
 		return new Content(store, isTarget);
 	}
+	
+	public IUnit copyUnit (IUnit original) {
+		IUnit dest = new Unit(original.getId());
+		for ( IPart oriPart : original ) {
+			((Unit)dest).appendPart(copyPart(dest.getStore(), oriPart, true, false));
+		}
+		dest.setCanResegment(original.getCanResegment());
+		dest.setId(original.getId());
+		dest.setName(original.getName());
+		dest.setPreserveWS(original.getPreserveWS());
+		dest.setSourceDir(original.getSourceDir());
+		dest.setTargetDir(original.getTargetDir());
+		dest.setTranslate(original.getTranslate());
+		dest.setType(original.getType());
+		return dest;
+	}
 
 	@Override
 	public IContent copyContent (IStore store,
@@ -85,28 +101,83 @@ public enum Factory implements IXLIFFFactory {
 		return dest;
 	}
 	
-	@Override
-	public ISegment copyEmptySegment (IStore store,
-		ISegment original)
+	public IPart copyPart (IStore store,
+		IPart original,
+		boolean copyContent,
+		boolean newId)
 	{
-		ISegment seg = createSegment(store);
+		if ( original.isSegment() ) {
+			return copySegment(store, (ISegment)original, copyContent, newId);
+		}
+		
+		IPart dest = createPart(store);
+		if ( copyContent ) {
+			dest.setSource(copyContent(store, false, original.getSource()));
+		}
+
+		GetTarget gtOpt = (copyContent ? GetTarget.CLONE_SOURCE : GetTarget.CREATE_EMPTY);
+		if ( original.hasTarget() ) {
+			dest.getTarget(gtOpt);
+			if ( copyContent ) {
+				dest.setTarget(copyContent(store, true, original.getTarget()));
+			}
+		}
+		// Copy xml:space info (source/target level in XLIFF but stored in part in library)
+		dest.setPreserveWS(original.getPreserveWS());
+		// Update ID value if requested
+		if ( newId ) dest.setId(dest.getStore().suggestId(true));
+		else {
+			if ( !store.getParent().isIdUsed(original.getId()) ) {
+				dest.setId(original.getId());
+			}
+		}
+		return dest;
+	}
+	
+	public ISegment copySegment (IStore store,
+		ISegment original,
+		boolean copyContent,
+		boolean newId)
+	{
+		ISegment dest = createSegment(store);
+		if ( copyContent ) {
+			dest.setSource(copyContent(store, false, original.getSource()));
+		}
+
+		GetTarget gtOpt = (copyContent ? GetTarget.CLONE_SOURCE : GetTarget.CREATE_EMPTY);
 		// Copy the metadata for the source
 //TODO		seg.getSource().setDir(original.getSource().getDir());
 		// Make sure we have a target if the original segment has one
 		if ( original.hasTarget() ) {
 			// Create the target
 			// and at the same time copy the metadata for the target
-			seg.getTarget(GetTarget.CREATE_EMPTY); //TODO .setDir(original.getTarget().getDir());
+			dest.getTarget(gtOpt);
+			if ( copyContent ) {
+				dest.setTarget(copyContent(store, true, original.getTarget()));
+			}
+			 //TODO .setDir(original.getTarget().getDir());
 		}
 		// Copy xml:space info (source/target level in XLIFF but stored in part in library)
-		seg.setPreserveWS(original.getPreserveWS());
+		dest.setPreserveWS(original.getPreserveWS());
 		// Copy the metadata for the segment
-		seg.setCanResegment(original.getCanResegment());
-		seg.setState(original.getState());
-		seg.setSubState(original.getSubState());
-		// Update ID value
-		seg.setId(seg.getStore().suggestId(true));
-		return seg;
+		dest.setCanResegment(original.getCanResegment());
+		dest.setState(original.getState());
+		dest.setSubState(original.getSubState());
+		// Update ID value if requested
+		if ( newId ) dest.setId(dest.getStore().suggestId(true));
+		else {
+			if ( !store.getParent().isIdUsed(original.getId()) ) {
+				dest.setId(original.getId());
+			}
+		}
+		return dest;
+	}
+
+	@Override
+	public ISegment copyEmptySegment (IStore store,
+		ISegment original)
+	{
+		return copySegment(store, original, false, true);
 	}
 
 	@Override

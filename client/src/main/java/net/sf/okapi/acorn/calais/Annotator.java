@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import net.sf.okapi.acorn.xom.XUtil;
+import net.sf.okapi.lib.xliff2.core.Fragment;
 
 import org.oasisopen.xliff.om.v1.IContent;
 import org.oasisopen.xliff.om.v1.IMTag;

@@ -178,6 +178,12 @@ public class FilterBasedReader implements IDocumentReader {
 	private void copyCode (Code oriCode,
 		ICTag dstCTag)
 	{
+		if ( oriCode.hasReference() ) {
+			String ref = oriCode.getData();
+			int p1 = ref.indexOf("[#$");
+			int p2 = ref.indexOf(']', p1);
+			dstCTag.setSubFlows(ref.substring(p1+3, p2));
+		}
 		dstCTag.setCanCopy(oriCode.isCloneable());
 		dstCTag.setCanDelete(oriCode.isDeleteable());
 		//dstCTag.setCanOverlap(oriCTag.getCanOverlap());

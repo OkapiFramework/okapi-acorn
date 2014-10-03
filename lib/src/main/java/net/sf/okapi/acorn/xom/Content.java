@@ -284,16 +284,32 @@ public class Content implements IContent {
 		return this;
 	}
 
-	/**
-	 * Appends an {@link ICTag} object at the end of this content.
-	 * @param code the code to append.
-	 * @return the appended code (same code as the parameter).
-	 */
 	@Override
 	public ICTag append (ICTag code) {
 		ctext.append(XUtil.toRef(tags.add(code)));
 		return code;
 	}
+	
+	@Override
+	public void append (IContent content) {
+		if ( this == content ) {
+			throw new InvalidParameterException("Recursive append() on a content.");
+		}
+		// Copy the string/tags of the content
+		for ( Object obj : content ) {
+			if ( obj instanceof ICTag ) {
+				// Make sure we duplicate the tag
+				append((ICTag)Factory.XOM.copyTag((ITag)obj, getTags()));
+			}
+			else if ( obj instanceof IMTag ) {
+				//TODO
+			}
+			else { // String
+				append((String)obj);
+			}
+		}
+	}
+	
 	
 	@Override
 	public ICTag openCodeSpan (String id,
