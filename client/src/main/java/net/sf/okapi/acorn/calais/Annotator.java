@@ -32,7 +32,7 @@ public class Annotator {
 	 * Annotates a given fragment with a list of annotations.
 	 * @param fragment the fragment to annotate.
 	 * @param spans the annotations to apply. The list must be modifiable.
-	 * The start and end positions in each span must be the plain text positions
+	 * The start and end positions in each span must be the coded text positions
 	 * of the span (i.e. in the text return by {@link Fragment#getPlainText()}.
 	 * The IDs of the tags in the spans will not be used.
 	 */
@@ -50,13 +50,12 @@ public class Annotator {
 		int countStart = 0;
 		int countEnd = 0;
 		
-		String ct = content.getCodedText();
 		for ( IInfoSpan span : spans ) {
-			start = span.getStart(); //Util.getCodedTextPosition(ct, span.getStart(), false);
-			end = span.getEnd(); //Util.getCodedTextPosition(ct, span.getEnd(), false);
+			start = span.getStart();
+			end = span.getEnd();
 			type = span.getInfo().getType();
 			value = span.getInfo().getValue();
-System.out.println("s="+start+" e="+end+" len="+(end-start)+" t="+type+" v="+value);
+//System.out.println("s="+start+" e="+end+" len="+(end-start)+" t="+type+" v="+value);
 			
 			int addStart = 0;
 			int addEnd = 0;

@@ -55,4 +55,9 @@ public class TAUSTransRequester extends XLIFFDocumentTask {
 			+ "</body></html>";
 	}
 
+    @Override
+	public String getInfoLink () {
+		return "https://labs.taus.net/interoperability/taus-translation-api";
+	};
+    
 }

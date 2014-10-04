@@ -209,7 +209,7 @@ public class TAAS extends XLIFFDocumentTask {
 					if ( obj.getNSUri().equals(GLS_URI) ) {
 						IExtObject t = (IExtObject)obj.getItems().get(0);
 						IExtObjectData data = (IExtObjectData)t.getItems().get(0);
-						if (( data != null ) && data.getContent().equals(ent.source) ) {
+						if (( data != null ) && data.getContent().equalsIgnoreCase(ent.source) ) {
 							entry = obj;
 							break;
 						}
@@ -246,4 +246,9 @@ public class TAAS extends XLIFFDocumentTask {
 			+ "</body></html>";
 	}
 
+    @Override
+	public String getInfoLink () {
+		return "https://demo.taas-project.eu/projects/4222";
+	};
+    
 }

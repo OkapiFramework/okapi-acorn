@@ -1,7 +1,7 @@
 package org.oasisopen.xliff.om.v1;
 
 /**
- * Handle common to a group and a unit.
+ * Handle common to a {@link IGroup} and a {@link IUnit}.
  */
 public interface IGroupOrUnit extends IWithExtFields, IWithExtObjects, IWithNotes {
 

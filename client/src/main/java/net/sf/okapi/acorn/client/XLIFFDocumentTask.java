@@ -40,6 +40,10 @@ public class XLIFFDocumentTask extends SwingWorker<Void, Void> implements IXLIFF
 		return "<html></html>";
 	}
 	
+	public String getInfoLink () {
+		return null;
+	};
+	
 	public Throwable getError () {
 		return error;
 	}

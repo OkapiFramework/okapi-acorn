@@ -78,7 +78,7 @@ public class OpenCalais extends XLIFFDocumentTask {
     	super.process(segment);
 		IContent content = segment.getSource();
 		if ( content.isEmpty() ) return;
-		String body = content.getPlainText();
+		String body = content.getCodedText(); //.getPlainText();
 		if ( body.isEmpty() ) return;
 		
 		PostMethod method = new PostMethod(BASEURL);
@@ -169,4 +169,9 @@ public class OpenCalais extends XLIFFDocumentTask {
 			+ "</body></html>";
 	}
 
+    @Override
+	public String getInfoLink () {
+		return "http://www.opencalais.com/documentation/calais-web-service-api";
+	};
+    
 }

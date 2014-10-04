@@ -384,4 +384,9 @@ public class DBpediaSpotlight extends XLIFFDocumentTask {
 			+ "</body></html>";
 	}
 
+    @Override
+	public String getInfoLink () {
+		return "https://github.com/dbpedia-spotlight/dbpedia-spotlight/wiki";
+	};
+    
 }

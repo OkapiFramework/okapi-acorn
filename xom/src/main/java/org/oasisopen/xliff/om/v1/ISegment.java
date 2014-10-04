@@ -1,7 +1,10 @@
 package org.oasisopen.xliff.om.v1;
 
 /**
- * Represents a segment in a unit.
+ * Represents a segment in a {@link IUnit}.
+ * This object is derived from the {@link IPart} object.
+ * A segment has always a source content and may have a target content, both are
+ * represented by {@link IContent} objects.
  */
 public interface ISegment extends IPart {
 

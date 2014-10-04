@@ -3,7 +3,12 @@ package org.oasisopen.xliff.om.v1;
 import java.util.List;
 
 /**
- * Represents a unit.
+ * Represents a unit. The unit is the representation of an extracted 'paragraph', for
+ * example: the content of an HTML &lt;p> element, the content of a single entry in
+ * a Java properties file, etc.
+ * <p>A unit is made of one or more {@link ISegment} objects and zero or more "ignorable" elements 
+ * which are represented by {@link IPart} objects. Note that a {@link ISegment} is derived
+ * from {@link IPart}.
  */
 public interface IUnit extends IGroupOrUnit, IWithStore, Iterable<IPart> {
 
@@ -174,7 +179,10 @@ public interface IUnit extends IGroupOrUnit, IWithStore, Iterable<IPart> {
 	 * @param endPartIndex the index of the last part to join (in the target order)
 	 * @param restrictedJoin true to throw an exception if one of the segment cannot be merged,
 	 * false to allow to merge regardless of the canResegment values (e.g for merger mode)
-	 * @param adjustTargetIgnorable TODO
+	 * @param sourceIfNoTargetSegment true to copy the source if the target segment is absent 
+	 * or empty, false to leave the target empty.
+	 * @param sourceIfNoTargetIgnorable true to copy the source if the target ignorable is
+	 * absent or empty, false or leave the target empty. 
 	 */
 	public void join (int startPartIndex,
 		int endPartIndex,
@@ -184,6 +192,10 @@ public interface IUnit extends IGroupOrUnit, IWithStore, Iterable<IPart> {
 
 	/**
 	 * Joins all the parts of this unit into a single segment.
+	 * @param sourceIfNoTargetSegment true to copy the source if the target segment is absent 
+	 * or empty, false to leave the target empty.
+	 * @param sourceIfNoTargetIgnorable true to copy the source if the target ignorable is
+	 * absent or empty, false or leave the target empty. 
 	 */
 	public void joinAll (boolean sourceIfNoTargetSegment,
 		boolean sourceIfNoTargetIgnorable);

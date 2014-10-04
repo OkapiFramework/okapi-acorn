@@ -126,4 +126,9 @@ public class YahooAnalyzer extends XLIFFDocumentTask {
 			+ "</body></html>";
 	}
 
+    @Override
+	public String getInfoLink () {
+		return "https://developer.yahoo.com/contentanalysis/";
+	};
+    
 }

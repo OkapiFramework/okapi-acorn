@@ -6,6 +6,8 @@ import java.util.Map;
 /**
  * Represents the inline content of an extracted original document.
  * For example, the content of XLIFF <code>&lt;source></code> or <code>&lt;target></code>.
+ * The content is composed of text and {@link ITag} objects which represent the inline
+ * data that are not text.
  */
 public interface IContent extends Iterable<Object> {
 

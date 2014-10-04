@@ -1,6 +1,7 @@
 package net.sf.okapi.acorn.client;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -8,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.URI;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -24,9 +26,11 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 
 	private final JEditorPane edNote;
 	private final JButton btStart;
+	private final JButton btInfo;
 	private final JProgressBar pbProgress;
 	private final JTextField edText;
 
+	private String infoLink;
 	private XLIFFDocumentTask task;
 	private boolean done = false;
 
@@ -44,6 +48,7 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 		c.gridx = 0; c.gridy = 0;
 		c.weightx = 1.0;
 		c.anchor = GridBagConstraints.PAGE_START;
+		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(pbProgress, c);
 
@@ -62,11 +67,26 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 		btStart.setActionCommand("start");
 		btStart.addActionListener(this);
 		c.gridx = 0; c.gridy = 2;
-		c.weightx = 1.0;
+		c.weightx = 0.5;
 		c.anchor = GridBagConstraints.LINE_START;
-		c.gridwidth = GridBagConstraints.REMAINDER;
+		//c.gridwidth = GridBagConstraints.REMAINDER;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(btStart, c);
+
+		c = new GridBagConstraints();
+		btInfo = new JButton("Info...");
+		btInfo.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				showInfo();
+			}
+		});
+		c.gridx = 1; c.gridy = 2;
+		c.weightx = 0.5;
+		c.anchor = GridBagConstraints.LINE_START;
+		//c.gridwidth = GridBagConstraints.REMAINDER;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(btInfo, c);
 
 		c = new GridBagConstraints();
 		edNote = new JEditorPane();
@@ -97,6 +117,7 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 		btStart.setText("Start");
 		pbProgress.setValue(0);
 		edText.setText("Click Start to start the process");
+		btInfo.setEnabled(infoLink!=null);
 	}
 
 	public void setTask (XLIFFDocumentTask task,
@@ -105,6 +126,7 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 		setTitle(title);
 		edNote.setText(task.getInfo());
 		this.task = task;
+		this.infoLink = task.getInfoLink();
 		resetUI();
 	}
 	
@@ -146,4 +168,14 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 		else edText.setText("Done");
 	}
 
+	private void showInfo () {
+		if ( infoLink == null ) return;
+		try {
+			if ( Desktop.isDesktopSupported() ) {
+				Desktop.getDesktop().browse(new URI(infoLink));
+			}
+		}
+		catch ( Throwable e ) {
+		}
+	}
 }

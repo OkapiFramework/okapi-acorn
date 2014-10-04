@@ -20,6 +20,7 @@
 
 package net.sf.okapi.acorn.client;
 
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -28,6 +29,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.text.NumberFormat;
 
 import javax.swing.JFileChooser;
@@ -230,6 +232,23 @@ public class MainDialog extends JFrame {
 			@Override
 			public void actionPerformed (ActionEvent event) {
 				docPanel.doTAUSRetrieveAndClean();
+			}
+		});
+		
+		menu.addSeparator();
+		
+		JMenuItem miDoc = new JMenuItem("API Documentation...", KeyEvent.VK_D);
+		menu.add(miDoc);
+		miDoc.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				try {
+					if ( Desktop.isDesktopSupported() ) {
+						Desktop.getDesktop().browse(new URI("http://opentag.com/data/xliffomapi/"));
+					}
+				}
+				catch ( Throwable e ) {
+				}
 			}
 		});
 		
