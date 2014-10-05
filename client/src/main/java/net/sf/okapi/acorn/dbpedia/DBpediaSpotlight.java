@@ -380,7 +380,7 @@ public class DBpediaSpotlight extends XLIFFDocumentTask {
 			+ "<ul><li>The <b>DBpedia Splotlight Web service</b> is used to extract entities. Each entity comes with a URI.</li>"
 			+ "<li>For each entity, we use a <b>SPARQL query</b> to cross-reference on <b>DBpedia</b> the URI with <b>Wikidata</b> information. This may give us a Q-Value (a unique identifier for Wikidata).</li>"
 			+ "<li>If there is a Q-Value, we query it on Wikidata to try to get translations in the target language.</li></ul>"
-			+ "<p>Found entities are annotated with their types, and any translation found is added in the unit using the Glossary module.</p>"
+			+ "<p>Found entities are annotated with their types, and any translation found is added in the unit using the <b>Glossary module</b>.</p>"
 			+ "</body></html>";
 	}
 

@@ -123,6 +123,9 @@ public class YahooAnalyzer extends XLIFFDocumentTask {
 			+ "<p>The <b>Yahoo Content Analysis Web Service</b> is used to find entities and mark them as 'terms' "
 			+ "using term markers. When available, the <code>ref</code> attribute points to the "
 			+ "Wikipedia page corresponding to the entity.</p>"
+			+ "<pre>&lt;mrk id='m1'\n"
+			+ "     type='term'\n"
+			+ "     ref='http://en.wikipedia.com/wiki/Fun'>Fun&lt;/mrk></pre>"
 			+ "</body></html>";
 	}
 

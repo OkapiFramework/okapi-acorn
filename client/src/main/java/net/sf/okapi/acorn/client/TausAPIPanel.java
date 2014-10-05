@@ -112,6 +112,7 @@ public class TausAPIPanel extends JPanel {
 		c.gridx = 1; c.gridy = 2; c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 0.90; c.gridwidth = GridBagConstraints.REMAINDER;
 		add((edId = new JTextField()), c);
+		edId.setText("381c165c-bbbb-eeee-9b53-9fe0decc8a11");
 		
 		c = new GridBagConstraints();
 		c.gridx = 0; c.gridy = 3; c.anchor = GridBagConstraints.LINE_START;

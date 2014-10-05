@@ -30,6 +30,7 @@ public class DocumentsPanel extends JPanel {
 	private final SimpleTM tm;
 	private final TransAPIClient ttapi;
 	private final JTextField edPath;
+	private final JTextField edTarget;
 	private final JTable table;
 	private final DocumentTableModel tableModel;
 	private final MainDialog main;
@@ -48,9 +49,18 @@ public class DocumentsPanel extends JPanel {
 		GridBagConstraints c = new GridBagConstraints();
 		edPath = new JTextField();
 		edPath.setEditable(false);
+		c.weightx = 0.9;
 		c.anchor = GridBagConstraints.PAGE_START;
 		c.gridx = 0; c.gridy = 0; c.fill = GridBagConstraints.HORIZONTAL;
 		add(edPath, c);
+		
+		c = new GridBagConstraints();
+		edTarget = new JTextField();
+		edTarget.setEditable(false);
+		c.weightx = 0.1;
+		c.anchor = GridBagConstraints.PAGE_START;
+		c.gridx = 1; c.gridy = 0; c.fill = GridBagConstraints.HORIZONTAL;
+		add(edTarget, c);
 		
 		c = new GridBagConstraints();
 		tableModel = new DocumentTableModel();
@@ -78,6 +88,12 @@ public class DocumentsPanel extends JPanel {
 	{
 		tableModel.setDocument(doc);
 		edPath.setText(path);
+		String trg = doc.getTargetLanguage();
+		if ( trg == null ) {
+			trg = "iu";
+			doc.setTargetLanguage(trg);
+		}
+		edTarget.setText(trg);
 	}
 
 	public IDocument getDocument () {

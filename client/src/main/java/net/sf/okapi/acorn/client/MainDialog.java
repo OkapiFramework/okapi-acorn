@@ -94,7 +94,7 @@ public class MainDialog extends JFrame {
 	}
 
 	private void initComponents () {
-		setTitle("Okapi Acorn - Client");
+		setTitle("Okapi Acorn");
 		final String tabStart = "<html><body><table width='160'>";
 		final String tabEnd = "</table></body></html>";
 		
@@ -237,7 +237,7 @@ public class MainDialog extends JFrame {
 		
 		menu.addSeparator();
 		
-		JMenuItem miDoc = new JMenuItem("API Documentation...", KeyEvent.VK_D);
+		JMenuItem miDoc = new JMenuItem("API Documentation...", KeyEvent.VK_O);
 		menu.add(miDoc);
 		miDoc.addActionListener(new ActionListener() {
 			@Override

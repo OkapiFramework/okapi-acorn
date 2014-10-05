@@ -242,7 +242,7 @@ public class TAAS extends XLIFFDocumentTask {
 			+ "<p>The <b>TAAS Web Service</b> (Terminology as a Service) powered by Tilde, provides a way "
 			+ "to discover in the source text the terms stored in common or private collections.</p>"
 			+ "<p>The list of the found terms and their translation is added to each unit of the document "
-			+ "using the Glossary module.</p>"
+			+ "using the <b>Glossary module</b>.</p>"
 			+ "</body></html>";
 	}
 

@@ -121,7 +121,14 @@ public class FilterBasedReader implements IDocumentReader {
 			IPart dstPart;
 			if ( srcPart.isSegment() ) {
 				dstPart = dstUnit.appendSegment();
-				dstPart.setId(UUID.randomUUID().toString());
+				// Cheat to assign one special ID to "Sign in"
+				// for demonstration purpose
+				if ( srcPart.getContent().getText().equals("Sign in") ) {
+					dstPart.setId("381c165c-bbbb-eeee-9b53-9fe0decc8a11");
+				}
+				else {
+					dstPart.setId(UUID.randomUUID().toString());
+				}
 			}
 			else dstPart = dstUnit.appendIgnorable();
 			// Source

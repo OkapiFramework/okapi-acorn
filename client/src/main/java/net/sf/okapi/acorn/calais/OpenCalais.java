@@ -25,7 +25,6 @@ public class OpenCalais extends XLIFFDocumentTask {
 		private int start;
 		private int end;
 		private IMTag info;
-		private String name;
 
 		public Occurrence (int offset,
 			int length,
@@ -34,7 +33,6 @@ public class OpenCalais extends XLIFFDocumentTask {
 		{
 			this.start = offset;
 			this.end = offset+length;
-			this.name = name;
 			info = Factory.XOM.createOpeningMTag("notused", type);
 			info.setValue(name);
 		}
@@ -64,6 +62,7 @@ public class OpenCalais extends XLIFFDocumentTask {
 	
 	private static final String BASEURL = "http://api.opencalais.com/tag/rs/enrich";
 
+	private Credentials credentials;
 	private JSONParser parser;
 	private HttpClient client;
 	
@@ -71,6 +70,7 @@ public class OpenCalais extends XLIFFDocumentTask {
 		client = new HttpClient();
         client.getParams().setParameter("http.useragent", "Okapi-Acorn");
         parser = new JSONParser();
+        credentials = new Credentials();
 	}
 	
 	@Override
@@ -78,21 +78,20 @@ public class OpenCalais extends XLIFFDocumentTask {
     	super.process(segment);
 		IContent content = segment.getSource();
 		if ( content.isEmpty() ) return;
-		String body = content.getCodedText(); //.getPlainText();
-		if ( body.isEmpty() ) return;
+		String text = content.getCodedText();
+		if ( text.isEmpty() ) return;
 		
 		PostMethod method = new PostMethod(BASEURL);
-		method.setRequestHeader("x-calais-licenseID", "qp4vk8cbb4xjmjde6hzpuxdq");
+		method.setRequestHeader("x-calais-licenseID", credentials.getLicenseId());
         method.setRequestHeader("Content-Type", "text/raw; charset=UTF-8");
         method.setRequestHeader("Accept", "application/json");
         method.setRequestHeader("enableMetadataType", "SocialTags,GenericRelations");
         
         // Do the call
         try {
-			method.setRequestEntity(new StringRequestEntity(body, "text/raw", "UTF-8"));
+			method.setRequestEntity(new StringRequestEntity(text, "text/raw", "UTF-8"));
 		}
 		catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
         String res = doRequest(method);
@@ -166,6 +165,9 @@ public class OpenCalais extends XLIFFDocumentTask {
 			+ "</style></header><body>"
 			+ "<p>The <b>Open-Calais Web Service</b> from Thomson Reuters is used to find entities and mark them "
 			+ "using the ITS Text Analysis annotation.</p>"
+			+ "<pre>&lt;mrk id='m1'\n"
+			+ "     type='oc:entity/City'\n"
+			+ "     value='Vancouver'>Vancouver&lt;/mrk></pre>"
 			+ "</body></html>";
 	}
 
