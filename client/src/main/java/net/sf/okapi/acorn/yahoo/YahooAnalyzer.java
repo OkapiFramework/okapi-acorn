@@ -27,10 +27,6 @@ public class YahooAnalyzer extends XLIFFDocumentTask {
     @Override
     protected void process (ISegment segment) {
     	super.process(segment);
-    	getTerms(segment);
-    }
-
-	private void getTerms (ISegment segment) {
 		try {
 			// Get the source content
 			IContent content = segment.getSource();

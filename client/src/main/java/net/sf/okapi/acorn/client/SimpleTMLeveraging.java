@@ -19,12 +19,10 @@ public class SimpleTMLeveraging extends XLIFFDocumentTask {
 	@Override
 	protected void process (ISegment segment) {
 		super.process(segment);
-		
 		// Skip segments with empty source, or with existing non-empty target
 		if ( segment.hasTarget() && !segment.getTarget().isEmpty() ) return;
 		if ( segment.getSource().isEmpty() ) return;
-		
-		// Treat code-only segments cases (WS is not seen as text here)
+		// Treat code-only segments cases (whitespace is not considered text here)
 		if ( !segment.getSource().hasText(false) ) {
 			// Just clone the source
 			segment.copyTarget(segment.getSource());
@@ -37,7 +35,6 @@ public class SimpleTMLeveraging extends XLIFFDocumentTask {
 		if ( res != null ) {
 			Util.leverage(segment, res.getTarget());
 		}
-		
 	}
 
     @Override
