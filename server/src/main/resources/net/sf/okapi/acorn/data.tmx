@@ -67,8 +67,8 @@
    <tuv xml:lang="iu"><seg>ᐃᖃᓗᐃᑦᒨᓕᖓᔪᑦ</seg></tuv>
   </tu>
   <tu>
-   <tuv xml:lang="en"><seg><bpt i='1'>&lt;/B></bpt>Sign in<ept i='1'>&lt;B></ept></seg></tuv>
-   <tuv xml:lang="iu"><seg><bpt i='1'>&lt;/B></bpt>ᐃᑎᕐᓗᑎᑦ<ept i='1'>&lt;B></ept></seg></tuv>
+   <tuv xml:lang="en"><seg><bpt i='1'>&lt;B></bpt>Sign in<ept i='1'>&lt;/B></ept></seg></tuv>
+   <tuv xml:lang="iu"><seg><bpt i='1'>&lt;B></bpt>ᐃᑎᕐᓗᑎᑦ<ept i='1'>&lt;/B></ept></seg></tuv>
   </tu>
   <tu>
    <tuv xml:lang="en"><seg>Our Organization</seg></tuv>
