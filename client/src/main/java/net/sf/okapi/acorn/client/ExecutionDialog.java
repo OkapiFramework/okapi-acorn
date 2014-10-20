@@ -26,6 +26,7 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 
 	private final JEditorPane edNote;
 	private final JButton btStart;
+	private final JButton btStop;
 	private final JButton btInfo;
 	private final JProgressBar pbProgress;
 	private final JTextField edText;
@@ -33,6 +34,7 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 	private String infoLink;
 	private XLIFFDocumentTask task;
 	private boolean done = false;
+	private boolean wasCanceled = false;
 
 	public ExecutionDialog (JFrame owner,
 		boolean modal)
@@ -67,11 +69,24 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 		btStart.setActionCommand("start");
 		btStart.addActionListener(this);
 		c.gridx = 0; c.gridy = 2;
-		c.weightx = 0.5;
+		c.weightx = 0.33;
 		c.anchor = GridBagConstraints.LINE_START;
-		//c.gridwidth = GridBagConstraints.REMAINDER;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(btStart, c);
+
+		c = new GridBagConstraints();
+		btStop = new JButton("Cancel");
+		btStop.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent event) {
+				stopProcess();
+			}
+		});
+		c.gridx = 1; c.gridy = 2;
+		c.weightx = 0.33;
+		c.anchor = GridBagConstraints.LINE_START;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(btStop, c);
 
 		c = new GridBagConstraints();
 		btInfo = new JButton("Info...");
@@ -81,10 +96,9 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 				showInfo();
 			}
 		});
-		c.gridx = 1; c.gridy = 2;
-		c.weightx = 0.5;
+		c.gridx = 2; c.gridy = 2;
+		c.weightx = 0.33;
 		c.anchor = GridBagConstraints.LINE_START;
-		//c.gridwidth = GridBagConstraints.REMAINDER;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(btInfo, c);
 
@@ -114,7 +128,9 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 
 	private void resetUI () {
 		done = false;
+		wasCanceled = false;
 		btStart.setText("Start");
+		btStop.setEnabled(false);
 		pbProgress.setValue(0);
 		edText.setText("Click Start to start the process");
 		btInfo.setEnabled(infoLink!=null);
@@ -134,6 +150,7 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 	public void propertyChange (PropertyChangeEvent event) {
 		switch ( event.getPropertyName() ) {
 		case "progress":
+			if ( wasCanceled ) return;
 			int progress = (Integer)event.getNewValue();
 			pbProgress.setValue(progress);
 			edText.setText(String.format("Completed %d%% of task...", task.getProgress()));
@@ -153,7 +170,7 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 		}
 		else { // Start
 			btStart.setEnabled(false);
-			//setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			btStop.setEnabled(true);
 			task.addPropertyChangeListener(this);
 			task.execute();
 		}
@@ -161,13 +178,24 @@ public class ExecutionDialog extends JDialog implements ActionListener, Property
 
 	private void done () {
 		done = true;
-		pbProgress.setValue(pbProgress.getMaximum());
 		btStart.setText("Close");
 		btStart.setEnabled(true);
-		if ( task.getError() != null ) edText.setText("Error(s) occurred: See the log.");
-		else edText.setText("Done");
+		btStop.setEnabled(false);
+		if ( wasCanceled ) {
+			edText.setText("The tasks was was canceled.");
+		}
+		else {
+			pbProgress.setValue(pbProgress.getMaximum());
+			if ( task.getError() != null ) edText.setText("Error(s) occurred: See the log.");
+			else edText.setText("Done");
+		}
 	}
 
+	private void stopProcess () {
+		wasCanceled = true;
+		task.cancel(true);
+	}
+	
 	private void showInfo () {
 		if ( infoLink == null ) return;
 		try {

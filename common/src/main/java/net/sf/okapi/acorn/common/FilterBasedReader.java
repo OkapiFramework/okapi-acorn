@@ -9,7 +9,6 @@ import net.sf.okapi.common.Event;
 import net.sf.okapi.common.LocaleId;
 import net.sf.okapi.common.filters.FilterConfigurationMapper;
 import net.sf.okapi.common.filters.IFilter;
-import net.sf.okapi.common.filters.IFilterConfigurationMapper;
 import net.sf.okapi.common.resource.Code;
 import net.sf.okapi.common.resource.ITextUnit;
 import net.sf.okapi.common.resource.RawDocument;
@@ -49,10 +48,17 @@ public class FilterBasedReader implements IDocumentReader {
 		IDocument doc = null;
 		
 		try {
-			IFilterConfigurationMapper fcm = new FilterConfigurationMapper();
+			FilterConfigurationMapper fcm = new FilterConfigurationMapper();
 			fcm.addConfigurations("net.sf.okapi.filters.tmx.TmxFilter");
 			fcm.addConfigurations("net.sf.okapi.filters.openxml.OpenXMLFilter");
 			fcm.addConfigurations("net.sf.okapi.filters.html.HtmlFilter");
+//			// Load custom configuration for HTML5
+//			String path = inputFile.getAbsolutePath();
+//			int p = path.lastIndexOf(File.separatorChar);
+//			path = path.substring(0, p);
+//			fcm.setCustomConfigurationsDirectory(path);
+//			fcm.addCustomConfiguration("okf_html@HTML5");
+			// Create filter
 			filter = fcm.createFilter(filterConfigId);
 			filter.open(rd);
 			IFile file;
