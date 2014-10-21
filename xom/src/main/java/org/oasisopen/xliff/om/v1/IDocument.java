@@ -2,6 +2,7 @@ package org.oasisopen.xliff.om.v1;
 
 /**
  * Represents a document object (one or more {@link IFile} objects).
+ * <p>See <a href='http://opentag.com/data/xliffomapi'>http://opentag.com/data/xliffomapi</a>
  */
 public interface IDocument extends Iterable<IFile> {
 
