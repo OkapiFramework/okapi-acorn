@@ -43,7 +43,9 @@ public class DBpediaSpotlight extends XLIFFDocumentTask {
 	private static final String DBP_URI = "myDBpediaNS";
 	private static final String GLS_URI = Util.NS_XLIFF20_GLOSSARY;
 	
-	private String dbpslBaseURL = "http://spotlight.sztaki.hu:2222/rest";
+	// private String dbpslBaseURL = "http://spotlight.dbpedia.org/rest"; // Slower, too many data, but usually up and running 
+	private String dbpslBaseURL = "http://spotlight.sztaki.hu:2222/rest"; // Faster, better, but down often
+	
 	private String wikidataBaseURL = "http://www.wikidata.org/entity/";
 	
 	private JSONParser parser;
@@ -200,20 +202,27 @@ public class DBpediaSpotlight extends XLIFFDocumentTask {
 		HashMap<String, Resource> newEntries)
 	{
 		Occurrence occurrence = new Occurrence();
-		list.add(occurrence);
 		JSONObject o3 = (JSONObject)surfaceFormItem;
 		occurrence.start = Integer.parseInt(o3.get("@offset").toString());
-		JSONObject o4 = (JSONObject)o3.get("resource");
+		Object objRes = o3.get("resource");
+		if ( objRes == null ) return;
+		JSONObject o4;
+		if ( objRes instanceof JSONArray ) {
+			JSONArray a1 = (JSONArray)objRes;
+			o4 = (JSONObject)a1.get(0);
+		}
+		else {
+			o4 = (JSONObject)objRes;
+		}
 		String uri = (String)o4.get("@uri");
 		String name = (String)o3.get("@name");
 		// Use URI+name to store same URI found based on different spans of content
 		occurrence.uriAndName = uri+"_"+name;
-//		System.out.println("New Occurence: name="+name+" start="+occurrence.start);
+		list.add(occurrence);
 		// Do we have it yet?
 		if ( unitEntries.containsKey(occurrence.uriAndName)
 			|| newEntries.containsKey(occurrence.uriAndName) ) {
 			// We already have the data, move to the next one
-//			System.out.println(" Resource exists already");
 			return;
 		}
 		// Else: create a new resource
