@@ -43,8 +43,8 @@ public class DBpediaSpotlight extends XLIFFDocumentTask {
 	private static final String DBP_URI = "myDBpediaNS";
 	private static final String GLS_URI = Util.NS_XLIFF20_GLOSSARY;
 	
-	// private String dbpslBaseURL = "http://spotlight.dbpedia.org/rest"; // Slower, too many data, but usually up and running 
-	private String dbpslBaseURL = "http://spotlight.sztaki.hu:2222/rest"; // Faster, better, but down often
+	private String dbpslBaseURL = "http://spotlight.dbpedia.org/rest"; // Slower, too many data, but usually up and running 
+	//private String dbpslBaseURL = "http://spotlight.sztaki.hu:2222/rest"; // Faster, better, but down often
 	
 	private String wikidataBaseURL = "http://www.wikidata.org/entity/";
 	

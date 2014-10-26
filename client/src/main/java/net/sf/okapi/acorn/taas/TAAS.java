@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -45,6 +47,7 @@ public class TAAS extends XLIFFDocumentTask {
 	private static final String GLS_URI = Util.NS_XLIFF20_GLOSSARY;
 
 	private final DocumentBuilder docBuilder;
+	//private final SSLSocketFactory sockFactory;
 	private final String srcLang = "en";
 	private final String trgLang = "fi"; // For demo
 	private final String transacUser = "ysavourel";
@@ -62,9 +65,30 @@ public class TAAS extends XLIFFDocumentTask {
 			targets = new ArrayList<>();
 		}
 	}
-	
+
+	/**
+	 * Simple trust manager that does nothing.
+	 * To by-pass invalid SSL certificate on web service end-point.
+	 */
+//	private class SimpleX509TrustManager implements X509TrustManager {
+//		@Override
+//		public void checkClientTrusted (X509Certificate[] cert, String s)
+//			throws CertificateException {
+//		}
+//
+//		@Override
+//		public void checkServerTrusted (X509Certificate[] cert, String s)
+//			throws CertificateException {
+//		}
+//
+//		@Override
+//		public X509Certificate[] getAcceptedIssuers () {
+//			return null;
+//		}
+//	}	
+
 	public TAAS ()
-		throws ParserConfigurationException
+		throws ParserConfigurationException, NoSuchAlgorithmException, KeyManagementException
 	{
 		client = new HttpClient();
         client.getParams().setParameter("http.useragent", "Okapi-Acorn");
@@ -73,6 +97,13 @@ public class TAAS extends XLIFFDocumentTask {
         DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
 		domFactory.setNamespaceAware(true);
 		docBuilder = domFactory.newDocumentBuilder();
+
+		// Using our own trust manager is needed temporarily to by-pass 
+		// the invalid SSL certificate of the Web service end-point.
+		// This should be removed as soon as the issue is fixed at the end-point
+//	    SSLContext ssl = SSLContext.getInstance("TLSv1");
+//		ssl.init(null, new TrustManager[]{new SimpleX509TrustManager()}, null);
+//		sockFactory = ssl.getSocketFactory();
 	}
 
 	@Override
@@ -100,8 +131,11 @@ public class TAAS extends XLIFFDocumentTask {
 	        r.append("?sourceLang=").append(srcLang);
 	        r.append("&targetLang=").append(trgLang); // Hard-coded for the demo
 	        r.append("&method=").append("4"); //4
-	        HttpURLConnection conn;
-	        conn = (HttpURLConnection) new URL(r.toString()).openConnection();
+	        HttpsURLConnection conn;
+	        conn = (HttpsURLConnection) new URL(r.toString()).openConnection();
+	        //--- start fix: by-pass SSL bad certificate error
+	        // conn.setSSLSocketFactory(sockFactory);
+	        //--- end fix
 	        conn.setRequestProperty("Authorization", credentials.getBasic());
 	        String tuk = credentials.getUserKey();
 	        if ( tuk != null ) {
@@ -131,7 +165,6 @@ public class TAAS extends XLIFFDocumentTask {
 	        finally {
 	            in.close();
 	        }	        
-	//        System.out.println(res);
 	        parseTerms(res);
 		}
 		catch ( Throwable e ) {
@@ -248,7 +281,7 @@ public class TAAS extends XLIFFDocumentTask {
 
     @Override
 	public String getInfoLink () {
-		return "https://demo.taas-project.eu/projects/4222";
+		return "https://term.tilde.com/projects/4222";
 	};
     
 }
