@@ -2,3 +2,6 @@ target
 .project
 .settings
 .classpath
+
+/client/src/main/resources/net/sf/okapi/acorn/calais/opencalais.properties
+/client/src/main/resources/net/sf/okapi/acorn/taas/taas.properties

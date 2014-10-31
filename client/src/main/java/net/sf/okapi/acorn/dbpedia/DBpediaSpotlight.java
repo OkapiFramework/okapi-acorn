@@ -37,14 +37,34 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
+/*===========================================================================
+Copyright (C) 2014 by the Okapi Framework contributors
+-----------------------------------------------------------------------------
+This library is free software; you can redistribute it and/or modify it 
+under the terms of the GNU Lesser General Public License as published by 
+the Free Software Foundation; either version 2.1 of the License, or (at 
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but 
+WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser 
+General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License 
+along with this library; if not, write to the Free Software Foundation, 
+Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+See also the full LGPL text here: http://www.gnu.org/copyleft/lesser.html
+===========================================================================*/
+
 public class DBpediaSpotlight extends XLIFFDocumentTask {
 
 	private static final String ITS20_URI = "http://www.w3.org/2005/11/its";
 	private static final String DBP_URI = "myDBpediaNS";
 	private static final String GLS_URI = Util.NS_XLIFF20_GLOSSARY;
 	
-	private String dbpslBaseURL = "http://spotlight.dbpedia.org/rest"; // Slower, too many data, but usually up and running 
-	//private String dbpslBaseURL = "http://spotlight.sztaki.hu:2222/rest"; // Faster, better, but down often
+	//private String dbpslBaseURL = "http://spotlight.dbpedia.org/rest"; // Slower, too many data, but usually up and running 
+	private String dbpslBaseURL = "http://spotlight.sztaki.hu:2222/rest"; // Faster, better, but down often
 	
 	private String wikidataBaseURL = "http://www.wikidata.org/entity/";
 	
