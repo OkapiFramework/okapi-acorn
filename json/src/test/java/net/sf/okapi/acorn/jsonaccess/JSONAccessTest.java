@@ -65,7 +65,7 @@ public class JSONAccessTest {
 	public void testSimpleExternalRules () {
 		JSONAccess ja = new JSONAccess();
 		ja.read("{"+createData1()+"}",
-			"{\"locRules\": [\"$.messages[*].text\"]}");
+			"{\"locRules\": [{\"sel\":\"$.messages[*].text\",\"trans\":true}]}");
 		assertTrue(testData1(ja));
 	}
 
@@ -73,7 +73,7 @@ public class JSONAccessTest {
 	public void testModifications () {
 		JSONAccess ja = new JSONAccess();
 		ja.read("{"+createData1()+"}",
-			"{\"locRules\": [\"$.messages[*].text\"]}");
+			"{\"locRules\": [{\"sel\":\"$.messages[*].text\",\"trans\":true}]}");
 		assertTrue(ja.hasNext());
 		assertEquals("Text 1", ja.next());
 		ja.setNewValue("new text");
@@ -98,16 +98,16 @@ public class JSONAccessTest {
 	public void testAlternateExternalRules () {
 		JSONAccess ja = new JSONAccess();
 		ja.read("{"+createData1()+"}",
-			"{\"locRules\": [\"$..text\"]}");
+			"{\"locRules\": [{\"sel\":\"$..text\",\"trans\":true}]}");
 		assertTrue(testData1(ja));
 		ja.read("{"+createData1()+"}",
-			"{\"locRules\": [\"$['messages'][*]['text']\"]}");
+			"{\"locRules\": [{\"sel\":\"$['messages'][*]['text']\",\"trans\":true}]}");
 		assertTrue(testData1(ja));
 	}
 
 	private String createInput1 () {
 		return "{"
-			+ "\"locRules\": [\"$.messages[*].text\"],"
+			+ "\"locRules\": [{\"sel\":\"$.messages[*].text\",\"trans\":true}],"
 			+ createData1()
 			+ "}";
 	}
@@ -115,7 +115,7 @@ public class JSONAccessTest {
 	private String createInput2 () {
 		return "{"
 			+ createData1()
-			+ ", \"locRules\": [\"$.messages[*].text\"]"
+			+ ", \"locRules\": [{\"sel\":\"$.messages[*].text\",\"trans\":true}]"
 			+ "}";
 	}
 

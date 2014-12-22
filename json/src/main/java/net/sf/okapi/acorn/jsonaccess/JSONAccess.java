@@ -22,6 +22,7 @@ package net.sf.okapi.acorn.jsonaccess;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -34,6 +35,15 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
  * Provides access to translatable strings for a JSON string.
  * The rules to specify which strings are translatable are provided through a special JSON string
  * which can be included in the data to read.
+ * Rules are applied in the order they are declared and the last one overrides any previous one
+ * when they resolve on the same node.
+ * <p>Each rule must be in the format:
+ * <pre>
+ * {
+ *  "sel":"&lt;json-path>",
+ *  "trans":true|false
+ * }
+ * </pre>
  */
 public class JSONAccess {
 
@@ -44,7 +54,7 @@ public class JSONAccess {
 
 	private DocumentContext dcV;
 	private DocumentContext dcP;
-	private List<String> rules;
+	private List<Rule> rules;
 	private int current;
 	private List<Object> strings;
 	private List<String> paths;
@@ -61,7 +71,7 @@ public class JSONAccess {
 	 * Gets the current rules.
 	 * @return the current rules (can be null or empty).
 	 */
-	public List<String> getRules () {
+	public List<Rule> getRules () {
 		return rules;
 	}
 	
@@ -70,7 +80,7 @@ public class JSONAccess {
 	 * @param rules the list of new rules (can be null).
 	 * @return the JSONAccess object itself (to allowed dot-operations).
 	 */
-	public JSONAccess setRules (List<String> rules) {
+	public JSONAccess setRules (List<Rule> rules) {
 		resetCursor();
 		this.rules = rules;
 		return this;
@@ -87,11 +97,38 @@ public class JSONAccess {
 			rules = null;
 		}
 		else {
-			rules = JsonPath.read(jp.parse(rulesString), LOCRULE_PATH);
+			List<Object> list = JsonPath.read(jp.parse(rulesString), LOCRULE_PATH);
+			compileRules(list);
 		}
 		return this;
 	}
 
+	/**
+	 * Compiles a set of new rules.
+	 * @param list the list of rules as JSON objects.
+	 * (if null or empty: it results on undefined rules) 
+	 */
+	private void compileRules (List<Object> list) {
+		if (( list == null ) || list.isEmpty() ) {
+			rules = null;
+			return;
+		}
+		// Else: process each rule
+		rules = new ArrayList<>();
+		try {
+			for ( Object obj : list ) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> map = (Map<String, Object>)obj;
+				String sel = (String)map.get("sel");
+				boolean trans = (Boolean)map.get("trans");
+				rules.add(new Rule(sel, trans));
+			}
+		}
+		catch ( Throwable e ) {
+			throw new RuntimeException("Syntax error in rule: "+e.getMessage());
+		}
+	}
+	
 	/**
 	 * Sets the input to process. The input may include the rules to use.
 	 * If the input includes the rules, they become the new rules. 
@@ -104,8 +141,8 @@ public class JSONAccess {
 		dcP = JsonPath.using(confP).parse(jsonString);
 		// Check if the rules are present in the data
 		try {
-			List<String> tmp = dcV.read(LOCRULE_PATH);
-			rules = tmp;
+			List<Object> tmp = dcV.read(LOCRULE_PATH);
+			compileRules(tmp);
 		}
 		catch ( PathNotFoundException e ) {
 			// Do nothing: this is not an error.
@@ -164,18 +201,21 @@ public class JSONAccess {
 		strings = new ArrayList<>();
 		paths = new ArrayList<>();
 		
-		String r1 = rules.get(0);
-
-		List<String> res = dcV.read(r1);
-		if (( res != null ) && !res.isEmpty() ) {
-			// Add the strings
-			strings.addAll(res);
-			// Get and add the corresponding paths
-			List<String> resP = dcP.read(r1);
-			if (( resP == null ) || ( res.size() != resP.size() )) {
-				throw new RuntimeException("Mismatch between strings and paths results.");
+		//TODO: implement overrides
+		
+		for ( Rule rule : rules) {
+			if ( !rule.getTrans() ) continue;
+			List<String> res = dcV.read(rule.getSel());
+			if (( res != null ) && !res.isEmpty() ) {
+				// Add the strings
+				strings.addAll(res);
+				// Get and add the corresponding paths
+				List<String> resP = dcP.read(rule.getSel());
+				if (( resP == null ) || ( res.size() != resP.size() )) {
+					throw new RuntimeException("Mismatch between strings and paths results.");
+				}
+				paths.addAll(resP);
 			}
-			paths.addAll(resP);
 		}
 	}
 
@@ -203,8 +243,7 @@ public class JSONAccess {
 	 * @param newValue the new text value to set.
 	 */
 	public void setNewValue (String newValue) {
-		String s = paths.get(current);
-		dcP.set(s, newValue);
+		dcP.set(paths.get(current), newValue);
 	}
 
 	/**
