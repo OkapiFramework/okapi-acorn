@@ -77,14 +77,18 @@ public class JSONAccessTest {
 		assertTrue(ja.hasNext());
 		assertEquals("Text 1", ja.next());
 		ja.setNewValue("new text");
-		// Re-process the output
+		// Re-apply the rules on the modified data
+		ja.applyRules();
+		assertTrue(ja.hasNext());
+		assertEquals("new text", ja.next());
+		// Try also to re-read the modified data
 		ja.read(ja.getOutput());
 		assertTrue(ja.hasNext());
 		assertEquals("new text", ja.next());
 	}
 
 	@Test
-	public void testReApply () {
+	public void testSimpleReApply () {
 		JSONAccess ja = new JSONAccess();
 		// Apply once
 		ja.read(createInput1());
@@ -103,6 +107,20 @@ public class JSONAccessTest {
 		ja.read("{"+createData1()+"}",
 			"{\"locRules\": [{\"sel\":\"$['messages'][*]['text']\",\"trans\":true}]}");
 		assertTrue(testData1(ja));
+	}
+
+	@Test
+	public void testOveriddenRules () {
+		JSONAccess ja = new JSONAccess();
+		ja.read("{"+createData1()+"}",
+			"{\"locRules\": ["
+			+ "{\"sel\":\"$..text\",\"trans\":true},"
+			+ "{\"sel\":\"['messages'][0]['text']\",\"trans\":false}"
+			+ "]}");
+		// Second rule overrides the translate=true for the first message
+		assertTrue(ja.hasNext());
+		assertEquals("Text 2", ja.next());
+		assertFalse(ja.hasNext());
 	}
 
 	private String createInput1 () {

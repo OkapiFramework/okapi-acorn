@@ -21,8 +21,11 @@
 package net.sf.okapi.acorn.jsonaccess;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -55,10 +58,15 @@ public class JSONAccess {
 	private DocumentContext dcV;
 	private DocumentContext dcP;
 	private List<Rule> rules;
-	private int current;
-	private List<Object> strings;
-	private List<String> paths;
+	private LinkedHashMap<String, Node> nodes;
+	private Iterator<Entry<String, Node>> nodesIter;
+	private Entry<String, Node> currentEntry;
 
+	private class Node {
+		boolean trans;
+		String text;
+	}
+	
 	/**
 	 * Creates a new JSONAccess object.
 	 */
@@ -198,24 +206,44 @@ public class JSONAccess {
 			throw new RuntimeException("No input data are set.");
 		}
 
-		strings = new ArrayList<>();
-		paths = new ArrayList<>();
-		
-		//TODO: implement overrides
-		
+		// Step 1: Create paths for all rules with flag for properties
+		nodes = new LinkedHashMap<>();
 		for ( Rule rule : rules) {
-			if ( !rule.getTrans() ) continue;
-			List<String> res = dcV.read(rule.getSel());
-			if (( res != null ) && !res.isEmpty() ) {
-				// Add the strings
-				strings.addAll(res);
-				// Get and add the corresponding paths
-				List<String> resP = dcP.read(rule.getSel());
-				if (( resP == null ) || ( res.size() != resP.size() )) {
-					throw new RuntimeException("Mismatch between strings and paths results.");
+			List<String> resP = dcP.read(rule.getSel());
+			if (( resP == null ) || resP.isEmpty() ) continue;
+			// Else: we have at least one match
+			for ( String path : resP ) {
+				// Try to get existing node (created from previous rule)
+				Node node = nodes.get(path);
+				// If it does not exists: create it and add it
+				if ( node == null ) {
+					node = new Node();
+					nodes.put(path, node);
 				}
-				paths.addAll(resP);
+				// then set the latest properties
+				node.trans = rule.getTrans();
 			}
+		}
+
+		// Step 2: Remove all nodes that are not translatable
+		// or get the text for the nodes that are translatable
+		Iterator<Entry<String, Node>> iter = nodes.entrySet().iterator();
+		while ( iter.hasNext() ) {
+			Entry<String, Node> entry = iter.next();
+			if ( entry.getValue().trans ) {
+				// Get the text
+				entry.getValue().text = dcV.read(entry.getKey());
+			}
+			else { // Not translatable: remove it
+				iter.remove();
+			}
+		}
+		
+		if ( !nodes.isEmpty() ) {
+			nodesIter = nodes.entrySet().iterator();
+		}
+		else {
+			nodes = null;
 		}
 	}
 
@@ -224,9 +252,8 @@ public class JSONAccess {
 	 * @return true if there is another translatable string, false otherwise.
 	 */
 	public boolean hasNext () {
-		if (( strings == null ) || strings.isEmpty() ) return false;
-		if ( current+1 >= strings.size() ) return false;
-		return true;
+		if ( nodesIter == null ) return false;
+		return nodesIter.hasNext();
 	}
 	
 	/**
@@ -235,7 +262,8 @@ public class JSONAccess {
 	 * @return the next translatable string.
 	 */
 	public String next () {
-		return (String)strings.get(++current);
+		currentEntry = nodesIter.next();
+		return currentEntry.getValue().text;
 	}
 	
 	/**
@@ -243,7 +271,7 @@ public class JSONAccess {
 	 * @param newValue the new text value to set.
 	 */
 	public void setNewValue (String newValue) {
-		dcP.set(paths.get(current), newValue);
+		dcV.set(currentEntry.getKey(), newValue);
 	}
 
 	/**
@@ -252,16 +280,16 @@ public class JSONAccess {
 	 * if there is no input specified.
 	 */
 	public String getOutput () {
-		if ( dcP == null ) return null;
-		return dcP.configuration().jsonProvider().toJson(dcP.json());
+		if ( dcV == null ) return null;
+		return dcV.configuration().jsonProvider().toJson(dcV.json());
 	}
 
 	/**
 	 * Resets the variables used for iterating through the translatable strings.
 	 */
 	private void resetCursor () {
-		current = -1;
-		strings = null;
+		nodes = null;
+		nodesIter = null;
 	}
 
 }
