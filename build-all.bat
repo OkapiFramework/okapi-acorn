@@ -10,4 +10,7 @@ call mvn clean install
 rem pause
 cd ..\tmlib
 call mvn clean install
+rem pause
+cd ..\json
+call mvn clean install
 pause

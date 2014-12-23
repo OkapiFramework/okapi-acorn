@@ -127,6 +127,11 @@ public class Util {
 		return tmp.toString();
 	}
 
+	/**
+	 * Indicates if a string is null or empty.
+	 * @param text the string to test
+	 * @return true if the string is either null or empty, false otherwise.
+	 */
 	public static boolean isNoE (String text) {
 		return (( text == null ) || text.isEmpty() );
 	}

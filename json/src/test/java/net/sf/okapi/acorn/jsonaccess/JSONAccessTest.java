@@ -27,12 +27,20 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.jayway.jsonpath.InvalidJsonException;
+
 public class JSONAccessTest {
 
 	@Test
 	public void testAccessWithoutRead () {
 		JSONAccess ja = new JSONAccess();
 		assertFalse(ja.hasNext());
+	}
+
+	@Test (expected = InvalidJsonException.class)
+	public void testBadInput () {
+		JSONAccess ja = new JSONAccess();
+		ja.read("{\"abc :\"test\"}"); // Bad JSON syntax
 	}
 
 	@Test
@@ -65,7 +73,15 @@ public class JSONAccessTest {
 	public void testSimpleExternalRules () {
 		JSONAccess ja = new JSONAccess();
 		ja.read("{"+createData1()+"}",
-			"{\"locRules\": [{\"sel\":\"$.messages[*].text\",\"trans\":true}]}");
+			"{\"locRules\": [{\"selector\":\"$.messages[*].text\",\"translate\":true}]}");
+		assertTrue(testData1(ja));
+	}
+
+	@Test
+	public void testSimpleExternalRulesUsingDefault () {
+		JSONAccess ja = new JSONAccess();
+		ja.read("{"+createData1()+"}",
+			"{\"locRules\": [{\"selector\":\"$.messages[*].text\"}]}");
 		assertTrue(testData1(ja));
 	}
 
@@ -73,7 +89,7 @@ public class JSONAccessTest {
 	public void testModifications () {
 		JSONAccess ja = new JSONAccess();
 		ja.read("{"+createData1()+"}",
-			"{\"locRules\": [{\"sel\":\"$.messages[*].text\",\"trans\":true}]}");
+			"{\"locRules\": [{\"selector\":\"$.messages[*].text\",\"translate\":true}]}");
 		assertTrue(ja.hasNext());
 		assertEquals("Text 1", ja.next());
 		ja.setNewValue("new text");
@@ -102,10 +118,10 @@ public class JSONAccessTest {
 	public void testAlternateExternalRules () {
 		JSONAccess ja = new JSONAccess();
 		ja.read("{"+createData1()+"}",
-			"{\"locRules\": [{\"sel\":\"$..text\",\"trans\":true}]}");
+			"{\"locRules\": [{\"selector\":\"$..text\",\"translate\":true}]}");
 		assertTrue(testData1(ja));
 		ja.read("{"+createData1()+"}",
-			"{\"locRules\": [{\"sel\":\"$['messages'][*]['text']\",\"trans\":true}]}");
+			"{\"locRules\": [{\"selector\":\"$['messages'][*]['text']\",\"translate\":true}]}");
 		assertTrue(testData1(ja));
 	}
 
@@ -114,8 +130,8 @@ public class JSONAccessTest {
 		JSONAccess ja = new JSONAccess();
 		ja.read("{"+createData1()+"}",
 			"{\"locRules\": ["
-			+ "{\"sel\":\"$..text\",\"trans\":true},"
-			+ "{\"sel\":\"['messages'][0]['text']\",\"trans\":false}"
+			+ "{\"selector\":\"$..text\",\"translate\":true},"
+			+ "{\"selector\":\"['messages'][0]['text']\",\"translate\":false}"
 			+ "]}");
 		// Second rule overrides the translate=true for the first message
 		assertTrue(ja.hasNext());
@@ -125,7 +141,7 @@ public class JSONAccessTest {
 
 	private String createInput1 () {
 		return "{"
-			+ "\"locRules\": [{\"sel\":\"$.messages[*].text\",\"trans\":true}],"
+			+ "\"locRules\": [{\"selector\":\"$.messages[*].text\",\"translate\":true}],"
 			+ createData1()
 			+ "}";
 	}
@@ -133,7 +149,7 @@ public class JSONAccessTest {
 	private String createInput2 () {
 		return "{"
 			+ createData1()
-			+ ", \"locRules\": [{\"sel\":\"$.messages[*].text\",\"trans\":true}]"
+			+ ", \"locRules\": [{\"selector\":\"$.messages[*].text\",\"translate\":true}]"
 			+ "}";
 	}
 

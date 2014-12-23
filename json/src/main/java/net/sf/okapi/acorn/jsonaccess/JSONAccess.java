@@ -43,8 +43,8 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
  * <p>Each rule must be in the format:
  * <pre>
  * {
- *  "sel":"&lt;json-path>",
- *  "trans":true|false
+ *  "selector":"&lt;json-path>",
+ *  "translate":true|false (optional, default is true)
  * }
  * </pre>
  */
@@ -127,9 +127,12 @@ public class JSONAccess {
 			for ( Object obj : list ) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> map = (Map<String, Object>)obj;
-				String sel = (String)map.get("sel");
-				boolean trans = (Boolean)map.get("trans");
-				rules.add(new Rule(sel, trans));
+				String selector = (String)map.get("selector");
+				boolean translate = true; // default
+				if ( map.containsKey("translate") ) {
+					translate = (boolean)map.get("translate");
+				}
+				rules.add(new Rule(selector, translate));
 			}
 		}
 		catch ( Throwable e ) {
@@ -209,7 +212,7 @@ public class JSONAccess {
 		// Step 1: Create paths for all rules with flag for properties
 		nodes = new LinkedHashMap<>();
 		for ( Rule rule : rules) {
-			List<String> resP = dcP.read(rule.getSel());
+			List<String> resP = dcP.read(rule.getSelector());
 			if (( resP == null ) || resP.isEmpty() ) continue;
 			// Else: we have at least one match
 			for ( String path : resP ) {
@@ -221,7 +224,7 @@ public class JSONAccess {
 					nodes.put(path, node);
 				}
 				// then set the latest properties
-				node.trans = rule.getTrans();
+				node.trans = rule.getTranslate();
 			}
 		}
 

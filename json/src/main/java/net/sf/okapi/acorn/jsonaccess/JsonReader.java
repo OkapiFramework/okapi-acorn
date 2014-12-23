@@ -20,32 +20,18 @@
 
 package net.sf.okapi.acorn.jsonaccess;
 
-public class Rule {
+import java.io.File;
 
-	private String selector;
-	private boolean translate;
-	
-	public Rule (String selector,
-		boolean translate)
-	{
-		this.selector = selector;
-		this.translate = translate;
+import org.oasisopen.xliff.om.v1.IDocument;
+
+import net.sf.okapi.acorn.common.IDocumentReader;
+
+public class JsonReader implements IDocumentReader {
+
+	@Override
+	public IDocument load (File inputFile) {
+		// TODO Auto-generated method stub
+		return null;
 	}
-	
-	public String getSelector () {
-		return selector;
-	}
-	
-	public void setSelector (String selector) {
-		this.selector = selector;
-	}
-	
-	public boolean getTranslate () {
-		return translate;
-	}
-	
-	public void setTranslate (boolean translate) {
-		this.translate = translate;
-	}
-	
+
 }
