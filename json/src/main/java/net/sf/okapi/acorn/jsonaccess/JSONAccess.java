@@ -20,6 +20,7 @@
 
 package net.sf.okapi.acorn.jsonaccess;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -141,7 +142,7 @@ public class JSONAccess {
 	}
 	
 	/**
-	 * Sets the input to process. The input may include the rules to use.
+	 * Sets a string as the input to process. The input may include the rules to use.
 	 * If the input includes the rules, they become the new rules. 
 	 * @param jsonString the input to set.
 	 * @return the JSONAccess object itself (to allowed dot-operations).
@@ -162,14 +163,47 @@ public class JSONAccess {
 	}
 	
 	/**
+	 * Sets an input stream as the input to process. The input may include the rules to use.
+	 * If the input includes the rules, they become the new rules. 
+	 * @param input the input to set.
+	 * @return the JSONAccess object itself (to allowed dot-operations).
+	 */
+	public JSONAccess setInput (InputStream input) {
+		resetCursor();
+		dcV = JsonPath.parse(input);
+		dcP = JsonPath.using(confP).parse(input);
+		// Check if the rules are present in the data
+		try {
+			List<Object> tmp = dcV.read(LOCRULE_PATH);
+			compileRules(tmp);
+		}
+		catch ( PathNotFoundException e ) {
+			// Do nothing: this is not an error.
+		}
+		return this;
+	}
+	
+	/**
 	 * Reads a given input string which may include new rules, and apply the latest rules.
-	 * If the input string include the rules, they become the current rules and are applied.
+	 * If the input includes the rules, they become the current rules and are applied.
 	 * Otherwise some rules are already set they remain the current rules and are applied.
 	 * If no rules are set, no rules are applied yet.
 	 * @param inputString the data string to read.
 	 */
 	public void read (String inputString) {
 		setInput(inputString);
+		applyRules();
+	}
+
+	/**
+	 * Reads a given input stream which may include new rules, and apply the latest rules.
+	 * If the input includes the rules, they become the current rules and are applied.
+	 * Otherwise some rules are already set they remain the current rules and are applied.
+	 * If no rules are set, no rules are applied yet.
+	 * @param inputString the data string to read.
+	 */
+	public void read (InputStream input) {
+		setInput(input);
 		applyRules();
 	}
 
@@ -268,7 +302,11 @@ public class JSONAccess {
 		currentEntry = nodesIter.next();
 		return currentEntry.getValue().text;
 	}
-	
+
+	public String getEntryPath () {
+		return currentEntry.getKey();
+	}
+
 	/**
 	 * Sets a new text value (the translation) for the current translatable string.
 	 * @param newValue the new text value to set.
