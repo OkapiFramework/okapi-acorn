@@ -1,3 +1,6 @@
+The project has been moved to Bitbucket:
+https://bitbucket.org/okapiframework/acorn
+
 The goal of the **[Okapi Framework](https://code.google.com/p/okapi/)** is to allow tools developers and localizers to build new localization processes or enhance existing ones to best meet their needs, while preserving a level of compatibility and interoperability. It also provides them with a way to share (and re-use) components across different solutions.
 
 **Okapi Acorn** is project to experiment various localization-related technologies.
